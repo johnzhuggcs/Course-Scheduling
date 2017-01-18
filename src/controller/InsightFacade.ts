@@ -12,7 +12,9 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
+        //Add Code
         return null;
+        //Add Code
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
@@ -20,6 +22,8 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
+        //Perform Query
         return null;
+        //Perform Query
     }
 }
