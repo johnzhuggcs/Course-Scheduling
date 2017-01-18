@@ -16,10 +16,17 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     removeDataset(id: string): Promise<InsightResponse> {
+        //adding code
+        //testing
+        //to
+        //line
+        //24
         return null;
     }
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
+        //perform query
         return null;
+        //perform query
     }
 }
