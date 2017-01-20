@@ -26,7 +26,13 @@ export default class InsightFacade implements IInsightFacade {
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
+
         return null;
         //perform query
+
     }
-}
+
+    isValid(query:QueryRequest):boolean{
+        return false;
+
+    }}
