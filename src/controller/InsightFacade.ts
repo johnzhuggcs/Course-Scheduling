@@ -70,8 +70,8 @@ export default class InsightFacade implements IInsightFacade {
                     try {
                         var parsedJSON = JSON.parse(content)
                     }
-                    catch (error: Error) {
-                        error = new Error('Error: Could not parse JSON');
+                    catch (err) {
+                        err = new Error('Error: Could not parse JSON');
                         reject(400);
                     }
 
@@ -84,7 +84,7 @@ export default class InsightFacade implements IInsightFacade {
                         fulfill(204);
                     }
 
-                    if (/*operation failed &&*/) {
+                    if (0/*operation failed &&*/) {
                         reject(400);
                     }
                 })
@@ -108,7 +108,13 @@ export default class InsightFacade implements IInsightFacade {
 
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
+
         return null;
         //perform query
+
     }
-}
+
+    isValid(query:QueryRequest):boolean{
+        return false;
+
+    }}

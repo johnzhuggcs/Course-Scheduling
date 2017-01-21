@@ -12,7 +12,28 @@ export interface InsightResponse {
 export interface QueryRequest {
     // you can define your own structure that complies with the EBNF here
 
+    WHERE:FilterQuery;
+    OPTIONS:ColumnsQuery;
 }
+
+export interface FilterQuery{
+    OR?:[FilterQuery, FilterQuery];
+    AND?:[FilterQuery, FilterQuery];
+    LT?:{string:number};
+    GT?:{string:number};
+    EQ?:{string:number};
+    IS?:{string:string};
+    NOT?:FilterQuery;
+}
+
+export interface ColumnsQuery{
+    Columns:[string, string];
+    ORDER:string;
+    FORM:"TABLE";
+}
+
+
+
 
 export interface IInsightFacade {
 
@@ -55,7 +76,7 @@ export interface IInsightFacade {
      * The promise should return an InsightResponse for both fulfill and reject.
      *
      * Fulfill should be for 2XX codes and reject for everything else.
-     *
+
      * This will delete both disk and memory caches for the dataset for the id meaning
      * that subsequent queries for that id should fail unless a new addDataset happens first.
      *
@@ -87,4 +108,11 @@ export interface IInsightFacade {
      *
      */
     performQuery(query: QueryRequest): Promise<InsightResponse>;
+
+    /** Checks if query provided is valid
+     *
+     * @param query
+     */
+
+    isValid(query:QueryRequest):boolean;
 }
