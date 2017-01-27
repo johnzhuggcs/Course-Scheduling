@@ -299,10 +299,8 @@ export default class InsightFacade implements IInsightFacade {
                     if(isString(sComparisonString)||(sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                         isString(sComparisonString))){
                         return true;
-                    }else
-                    return false;
-                }Log.error("invalid key in SComparison")
-                return false;
+                    }else return false;
+                }else return false;
 
             } else if (comparisonKey[0] == "NOT"){
                 if(this.hasFilter(comparisonValue) != false){
