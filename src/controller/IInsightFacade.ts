@@ -14,24 +14,43 @@ export interface QueryRequest {
 
     WHERE:FilterQuery;
     OPTIONS:ColumnsQuery;
+    [propName: string]: any;
 }
 
 export interface FilterQuery{
     OR?:[FilterQuery, FilterQuery];
     AND?:[FilterQuery, FilterQuery];
-    LT?:{string:number};
-    GT?:{string:number};
-    EQ?:{string:number};
-    IS?:{string:string};
+    LT?:MCompare;
+    GT?:MCompare;
+    EQ?:MCompare;
+    IS?:SCompare;
     NOT?:FilterQuery;
+    [propName:string]:any;
 }
 
+export interface MCompare{
+    //Valid Keys with number values
+    courses_avg?: number;        //The average of the course offering.
+    courses_pass?: number;       //The number of students that passed the course offering.
+    courses_fail?: number;       //The number of students that failed the course offering.
+    courses_audit?: number;      //The number of students that audited the course offering.
+
+}
+
+export interface SCompare{
+    //Valid Keys with string values
+    courses_dept?: string;       //The department that offered the course.
+    courses_id?: string;         //The course number (will be treated as a string (e.g., 499b)).
+    courses_instructor?: string; //The instructor teaching the course offering.
+    courses_title?: string;      //The name of the course.
+    courses_uuid?:string;        //The unique id of a course offering.
+   }
+
 export interface ColumnsQuery{
-    Columns:[string, string];
+    COLUMNS:[string, string];
     ORDER:string;
     FORM:"TABLE";
 }
-
 
 
 
@@ -115,4 +134,16 @@ export interface IInsightFacade {
      */
 
     isValid(query:QueryRequest):boolean;
+
+    /** Checks if query provided has filter
+     * needed as LOGICCOMPARISON and NEGATION recursively contains FILTER
+     * @param filter
+     */
+    hasFilter(filter:FilterQuery):boolean;
+
+    /** Used if encounters array of filter, iterates and calls hasFilter() for each element
+     *
+     * @param filterArray
+     */
+    hasArrayFilter(filterArray:FilterQuery[]):boolean;
 }
