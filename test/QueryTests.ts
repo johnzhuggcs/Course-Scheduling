@@ -76,7 +76,7 @@ describe("QueryTest", function () {
                             },
                             {
                                 "IS":{
-                                    "courses_dept":"adhe"
+                                    "courses_dept":"*adhe*"
                                 }
                             }
                         ]
