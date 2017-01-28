@@ -170,7 +170,6 @@ export default class InsightFacade implements IInsightFacade {
 
 
         }else return false;
-
     }
 
     hasFilter(filter:FilterQuery):boolean{ //
