@@ -78,9 +78,10 @@ describe("EchoSpec", function () {
 
 
 
-    /*const fs = require('fs');
+    const fs = require('fs');
     it.only("addDataset should add a dataset to UBCInsight", function () {
-        return insight.addDataset('courses.zip',fs.readFile('courses.zip','base64')).then(function (value: InsightResponse) {
+        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
+        return insight.addDataset('courses1',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             Log.test('Code: ' + value);
             expect(value.code).to.equal(204);
@@ -90,7 +91,7 @@ describe("EchoSpec", function () {
         })
 
     });
-*/
+
 
 
 

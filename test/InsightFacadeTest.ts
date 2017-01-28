@@ -21,9 +21,10 @@ describe("InsightFacadeTest", function () {
         insight = null;
     })
 
-   /* const fs = require('fs');
+   const fs = require('fs');
     it.only("addDataset should add a dataset to UBCInsight", function () {
-        return insight.addDataset('courses',fs.readFile('courses.zip','base64')).then(function (value: InsightResponse) {
+        Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             Log.test('Code: ' + value);
             expect(value.code).to.equal(204);
@@ -31,7 +32,8 @@ describe("InsightFacadeTest", function () {
             Log.test('Error: ' + err);
             expect.fail();
         })
-    });*/
+
+    });
 
 
 
