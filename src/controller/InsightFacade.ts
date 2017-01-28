@@ -121,7 +121,6 @@ export default class InsightFacade implements IInsightFacade {
 
     isValid(query:QueryRequest):boolean{
         //checks for query provided is of valid syntax
-        var checked;
         var keyArray = Object.keys(query); //an array of the keys, should only be WHERE and OPTIONS now
         var Where    //returns WHERE
         var Options; //returns OPTIONS
@@ -138,7 +137,7 @@ export default class InsightFacade implements IInsightFacade {
                 filter = query[Where]; //returns content of FILTER
 
 
-                if(this.hasFilter(filter)) { //check if FILTER is valid, needed as FILTER is recursively nested
+                if(this.hasFilter(filter) != false) { //check if FILTER is valid, needed as FILTER is recursively nested
                     optionsValue = query[Options];
                     columnsEtcKey = Object.keys(optionsValue);
                     if(columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM"){
@@ -160,10 +159,7 @@ export default class InsightFacade implements IInsightFacade {
                             || orderValidKey == "courses_uuid"){
                                 Table = optionsValue[columnsEtcKey[2]];
                                 if(Table == "TABLE"){
-                                    checked = true;
-                                    if(checked == true){
                                         return true
-                                    }
                                 }else return false;
                         }
                     } else return false;
@@ -175,7 +171,6 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     hasFilter(filter:FilterQuery):boolean{ //
-        var checked;
         var comparisonKey = Object.keys(filter); //gets first comparator from FILTER
         var comparisonValue = filter[comparisonKey[0]] //gets value from each FILTER
         var validProjectKey; //gets valid key e.g. courses_dept
@@ -184,8 +179,8 @@ export default class InsightFacade implements IInsightFacade {
         if(comparisonKey.length == 1){ //checks that there is only one comparator
 
             if(comparisonKey[0] == "AND" || comparisonKey[0] == "OR"){
-                if(this.hasArrayFilter(comparisonValue)){
-                    return true;
+                if(this.hasArrayFilter(comparisonValue) != false){
+                    Log.test("true")
                 } else return false;
 
             } else if(comparisonKey[0] == "LT" || comparisonKey[0] == "GT" || comparisonKey[0] == "EQ"){
@@ -195,21 +190,25 @@ export default class InsightFacade implements IInsightFacade {
                     validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit")){
                         if (isNumber(mComparisonNumber)){
                             return true;
-                        }else return false;
-                }else return false;
+                        }else
+                    return false;
+                }else
+                return false;
 
             } else if (comparisonKey[0] == "IS"){
                 validProjectKey = Object.keys(comparisonValue);
                 sComparisonString = comparisonValue[validProjectKey[0]];
-                if(validProjectKey.length == 1  && (validProjectKey[0] == "course_dept" || validProjectKey[0] == "course_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
+                if(validProjectKey.length == 1  && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
                     if(isString(sComparisonString)||(sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                         isString(sComparisonString))){
                         return true;
                     }else return false;
-                }return false;
+                }else return false;
 
             } else if (comparisonKey[0] == "NOT"){
-                this.hasFilter(comparisonValue);
+                if(this.hasFilter(comparisonValue) != false){
+                    Log.test("NEGATION is good")
+                } else return false
             } else return false
         }else return false
     }
@@ -217,8 +216,8 @@ export default class InsightFacade implements IInsightFacade {
     hasArrayFilter(filterArray:FilterQuery[]):boolean{
 
             for(let x in filterArray){
-                if(this.hasFilter(filterArray[x])) {//checks if each element is actually FILTER
-                    return true
+                if(this.hasFilter(filterArray[x]) == false) {//checks if each element is actually FILTER
+                    return false
                 }
             }
 

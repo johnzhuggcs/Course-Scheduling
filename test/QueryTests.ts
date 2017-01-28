@@ -76,7 +76,7 @@ describe("QueryTest", function () {
                             },
                             {
                                 "IS":{
-                                    "courses_dept":"adhe"
+                                    "courses_dept":"*adhe*"
                                 }
                             }
                         ]
@@ -140,9 +140,95 @@ describe("QueryTest", function () {
             }
         }
         sanityCheck(queryTest);
-        expect(insightFacade.isValid(queryTest)).to.equal(true);
+        expect(insightFacade.isValid(queryTest)).to.equal(false);
 
 
     });
+
+    it("testing hasFilter() with nested filters", function () {
+        var queryTest:any =     {
+
+                "OR":[
+                    {
+                        "AND":[
+                            {
+                                "GT":{
+                                    "courses_avg":90
+                                }
+                            },
+                            {
+                                "IS":{
+                                    "courses_dept":10
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "EQ":{
+                            "courses_avg":"blah"
+                        }
+                    }
+                ]
+
+
+        }
+
+        expect(insightFacade.hasFilter(queryTest)).to.equal(false);
+
+
+    });
+
+    it("testing out complex query with further nested array", function () {
+        var queryTest:any =     {
+            "WHERE":{
+                "OR":[
+                    {
+                        "AND":[
+                            {
+                                "AND":[
+                                    {
+                                       "GT":{
+                                           "courses_avg":90
+                                       }
+                                    }
+                                ]
+                            },
+                            {
+                                "NOT":{
+                                    "AND":[
+                                        {
+                                            "GT":{
+                                                "courses_avg":"haha"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "EQ":{
+                            "courses_avg":95
+                        }
+                    }
+                ]
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+        sanityCheck(queryTest);
+        expect(insightFacade.isValid(queryTest)).to.equal(false);
+
+
+    });
+
+
 
 });
