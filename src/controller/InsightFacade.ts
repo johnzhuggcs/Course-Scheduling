@@ -177,6 +177,9 @@ export default class InsightFacade implements IInsightFacade {
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
 
+        if(this.isValid(query) == true){
+            return null;
+        }else
         return null;
         //perform query
 
@@ -201,27 +204,27 @@ export default class InsightFacade implements IInsightFacade {
 
 
                 if(this.hasFilter(filter) != false) { //check if FILTER is valid, needed as FILTER is recursively nested
-                    optionsValue = query[Options];
-                    columnsEtcKey = Object.keys(optionsValue);
+                    optionsValue = query[Options]; //gets all values from OPTIONS
+                    columnsEtcKey = Object.keys(optionsValue); //gets all the "key" within the value from OPTIONS, such as COLUMNS and etc...
                     if(columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM"){
-                        columnsValidKeyArray = optionsValue[columnsEtcKey[0]]
+                        columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
                         for(let x in columnsValidKeyArray){
                             if(columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
                                 || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                                 || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
                                 || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
-                                || columnsValidKeyArray[x] == "courses_uuid"){
+                                || columnsValidKeyArray[x] == "courses_uuid"){ //checks for valid keys
                                 Where = keyArray[0] //dummy line of code so further check would be done outside of for-loop
                             } else return false
                         }
-                        orderValidKey = optionsValue[columnsEtcKey[1]];
+                        orderValidKey = optionsValue[columnsEtcKey[1]]; //gets ORDER key
                         if(orderValidKey == "courses_dept" || orderValidKey == "courses_id"
                             || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
                             || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
                             || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                            || orderValidKey == "courses_uuid"){
+                            || orderValidKey == "courses_uuid"){ //checks for valid key
                                 Table = optionsValue[columnsEtcKey[2]];
-                                if(Table == "TABLE"){
+                                if(Table == "TABLE"){ //if value of FORM is TABLE
                                         return true
                                 }else return false;
                         }
@@ -230,7 +233,6 @@ export default class InsightFacade implements IInsightFacade {
 
 
         }else return false;
-
     }
 
     hasFilter(filter:FilterQuery):boolean{ //
@@ -242,23 +244,23 @@ export default class InsightFacade implements IInsightFacade {
         if(comparisonKey.length == 1){ //checks that there is only one comparator
 
             if(comparisonKey[0] == "AND" || comparisonKey[0] == "OR"){
-                if(this.hasArrayFilter(comparisonValue) != false){
+                if(this.hasArrayFilter(comparisonValue) != false){ //anything that isn't a false (meaning error) passes)
                     Log.test("true")
                 } else return false;
 
-            } else if(comparisonKey[0] == "LT" || comparisonKey[0] == "GT" || comparisonKey[0] == "EQ"){
+            } else if(comparisonKey[0] == "LT" || comparisonKey[0] == "GT" || comparisonKey[0] == "EQ"){ //checks for MCOMPARATOR
                 validProjectKey = Object.keys(comparisonValue);
                 mComparisonNumber = comparisonValue[validProjectKey[0]];
                 if(validProjectKey.length == 1 && (validProjectKey[0] == "courses_avg" || validProjectKey[0] == "courses_pass" ||
-                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit")){
-                        if (isNumber(mComparisonNumber)){
+                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit")){ //make sure only a valid key exists
+                        if (isNumber(mComparisonNumber)){ //makes sure the valid keys are mapped to a number
                             return true;
                         }else
                     return false;
                 }else
                 return false;
 
-            } else if (comparisonKey[0] == "IS"){
+            } else if (comparisonKey[0] == "IS"){ //SComparator
                 validProjectKey = Object.keys(comparisonValue);
                 sComparisonString = comparisonValue[validProjectKey[0]];
                 if(validProjectKey.length == 1  && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
@@ -268,8 +270,8 @@ export default class InsightFacade implements IInsightFacade {
                     }else return false;
                 }else return false;
 
-            } else if (comparisonKey[0] == "NOT"){
-                if(this.hasFilter(comparisonValue) != false){
+            } else if (comparisonKey[0] == "NOT"){ //NEGATION
+                if(this.hasFilter(comparisonValue) != false){ //loops back to FILTER
                     Log.test("NEGATION is good")
                 } else return false
             } else return false
