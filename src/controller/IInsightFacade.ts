@@ -52,9 +52,13 @@ export interface ColumnsQuery{
     FORM:"TABLE";
 }
 
+export interface TypeScriptSucks{
 
+}
 
 export interface IInsightFacade {
+
+    base64ToBuffer(str:string):any;
 
     /**
      * Add a dataset to UBCInsight.
@@ -126,6 +130,7 @@ export interface IInsightFacade {
      * 424: the query failed because it depends on a resource that has not been PUT. The body should contain {"missing": ["id1", "id2"...]}.
      *
      */
+
     performQuery(query: QueryRequest): Promise<InsightResponse>;
 
     /** Checks if query provided is valid

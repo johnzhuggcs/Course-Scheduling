@@ -1,7 +1,7 @@
 /**
  * This is the main programmatic entry point for the project.
  */
-import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery} from "./IInsightFacade";
+import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery, TypeScriptSucks} from "./IInsightFacade";
 
 import Log from "../Util";
 import {isString} from "util";
@@ -14,6 +14,17 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace('InsightFacadeImpl::init()');
     }
 
+    base64ToBuffer(str:string):any {
+        Log.info("this function runs!");
+        str = window.atob(str); // creates a ASCII string
+        Log.info("this function runs: " + str);
+        var buffer = new ArrayBuffer(str.length),
+            view = new Uint8Array(buffer);
+        for(var i = 0; i < str.length; i++){
+            view[i] = str.charCodeAt(i);
+        }
+        return buffer;
+    }
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
@@ -34,65 +45,117 @@ export default class InsightFacade implements IInsightFacade {
             Log.info("zipasync:" + zip.loadAsync(content));
             Log.info("zipasync:" + typeof zip.loadAsync(content));
 
+            //var buffer = this.base64ToBuffer(content);
             zip.loadAsync(content,{'base64':true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+
 
                 zipasync.forEach(function (relativePath: any, file: any) {
 
-                    var p = new Promise ((fulfillapproved, rejectapproved) => {
-                        if (file.name != 'multi_courses/') {
-                            Log.info("file2:" + JSON.stringify(file));
-                            Log.info("file2:" + String(file.async("string")));
 
-                            var a = file.async("string");
+                    // var p = new Promise ((fulfillapproved, rejectapproved) => {
+                    if (file.name != 'multi_courses/') {
+                        Log.info("file1:" + JSON.stringify(file));
+                        Log.info("file2:" + String(file.async("string")));
+                        Log.info("filedata:" + JSON.stringify(file._data));
+                        Log.info("filecompressed:" + JSON.stringify(String(file._data.compressedContent[0])));
+                        //Log.info("filecompressed[x]:" + JSON.stringify(window.atob(String(file._data.compressedContent[0]))));
+                        Log.info("file2:" + String(file.async("string")));
+                        //Log.info("filecontent:" + file.compressedContent[0]);compressedContent
 
-                            fulfillapproved(a);
+                        Log.info("filetype:" + JSON.stringify(file));
+
+                        /*try {
+                            var x = window.btoa("Hello World!");
+                            Log.info("return:" + x);
+                        } catch (e) {
+                            e;
+                        }*/
+
+
+                        var filecompressednoasync = file._data.compressedContent;
+                        Log.info("JSon stringify: " + JSON.stringify(filecompressednoasync));
+
+
+                        /* var filestring = JSON.stringify(file._data.compressedContent);
+
+                         var buffer = new ArrayBuffer(filestring.length);
+                         var view = new Uint8Array(buffer);
+                         for (var i = 0; i < filestring.length; i++) {
+                         view[i] = filestring.charCodeAt[i];
+                         Log.info("view["+String(i)+"]:" + String(view[i]));
+                         }
+                         Log.info("buffer:" + buffer);
+
+                         var filedata = file.async("string");
+                         */
+                        //var str = window.atob(JSON.stringify(filecompressednoasync));
+                        //Log.info("str:" + str);
+                        //var filecompressed = filecompressednoasync.async("string").then;
+                        arrayOfUnparsedFileData.push(file.async("string"));
+
+                        // }
+                    }
+                }
+                    //arrayOfUnparsedFileData.push(p);
+
+                );
+
+                Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
+                    Log.info("Promise.all Pass through");
+
+                    Log.info("arrayOfUnparsedFileDataAll:" + arrayofUnparsedFileDataAll);
+
+
+                    var arrayCounter = 0;
+                    var parsedJSON = '';
+
+                    for (let i in arrayofUnparsedFileDataAll) {
+                        try {
+
+                            Log.info("JSon type: " + typeof arrayofUnparsedFileDataAll[i]);
+                            JSON.parse(JSON.stringify(arrayofUnparsedFileDataAll[i]));//JSON.parse
+
+                                /*Log.info(arrayofUnparsedFileDataAll[i]);
+                                Log.info(JSON.stringify(parsedJSON));
+                                Log.info("JSON.parse(String(arrayOfUnparsedFileData[i])):" + parsedJSON);
+                                noOfJsonStored++;
+                                Log.info('noOfJsonStored:' + String(noOfJsonStored));*/
+
                         }
+                        catch (err) {
+                            err;
+                            filesNotJsonCounter++;
+                        }
+                        noOfJsonStored++;
+                        parsedJSON += String(arrayofUnparsedFileDataAll[i])+"\r\n";//JSON.parse
+                    }
+
+                    Log.info(parsedJSON);
+                    Log.info(typeof parsedJSON);
+                    Log.info("The test passed through here");
+
+                    fs.writeFile(id, parsedJSON, (err: Error) => {
+                        if (err) throw err;
                     });
-                    arrayOfUnparsedFileData.push(p);
+
+                    if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
+                        var ir4: InsightResponse = {code: 204, body: {}};
+                        fulfill(ir4);
+                    }
+
+                    Log.info("noOfJsonStored == arrayOfUnparsedFileData.size:" + String(noOfJsonStored == arrayOfUnparsedFileData.size));
+
+                    if (filesNotJsonCounter == noOfFiles) {
+                        var ir2: InsightResponse = {code: 400, body: {'error': 'Could not parse JSON'}};
+                        reject(ir2);
+                    }
+
+                    Log.info("filesNotJsonCounter == noOfFiles:" + String(filesNotJsonCounter == noOfFiles));
 
                 });
 
             }).catch(function(e: any) {
                 console.log(e);
-            });
-
-            Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
-                Log.info("Promise.all Pass through");
-
-                for (let i in arrayofUnparsedFileDataAll) {
-
-                    try {
-                        var parsedJSON = JSON.parse(String(arrayofUnparsedFileDataAll[i]));
-                        Log.info("JSON.parse(String(arrayOfUnparsedFileData[i])):" + JSON.parse(String(arrayofUnparsedFileDataAll[i])));
-                        fs.writeFile(id, parsedJSON, (err: Error) => {
-                            if (err) throw err;
-                        });
-
-                        noOfJsonStored++;
-                        Log.info('noOfJsonStored:'+String(noOfJsonStored));
-
-
-                    }
-                    catch (err) {
-                        filesNotJsonCounter++;
-                    }
-                }
-                Log.info("arrayOfUnparsedFileDataAll:" + arrayofUnparsedFileDataAll);
-
-                if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
-                    var ir4: InsightResponse = {code: 204, body: {}};
-                    fulfill(ir4);
-                }
-
-                Log.info("noOfJsonStored == arrayOfUnparsedFileData.size:" + String(noOfJsonStored == arrayOfUnparsedFileData.size));
-
-                if (filesNotJsonCounter == noOfFiles) {
-                    var ir2: InsightResponse = {code: 400, body: {'error': 'Could not parse JSON'}};
-                    reject(ir2);
-                }
-
-                Log.info("filesNotJsonCounter == noOfFiles:" + String(filesNotJsonCounter == noOfFiles));
-
             });
 
         });
