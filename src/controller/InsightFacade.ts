@@ -7,6 +7,7 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {createGunzip} from "zlib";
+import JSZip = require('jszip');
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -31,7 +32,7 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise(function (fulfill, reject) {
 
             var request = require('request');
-            var JSZip = require('jszip');
+            //var JSZip = require('jszip');
             var fs = require('fs');
             var zip = new JSZip();
             var arrayOfId: string[] = [];
