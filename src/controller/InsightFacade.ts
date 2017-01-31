@@ -54,12 +54,12 @@ export default class InsightFacade implements IInsightFacade {
 
                     // var p = new Promise ((fulfillapproved, rejectapproved) => {
                     if (file.name != 'multi_courses/') {
-                        Log.info("file1:" + JSON.stringify(file));
-                        Log.info("file2:" + String(file.async("string")));
-                        Log.info("filedata:" + JSON.stringify(file._data));
-                        Log.info("filecompressed:" + JSON.stringify(String(file._data.compressedContent[0])));
+                        //Log.info("file1:" + JSON.stringify(file));
+                        //Log.info("file2:" + String(file.async("string")));
+                        //Log.info("filedata:" + JSON.stringify(file._data));
+                        //Log.info("filecompressed:" + JSON.stringify(String(file._data.compressedContent[0])));
                         //Log.info("filecompressed[x]:" + JSON.stringify(window.atob(String(file._data.compressedContent[0]))));
-                        Log.info("file2:" + String(file.async("string")));
+                        //Log.info("file2:" + String(file.async("string")));
                         //Log.info("filecontent:" + file.compressedContent[0]);compressedContent
 
                         Log.info("filetype:" + JSON.stringify(file));
@@ -101,7 +101,7 @@ export default class InsightFacade implements IInsightFacade {
                 );
 
                 Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
-                    Log.info("Promise.all Pass through");
+                    //Log.info("Promise.all Pass through");
 
                     Log.info("arrayOfUnparsedFileDataAll:" + arrayofUnparsedFileDataAll);
 
@@ -131,8 +131,8 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                     Log.info(parsedJSON);
-                    Log.info(typeof parsedJSON);
-                    Log.info("The test passed through here");
+                    //Log.info(typeof parsedJSON);
+                    //Log.info("The test passed through here");
 
                     fs.writeFile(id, parsedJSON, (err: Error) => {
                         if (err) throw err;
