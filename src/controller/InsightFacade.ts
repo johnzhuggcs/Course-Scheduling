@@ -179,6 +179,8 @@ export default class InsightFacade implements IInsightFacade {
 
         if(this.isValid(query) == true){
             return null;
+
+
         }else
         return null;
         //perform query
