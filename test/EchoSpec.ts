@@ -92,6 +92,23 @@ describe("EchoSpec", function () {
 
     });
 
+    it.only("addDataset should add a dataset to UBCInsight", function () {
+        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
+        fs.writeFile('UBCInsight', '{}', (err: Error) => {
+            if (err) throw err;
+        });
+        return insight.addDataset('UBCInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            Log.test('Code: ' + value);
+            expect(value.code).to.equal(201);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();
+        })
+
+    });
+
+
 
 
 
