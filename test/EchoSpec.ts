@@ -92,9 +92,9 @@ describe("EchoSpec", function () {
 
     });
 
-    it("addDataset should add a dataset to UBCInsight", function () {
+    it("addDataset should add a dataset to TestInsight", function () {
         Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
-        fs.writeFile('UBCInsight', '{}', (err: Error) => {
+        fs.writeFile('TestInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
         return insight.addDataset('UBCInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
