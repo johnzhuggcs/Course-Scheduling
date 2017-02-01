@@ -41,136 +41,100 @@ export default class InsightFacade implements IInsightFacade {
             var noOfFiles = 0;
             var noOfJsonStored = 0;
 
-            Log.info("content:" + content);
-            Log.info("zipasync:" + zip.loadAsync(content));
-            Log.info("zipasync:" + typeof zip.loadAsync(content));
-
-            //var buffer = this.base64ToBuffer(content);
-            zip.loadAsync(content,{'base64':true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+            zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
 
                 zipasync.forEach(function (relativePath: any, file: any) {
-
-
-                    // var p = new Promise ((fulfillapproved, rejectapproved) => {
-                    if (file.name != 'multi_courses/') {
-                        Log.info("file1:" + JSON.stringify(file));
-                        Log.info("file2:" + String(file.async("string")));
-                        Log.info("filedata:" + JSON.stringify(file._data));
-                        Log.info("filecompressed:" + JSON.stringify(String(file._data.compressedContent[0])));
-                        //Log.info("filecompressed[x]:" + JSON.stringify(window.atob(String(file._data.compressedContent[0]))));
-                        Log.info("file2:" + String(file.async("string")));
-                        //Log.info("filecontent:" + file.compressedContent[0]);compressedContent
-
-                        Log.info("filetype:" + JSON.stringify(file));
-
-                        /*try {
-                            var x = window.btoa("Hello World!");
-                            Log.info("return:" + x);
-                        } catch (e) {
-                            e;
-                        }*/
-
-
-                        var filecompressednoasync = file._data.compressedContent;
-                        Log.info("JSon stringify: " + JSON.stringify(filecompressednoasync));
-
-
-                        /* var filestring = JSON.stringify(file._data.compressedContent);
-
-                         var buffer = new ArrayBuffer(filestring.length);
-                         var view = new Uint8Array(buffer);
-                         for (var i = 0; i < filestring.length; i++) {
-                         view[i] = filestring.charCodeAt[i];
-                         Log.info("view["+String(i)+"]:" + String(view[i]));
-                         }
-                         Log.info("buffer:" + buffer);
-
-                         var filedata = file.async("string");
-                         */
-                        //var str = window.atob(JSON.stringify(filecompressednoasync));
-                        //Log.info("str:" + str);
-                        //var filecompressed = filecompressednoasync.async("string").then;
-                        arrayOfUnparsedFileData.push(file.async("string"));
-
-                        // }
+                        if (file.name != 'multi_courses/') {
+                            var filecompressednoasync = file._data.compressedContent;
+                            arrayOfUnparsedFileData.push(file.async("string"));
+                        }
                     }
-                }
-                    //arrayOfUnparsedFileData.push(p);
-
                 );
-
                 Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
-                    Log.info("Promise.all Pass through");
-
-                    Log.info("arrayOfUnparsedFileDataAll:" + arrayofUnparsedFileDataAll);
-
-
                     var arrayCounter = 0;
                     var parsedJSON = '';
-
+                    var data = '';
                     for (let i in arrayofUnparsedFileDataAll) {
                         try {
-
-                            Log.info("JSon type: " + typeof arrayofUnparsedFileDataAll[i]);
                             JSON.parse(JSON.stringify(arrayofUnparsedFileDataAll[i]));//JSON.parse
-
-                                /*Log.info(arrayofUnparsedFileDataAll[i]);
-                                Log.info(JSON.stringify(parsedJSON));
-                                Log.info("JSON.parse(String(arrayOfUnparsedFileData[i])):" + parsedJSON);
-                                noOfJsonStored++;
-                                Log.info('noOfJsonStored:' + String(noOfJsonStored));*/
-
                         }
                         catch (err) {
                             err;
                             filesNotJsonCounter++;
                         }
+                        noOfFiles++;
                         noOfJsonStored++;
-                        parsedJSON += String(arrayofUnparsedFileDataAll[i])+"\r\n";//JSON.parse
+                        parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
                     }
-
-                    Log.info(parsedJSON);
-                    Log.info(typeof parsedJSON);
-                    Log.info("The test passed through here");
-
-                    fs.writeFile(id, parsedJSON, (err: Error) => {
-                        if (err) throw err;
-                    });
-
-                    if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
-                        var ir4: InsightResponse = {code: 204, body: {}};
-                        fulfill(ir4);
-                    }
-
-                    Log.info("noOfJsonStored == arrayOfUnparsedFileData.size:" + String(noOfJsonStored == arrayOfUnparsedFileData.size));
 
                     if (filesNotJsonCounter == noOfFiles) {
                         var ir2: InsightResponse = {code: 400, body: {'error': 'Could not parse JSON'}};
                         reject(ir2);
                     }
 
-                    Log.info("filesNotJsonCounter == noOfFiles:" + String(filesNotJsonCounter == noOfFiles));
+                    if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
+                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                            fs.writeFile(id, parsedJSON, (err: Error) => {
+                                if (err) throw err;
+                            });//write data file
+                            fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                                if (err) throw err;
+                            }); //for new storage
+                            var ir4: InsightResponse = {code: 204, body: {}};
+                            fulfill(ir4);
+                        }
+                        else if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                            data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
+                            arrayOfId = data.split("\r\n");
+                            if (!arrayOfId.includes(id)) {
+                                {
+                                    fs.writeFile(id, parsedJSON, (err: Error) => {
+                                        if (err) throw err;
+                                    });
+                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                                        if (err) throw err;
+                                    });
+                                    var ir4: InsightResponse = {code: 204, body: {}};
+                                    fulfill(ir4);
+                                }
+                            }
+                            else {
+                                var count = -1;
+                                for (let i in arrayOfId) {
+                                    if (arrayOfId[i] != fs.existsSync(id)) {
+                                        count++;
+                                    }
+                                }
+                                id = id + "(" + count + ")";
 
+                                fs.writeFile(id, parsedJSON, (err: Error) => {
+                                    if (err) throw err;
+                                });//datafile is written
+                                data += id + "\r\n";
+                                fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
+                                    if (err) throw err;
+                                });
+                                arrayOfId = [];
+                                if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
+                                    var ir4: InsightResponse = {code: 201, body: {}};
+                                    fulfill(ir4);
+                                }
+                            }
+                        }
+                    }
                 });
-
-            }).catch(function(e: any) {
-                console.log(e);
+            }).catch(function (e: any) {
+                var ir2: InsightResponse = {code: 400, body: {e}};
+                reject(ir2);
             });
-
         });
     }
 
-
-    //TODO: Helper/testing function 1
-    readfile() {}
-
     removeDataset(id: string): Promise<InsightResponse> {
-        //adding code
-        //testing
-        //to
-        //line
-        //24
+        //by providing the id, remove the dataset
+
+
         return null;
     }
 
