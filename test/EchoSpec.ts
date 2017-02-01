@@ -79,9 +79,9 @@ describe("EchoSpec", function () {
 
 
     const fs = require('fs');
-    it.only("addDataset should add a dataset to UBCInsight", function () {
+    it("addDataset should add a dataset to UBCInsight", function () {
         Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
-        return insight.addDataset('UBCInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('NewInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             Log.test('Code: ' + value);
             expect(value.code).to.equal(204);
@@ -92,12 +92,15 @@ describe("EchoSpec", function () {
 
     });
 
-    it.only("addDataset should add a dataset to UBCInsight", function () {
+    it("addDataset should add a dataset to UBCInsight", function () {
         Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
-        fs.writeFile('UBCInsight', '{}', (err: Error) => {
+        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
-        return insight.addDataset('UBCInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
+        fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
+            if (err) throw err;
+        });
+        return insight.addDataset('VirtualInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             Log.test('Code: ' + value);
             expect(value.code).to.equal(201);
