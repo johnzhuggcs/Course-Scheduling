@@ -1,6 +1,7 @@
 /**
- * Created by johnz on 2017-01-21.
+ * Created by johnz on 2017-01-31.
  */
+
 import Server from "../src/rest/Server";
 import {expect} from 'chai';
 import Log from "../src/Util";
@@ -8,7 +9,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("QueryTest", function () {
+describe("QueryTestSpec", function () {
 
     var insightFacade:InsightFacade = null;
     function sanityCheck(response: QueryRequest) {
@@ -148,27 +149,27 @@ describe("QueryTest", function () {
     it("testing hasFilter() with nested filters", function () {
         var queryTest:any =     {
 
-                "OR":[
-                    {
-                        "AND":[
-                            {
-                                "GT":{
-                                    "courses_avg":90
-                                }
-                            },
-                            {
-                                "IS":{
-                                    "courses_dept":10
-                                }
+            "OR":[
+                {
+                    "AND":[
+                        {
+                            "GT":{
+                                "courses_avg":90
                             }
-                        ]
-                    },
-                    {
-                        "EQ":{
-                            "courses_avg":"blah"
+                        },
+                        {
+                            "IS":{
+                                "courses_dept":10
+                            }
                         }
+                    ]
+                },
+                {
+                    "EQ":{
+                        "courses_avg":"blah"
                     }
-                ]
+                }
+            ]
 
 
         }
@@ -187,9 +188,9 @@ describe("QueryTest", function () {
                             {
                                 "AND":[
                                     {
-                                       "GT":{
-                                           "courses_avg":90
-                                       }
+                                        "GT":{
+                                            "courses_avg":90
+                                        }
                                     }
                                 ]
                             },
