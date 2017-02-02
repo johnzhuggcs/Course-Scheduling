@@ -15,30 +15,98 @@ describe("InsightFacadeTest", function () {
 
     beforeEach(function() {
         insight = new InsightFacade();
-    })
+    });
 
     afterEach(function() {
         insight = null;
-    })
+    });
 
-   /*const fs = require('fs');
-    it.only("addDataset should add a dataset to UBCInsight", function () {
+    function sanityCheck(response: InsightResponse) {
+        expect(response).to.have.property('code');
+        expect(response).to.have.property('body');
+        expect(response.code).to.be.a('number');
+    }
+
+    const fs = require('fs');
+    it("204: addDataset should add a dataset to UBCInsight", function () {
         Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
-        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
-            Log.test('Code: ' + value);
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
             expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    });
+
+    it("201: addDataset should add a dataset to UBCInsight", function () {
+        Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
+            if (err) throw err;
+        });
+        fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
+            if (err) throw err;
+        });
+        return insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(201);
+            expect(value.body).to.deep.equal({});
         }).catch(function (err) {
             Log.test('Error: ' + err);
             expect.fail();
         })
 
-    });*/
+    });
+
+    it("400: addDataset should detect invalid JSON", function () {
+        return insight.addDataset('supposetofail',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'Error': 'Could not parse JSON'});
+        })
+
+    });
+    it("400: addDataset should detect empty zip", function () {
+        return insight.addDataset('supposetofail',fs.readFileSync('empty_zip.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'Error': 'No datafile is found'});
+        })
+
+    });
+    it("204: addDataset should add a dataset to UBCInsight and dump the invalid one", function () {
+        Log.info("readFile:"+ fs.readFileSync('1unparsable1parsable.zip').toString('base64'));
+        return insight.addDataset('1json1not',fs.readFileSync('1unparsable1parsable.zip').toString('base64')).then(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    });
 
 
-
-
-    //use fs.readfile to read the content here fs.readFile(id,function(err:Error, data:any) {};
+    //ask them about: same name but diff format
+    //why's the file produced in spite of having reject statements in front <-- asynchronous
+    //courses.zip file will be in diff directory for the user, so it doesn't matter
 
 });
 

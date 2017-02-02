@@ -76,45 +76,4 @@ describe("EchoSpec", function () {
         expect(out.body).to.deep.equal({error: 'Message not provided'});
     });
 
-
-
-    const fs = require('fs');
-    it("addDataset should add a dataset to UBCInsight", function () {
-        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
-        return insight.addDataset('NewInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
-            var ir: InsightResponse;
-            Log.test('Code: ' + value);
-            expect(value.code).to.equal(204);
-        }).catch(function (err) {
-            Log.test('Error: ' + err);
-            expect.fail();
-        })
-
-    });
-
-    it("addDataset should add a dataset to UBCInsight", function () {
-        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
-        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
-            if (err) throw err;
-        });
-        fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
-            if (err) throw err;
-        });
-        return insight.addDataset('VirtualInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
-            var ir: InsightResponse;
-            Log.test('Code: ' + value);
-            expect(value.code).to.equal(201);
-        }).catch(function (err) {
-            Log.test('Error: ' + err);
-            expect.fail();
-        })
-
-    });
-
-
-
-
-
-    //use fs.readfile to read the content here fs.readFile(id,function(err:Error, data:any) {};
-
 });
