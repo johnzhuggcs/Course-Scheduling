@@ -133,22 +133,57 @@ export default class InsightFacade implements IInsightFacade {
 
     removeDataset(id: string): Promise<InsightResponse> {
         //by providing the id, remove the dataset
+        //delete the zip file by id
+
+        return new Promise(function (fulfill,reject) {
+            var request = require('request');
+            var JSZip = require('jszip');
+            var fs = require('fs');
+            var zip = new JSZip();
+
+            if (fs.existsSync(id)) {
+                zip.remove(id);
 
 
-        return null;
+                var ir4: InsightResponse = {code: 204, body: {}};
+                fulfill(ir4);
+
+
+
+            } else {
+                var ir4: InsightResponse = {code: 400, body: {}};
+                reject(ir4);
+            }
+
+        });
     }
 
+
+    //TODO: if (<key> not found in UBCInsight) {return promise 400 body: {invalid <key>}}
+    /*TODO: return a promise --> search in UBCInsight (this is hell lot easier man...)
+    //TODO: Store each Query of UBCInsight into an arrayOfQuery (.split(\r\n))
+    //TODO: If (contains(keyword) -> extract the value of the key)
+
+    // if (match with the content within the file-->
+     */
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
-
-
-        if(this.isValid(query) == true){
-            return null;
-
-
-
-        }else
-        return null;
+        var fs = require("jszip");
+        var promise = new Promise(function (resolve, reject) {
+            if(this.isValid(query) == true){
+                var filterVal = query.WHERE
+                var keys = Object.keys(filterVal);
+                var result = filterVal[keys[0]];
+                for(let x in keys){
+                    resolve("great")
+                }
+                fs.readFileSync("")
+            } else{
+                var code424InvalidQuery:InsightResponse = {code:424, body:{"error":"invalid query"}};
+                reject(code424InvalidQuery);
+            }
+        });
+        return null
         //perform query
 
     }

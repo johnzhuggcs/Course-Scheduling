@@ -21,10 +21,11 @@ describe("InsightFacadeTest", function () {
         insight = null;
     })
 
-   /*const fs = require('fs');
-    it.only("addDataset should add a dataset to UBCInsight", function () {
-        Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
-        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+
+    const fs = require('fs');
+    it("addDataset should add a dataset to UBCInsight", function () {
+        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
+        return insight.addDataset('course',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             Log.test('Code: ' + value);
             expect(value.code).to.equal(204);
@@ -33,7 +34,26 @@ describe("InsightFacadeTest", function () {
             expect.fail();
         })
 
-    });*/
+    });
+
+    it("addDataset should add a dataset to TestInsight", function () {
+        Log.info("readFile:"+ fs.readFileSync('multi_courses.zip').toString('base64'));
+        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
+            if (err) throw err;
+        });
+        fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
+            if (err) throw err;
+        });
+        return insight.addDataset('VirtualInsight',fs.readFileSync('multi_courses.zip').toString('base64')).then(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            Log.test('Code: ' + value);
+            expect(value.code).to.equal(201);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();
+        })
+
+    });
 
 
 
