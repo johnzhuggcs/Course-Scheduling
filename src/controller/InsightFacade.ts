@@ -14,18 +14,6 @@ export default class InsightFacade implements IInsightFacade {
         Log.trace('InsightFacadeImpl::init()');
     }
 
-    base64ToBuffer(str:string):any {
-        Log.info("this function runs!");
-        str = window.atob(str); // creates a ASCII string
-        Log.info("this function runs: " + str);
-        var buffer = new ArrayBuffer(str.length),
-            view = new Uint8Array(buffer);
-        for(var i = 0; i < str.length; i++){
-            view[i] = str.charCodeAt(i);
-        }
-        return buffer;
-    }
-
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
         return new Promise(function (fulfill, reject) {
@@ -39,13 +27,12 @@ export default class InsightFacade implements IInsightFacade {
 
             var filesNotJsonCounter = 0;
             var noOfFiles = 0;
-            var noOfJsonStored = 0;
 
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
 
                 zipasync.forEach(function (relativePath: any, file: any) {
-                        if (file.name != 'multi_courses/') {
+                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
                             var filecompressednoasync = file._data.compressedContent;
                             arrayOfUnparsedFileData.push(file.async("string"));
                         }
@@ -55,25 +42,37 @@ export default class InsightFacade implements IInsightFacade {
                     var arrayCounter = 0;
                     var parsedJSON = '';
                     var data = '';
+                    var isTry = true;
                     for (let i in arrayofUnparsedFileDataAll) {
                         try {
-                            JSON.parse(JSON.stringify(arrayofUnparsedFileDataAll[i]));//JSON.parse
+                            isTry = true;
+                            var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
+                            JSON.parse(x);//JSON.parse
                         }
                         catch (err) {
-                            err;
                             filesNotJsonCounter++;
+                            isTry = false;
+                            err;
                         }
                         noOfFiles++;
-                        noOfJsonStored++;
-                        parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+
+                        if (isTry) {
+                            parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+                        }
                     }
 
-                    if (filesNotJsonCounter == noOfFiles) {
-                        var ir2: InsightResponse = {code: 400, body: {'error': 'Could not parse JSON'}};
+
+                    if (noOfFiles == 0) {
+                        var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
                         reject(ir2);
                     }
 
-                    if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
+                    if (filesNotJsonCounter == noOfFiles) {
+                        var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
+                        reject(ir2);
+                    }
+
+                    if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
                         if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             fs.writeFile(id, parsedJSON, (err: Error) => {
                                 if (err) throw err;
@@ -100,13 +99,16 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                             }
                             else {
-                                var count = -1;
+                                var count = 0;
                                 for (let i in arrayOfId) {
-                                    if (arrayOfId[i] != fs.existsSync(id)) {
+                                    if (arrayOfId.includes(id)||fs.existsSync(id)) {
+                                        //if id exists in arrayOfId
+                                        // or id exists in the project folder
                                         count++;
+                                        id = id + "(" + count + ")";
+                                        Log.info(id);
                                     }
                                 }
-                                id = id + "(" + count + ")";
 
                                 fs.writeFile(id, parsedJSON, (err: Error) => {
                                     if (err) throw err;
@@ -116,10 +118,8 @@ export default class InsightFacade implements IInsightFacade {
                                     if (err) throw err;
                                 });
                                 arrayOfId = [];
-                                if (noOfJsonStored == arrayofUnparsedFileDataAll.length) {
-                                    var ir4: InsightResponse = {code: 201, body: {}};
-                                    fulfill(ir4);
-                                }
+                                var ir4: InsightResponse = {code: 201, body: {}};
+                                fulfill(ir4);
                             }
                         }
                     }

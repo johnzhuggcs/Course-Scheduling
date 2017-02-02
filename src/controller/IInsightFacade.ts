@@ -58,8 +58,6 @@ export interface TypeScriptSucks{
 
 export interface IInsightFacade {
 
-    base64ToBuffer(str:string):any;
-
     /**
      * Add a dataset to UBCInsight.
      *

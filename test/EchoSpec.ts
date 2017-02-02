@@ -76,13 +76,4 @@ describe("EchoSpec", function () {
         expect(out.body).to.deep.equal({error: 'Message not provided'});
     });
 
-
-
-
-
-
-
-
-    //use fs.readfile to read the content here fs.readFile(id,function(err:Error, data:any) {};
-
 });
