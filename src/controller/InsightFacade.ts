@@ -170,13 +170,22 @@ export default class InsightFacade implements IInsightFacade {
      */
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
-
-        if(this.isValid(query) == true){
-            return null;
-
-
-        }else
-        return null;
+        var fs = require("jszip");
+        var promise = new Promise(function (resolve, reject) {
+            if(this.isValid(query) == true){
+                var filterVal = query.WHERE
+                var keys = Object.keys(filterVal);
+                var result = filterVal[keys[0]];
+                for(let x in keys){
+                    resolve("great")
+                }
+                fs.readFileSync("")
+            } else{
+                var code424InvalidQuery:InsightResponse = {code:424, body:{"error":"invalid query"}};
+                reject(code424InvalidQuery);
+            }
+        });
+        return null
         //perform query
 
     }

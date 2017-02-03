@@ -30,9 +30,10 @@ describe("InsightFacadeTest", function () {
     const fs = require('fs');
     it("204: addDataset should add a dataset to UBCInsight", function () {
         return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+
             var ir: InsightResponse;
             sanityCheck(value);
-            Log.test(JSON.stringify(value));
+            //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
@@ -52,7 +53,7 @@ describe("InsightFacadeTest", function () {
         return insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
-            Log.test(JSON.stringify(value));
+            //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(201);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
@@ -62,13 +63,14 @@ describe("InsightFacadeTest", function () {
 
     });
 
+
     it("400: addDataset should detect invalid JSON", function () {
         return insight.addDataset('supposetofail',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
-            Log.test(JSON.stringify(value));
+            //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(400);
             expect(value.body).to.deep.equal({'Error': 'Could not parse JSON'});
         })
@@ -80,7 +82,7 @@ describe("InsightFacadeTest", function () {
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
-            Log.test(JSON.stringify(value));
+            //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(400);
             expect(value.body).to.deep.equal({'Error': 'No datafile is found'});
         })
@@ -90,7 +92,7 @@ describe("InsightFacadeTest", function () {
         return insight.addDataset('1json1not',fs.readFileSync('1unparsable1parsable.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
-            Log.test(JSON.stringify(value));
+            //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
