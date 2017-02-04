@@ -106,7 +106,6 @@ export default class InsightFacade implements IInsightFacade {
                                         // or id exists in the project folder
                                         count++;
                                         id = id + "(" + count + ")";
-                                        Log.info(id);
                                     }
                                 }
 
@@ -142,8 +141,11 @@ export default class InsightFacade implements IInsightFacade {
             var zip = new JSZip();
 
             if (fs.existsSync(id)) {
-                zip.remove(id);
+                //zip.remove(id);
+//DON'T use js zip, just use it for my own data structure and the ones I've created
+                //correct the counter so that it conserves all the ids
 
+                fs.unlinkSync(id);
 
                 var ir4: InsightResponse = {code: 204, body: {}};
                 fulfill(ir4);
@@ -151,7 +153,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else {
-                var ir4: InsightResponse = {code: 400, body: {}};
+                var ir4: InsightResponse = {code: 400, body: {'Error': 'Delete was a resource that was not previously added'}};
                 reject(ir4);
             }
 

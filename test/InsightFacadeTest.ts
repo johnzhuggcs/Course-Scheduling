@@ -29,7 +29,7 @@ describe("InsightFacadeTest", function () {
 
     const fs = require('fs');
     it("204: addDataset should add a dataset to UBCInsight", function () {
-        //Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+
         return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
 
             var ir: InsightResponse;
@@ -45,7 +45,7 @@ describe("InsightFacadeTest", function () {
     });
 
     it("201: addDataset should add a dataset to UBCInsight", function () {
-        //Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
@@ -91,7 +91,6 @@ describe("InsightFacadeTest", function () {
 
     });
     it("204: addDataset should add a dataset to UBCInsight and dump the invalid one", function () {
-        Log.info("readFile:"+ fs.readFileSync('1unparsable1parsable.zip').toString('base64'));
         return insight.addDataset('1json1not',fs.readFileSync('1unparsable1parsable.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
@@ -101,6 +100,38 @@ describe("InsightFacadeTest", function () {
         }).catch(function (err) {
             //Log.test('Error: ' + err);
             expect.fail();//should check the same name within the respairatory
+        })
+
+    });
+
+
+    //TODO: removeDataset
+
+    var JSZip = require('jszip');
+    var zip = new JSZip();
+    it("204: removeDataset should remove the dataset", function () {
+        return insight.removeDataset('VirtualInsight(1)').then(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    });
+
+    it("404: removeDataset cannot find the added source", function () {
+        return insight.removeDataset('VirtualInsight(1)').then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
         })
 
     });
