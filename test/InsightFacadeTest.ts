@@ -29,7 +29,7 @@ describe("InsightFacadeTest", function () {
 
     const fs = require('fs');
     it("204: addDataset should add a dataset to UBCInsight", function () {
-        Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+        //Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
         return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
 
             var ir: InsightResponse;
@@ -38,14 +38,14 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
             expect.fail();//should check the same name within the respairatory
         })
 
     });
 
     it("201: addDataset should add a dataset to UBCInsight", function () {
-        Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
+        //Log.info("readFile:"+ fs.readFileSync('courses.zip').toString('base64'));
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
@@ -59,7 +59,7 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(201);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
             expect.fail();
         })
 
@@ -99,7 +99,7 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
             expect.fail();//should check the same name within the respairatory
         })
 

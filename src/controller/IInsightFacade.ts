@@ -136,17 +136,25 @@ export interface IInsightFacade {
      * @param query
      */
 
-    isValid(query:QueryRequest):boolean;
+    isValid(query:QueryRequest):any;
 
     /** Checks if query provided has filter
      * needed as LOGICCOMPARISON and NEGATION recursively contains FILTER
      * @param filter
      */
-    hasFilter(filter:FilterQuery):boolean;
+    hasFilter(filter:FilterQuery, invalidIdArray:string[]):boolean|string[];
 
     /** Used if encounters array of filter, iterates and calls hasFilter() for each element
      *
-     * @param filterArray
+     * @param filterArray, invalidIdArray
      */
-    hasArrayFilter(filterArray:FilterQuery[]):boolean;
+    hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[]):boolean|string[];
+
+    /** Used for iterating through logic comparisons
+     *
+     * @param logicFilter
+     */
+
+    getFilterArray(logicFilter:any):any;
+
 }
