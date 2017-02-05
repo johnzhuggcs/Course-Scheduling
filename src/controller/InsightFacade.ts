@@ -166,7 +166,7 @@ export default class InsightFacade implements IInsightFacade {
     //TODO: Store each Query of UBCInsight into an arrayOfQuery (.split(\r\n))
     //TODO: If (contains(keyword) -> extract the value of the key)
 
-    //TODO: Check options for valid Id
+
     //TODO: Go into file and spli through \r\n
 
     // if (match with the content within the file-->
@@ -177,13 +177,18 @@ export default class InsightFacade implements IInsightFacade {
         var queryCheck = this.isValid(query);
         return new Promise(function (resolve, reject) {
             if(queryCheck == true){
-                var filterVal = query.WHERE
-                var keys = Object.keys(filterVal);
-                var result = filterVal[keys[0]];
+                var filter = query.WHERE
+                var columns = query.OPTIONS.COLUMNS;
+                var order =  query.OPTIONS.ORDER;
+                var table = query.OPTIONS.FORM;
+                var keys = Object.keys(filter);
+                var result = filter[keys[0]]; //value of the WHERE Filters
                 var validKey;
                 var contentDatasetResult;
-                var cachedId = fs.readFileSync("existingIds_Don\'tMakeAnotherIdOfThisFileName").toString;
-                var cachedIdArray = cachedId.split("\r\n");
+                var datasetResultArray;
+                //var cachedId = fs.readFileSync("existingIds_Don\'tMakeAnotherIdOfThisFileName").toString;
+                //var cachedIdArray = cachedId.split("\r\n");
+                //var nonExistIdArray = [];
 
 
 
@@ -191,17 +196,18 @@ export default class InsightFacade implements IInsightFacade {
                     var nonLogicFilter = this.getFilterArray(result);
                     var nonLogicFilterVals = nonLogicFilter[0];
                     var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                    validKey = nonLogicFilterVals(nonLogicFilterKeys[0]);
+                    validKey = nonLogicFilterVals(nonLogicFilterKeys[0]).split("_");
 
+                    var testingResult = validKey[0]
 
-                        for(let x in cachedIdArray){
+                        // for future projects
+                        /**for(let x in cachedIdArray){
                             if(validKey == cachedIdArray[x]){
                                 contentDatasetResult = fs.readFileSync(validKey);
-                            } else reject("error")
-                        }
+                            } else nonExistIdArray.push(validKey);
+                        }*/
 
-
-                    try {
+                    /**try {
                         contentDatasetResult = fs.readFileSync(validKey);
                     } catch (err) {
                         if (err.code === 'ENOENT') {
@@ -213,15 +219,114 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         // Here you get the error when the file was not found,
                         // but you also get any other error
-                    }
+                    } */
 
+                    contentDatasetResult = fs.readFileSync(testingResult);
 
                 } else {
-                    var nonLogicFilterVals = result[0];
-                    var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                    validKey = nonLogicFilterVals(nonLogicFilterKeys[0]);
-                    contentDatasetResult = fs.readFileSync(validKey);
+                    //var nonLogicFilterVals = result[0];
+                    var nonLogicFilterKeys = Object.keys(result);
+                    validKey = nonLogicFilterKeys[0].split("_");
+                    var testingResult:any = validKey[0]
+                    contentDatasetResult = fs.readFileSync(testingResult);
                 }
+
+                datasetResultArray = contentDatasetResult.split("\r\n")
+                // TODO: sort result Info
+
+
+                // example empty result {"result":[],"rank":0}
+                // example valid result {"result":[section1, section2, etc...], "rank":0}
+
+                if(datasetResultArray.length > 0) {
+                    var lmaoWeDone;
+                    var finalReturn = [];
+                    var returnInfo = [];
+                    var atomicReturnInfo:any; //building block of query's return based on valid Keys
+                    for (let x in datasetResultArray) { //iterates through the array of results, now just a result
+                        var singleCourse = datasetResultArray[x];
+                        var sectionArray;
+                        var singleSection;
+                        var singleColumnKey;
+                        var translatedKey; //translated key from query into the corresponding one into dataSet
+
+                        sectionArray = singleCourse["result"]
+                        if(sectionArray.isUndefined()){
+                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with no result in array"}};
+                            reject(code400InvalidQuery);
+                        }else{
+                            if(sectionArray.length > 0){ //going into the arrays of sections and organizing them based on the OPTIONS
+                                for(let x in sectionArray){
+                                    singleSection = sectionArray[x]
+                                    for(let x in columns){
+                                        singleColumnKey = columns[x]
+                                        translatedKey = this.vocabValidKey(singleColumnKey);
+                                        /**if(translatedKey == false){
+                                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
+                                            reject(code400InvalidQuery);
+                                        }*/
+
+                                        atomicReturnInfo = {singleColumnKey:singleSection[translatedKey]}
+                                        if(singleSection[translatedKey].isUndefined()){
+                                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with no key in result"}};
+                                            reject(code400InvalidQuery);
+                                        } else {
+                                            returnInfo.push(atomicReturnInfo);
+                                        }
+                                    }
+                                }
+                            } else {
+                                var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with empty result in array"}};
+                                reject(code400InvalidQuery);
+                            }
+                        }
+                        // TODO: then get the WHERE to decide which ones to keep
+
+
+                        returnInfo = this.filterQueryRequest(returnInfo, result, keys)
+
+                        finalReturn.push(returnInfo);
+
+                    }
+                    // TODO: sort using order last
+
+                    if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")){
+                        finalReturn = finalReturn.sort(function (a, b) {
+                            return a.order - b.order;
+                        });
+
+                    } else if(order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")){
+                        finalReturn = finalReturn.sort(function(a, b) {
+                            var nameA = a.order.toUpperCase(); // ignore upper and lowercase
+                            var nameB = b.order.toUpperCase(); // ignore upper and lowercase
+                            if (nameA < nameB) {
+                                return -1;
+                            }else if (nameA > nameB) {
+                                return 1;
+                            }else
+                            return 0;
+                        });
+
+                    } else {
+                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"order error"}};
+                        reject(code400InvalidQuery);
+                    }
+
+                    // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
+
+                    lmaoWeDone = {render:table, result:finalReturn}
+
+                    var code200Done:InsightResponse = {code:200, body:{lmaoWeDone}}
+                    resolve(code200Done);
+
+
+
+
+                } else{
+                    var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"empty dataset"}};
+                    reject(code400InvalidQuery);
+                }
+
 
 
 
@@ -241,7 +346,7 @@ export default class InsightFacade implements IInsightFacade {
         //perform query
 
 
-
+    //Helper function in main queryRequest()
     getFilterArray(logicFilter:any):any{
         if(logicFilter instanceof Array) {
 
@@ -263,7 +368,196 @@ export default class InsightFacade implements IInsightFacade {
         }
 
     }
+    /** courses_dept: string; The department that offered the course. = "Subject"
+     ** courses_id: string; The course number (will be treated as a string (e.g., 499b)). = "Course":"numberstring"
+     ** courses_avg: number; The average of the course offering. = "Avg":number
+     ** courses_instructor: string; The instructor teaching the course offering. = "Professor":"lastname, firstname"
+     ** courses_title: string; The name of the course. = "Title"
+     ** courses_pass: number; The number of students that passed the course offering. = "Pass"
+     ** courses_fail: number; The number of students that failed the course offering. = "Fail"
+     ** courses_audit: number; The number of students that audited the course offering. = "Audit"
+     ** courses_uuid: string; The unique id of a course offering. = "id"
+     */
+    vocabValidKey(validKey:string):string|boolean{
+        if(validKey == "courses_dept"){
+            return "Subject"
+        } else if(validKey == "courses_id"){
+            return "Course"
+        } else if(validKey == "courses_avg"){
+            return "Avg"
+        } else if(validKey == "courses_instructor"){
+            return "Professor"
+        } else if(validKey == "courses_title"){
+            return "Title"
+        } else if(validKey == "courses_pass"){
+            return "Pass"
+        } else if(validKey == "courses_fail"){
+            return "Fail"
+        } else if(validKey == "courses_audit"){
+            return "Audit"
+        } else if(validKey == "courses_uuid"){
+            return "id"
+        } else return false;
+    }
 
+    filterQueryRequest(returnInfo:any, resultOfWhere:any, keys:any):any{
+        var sortVal:any;
+        var resultKeyArray:any = Object.keys(resultOfWhere);
+        sortVal = resultOfWhere[resultKeyArray[0]];
+        if(keys[0] == "LT"){
+
+            returnInfo = this.isLessThan(returnInfo, resultKeyArray, keys, sortVal);
+            return returnInfo;
+
+        }else if(keys[0] == "GT"){
+
+            returnInfo = this.isGreaterThan(returnInfo, resultKeyArray, keys, sortVal);
+            return returnInfo;
+
+        }else if(keys[0] == "EQ"){
+
+            returnInfo = this.isEqualTo(returnInfo, resultKeyArray, keys, sortVal);
+            return returnInfo;
+        }else if(keys[0] == "AND"){
+
+            var newFilter;
+            var newKeys;
+            var newResult;
+            var tempReturnInfo
+            for(let x in resultKeyArray){
+                newFilter = resultKeyArray[x];
+                newKeys = Object.keys(newFilter);
+                newResult = newFilter[newKeys[0]];
+
+                tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+                returnInfo = this.filterQueryRequest(tempReturnInfo, newResult, newKeys);
+
+            }return returnInfo
+
+        }else if(keys[0] == "OR"){
+
+            var newFilter;
+            var newKeys;
+            var newResult;
+            var tempReturnInfo
+            for(let x in resultKeyArray){
+                newFilter = resultKeyArray[x];
+                newKeys = Object.keys(newFilter);
+                newResult = newFilter[newKeys[0]];
+
+                if(Number(x) == 0){
+                    returnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+                }else {
+                    tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+                    returnInfo = this.mergeDeDuplicate(returnInfo, tempReturnInfo);
+
+                }
+            }return returnInfo
+        }else if(keys[0] == "NOT"){
+            var newFilter;
+            var newKeys;
+            var newResult;
+            var tempReturnInfo
+            for(let x in resultKeyArray){
+                newFilter = resultKeyArray[x];
+                newKeys = Object.keys(newFilter);
+                newResult = newFilter[newKeys[0]];
+
+                tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+
+                returnInfo = this.isNOT(returnInfo, tempReturnInfo);
+
+            }return returnInfo
+        }else if(keys[0] == "IS"){
+
+            returnInfo = this.isIsLOL(returnInfo, resultKeyArray, keys, sortVal);
+            return returnInfo;
+        }
+        else return null
+    }
+
+    mergeDeDuplicate(theWaitingArray:any, theIteratedArray:any):any{
+        for(let x in theIteratedArray){
+            if(theWaitingArray.includes(theIteratedArray[x])){
+                Log.info("merging duplicates"+theWaitingArray.toString()+theIteratedArray.toString())
+            } else {
+                theWaitingArray.push(theIteratedArray[x]);
+            }
+
+        } return theWaitingArray
+    }
+
+    isLessThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
+        //resultKeyArray[0] is basically "courses_avg"
+
+        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
+            var tempAtomicInfo = returnInfo[x];
+            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
+            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue < sortVal ){
+                Log.info(tempQueryValue);
+            } else{
+                returnInfo = returnInfo.splice(x, 1) //TODO: Possible error HERE!!!
+            }
+        }return returnInfo;
+    }
+
+    isGreaterThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
+        //resultKeyArray[0] is basically "courses_avg"
+
+        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
+            var tempAtomicInfo = returnInfo[x];
+            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
+            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue > sortVal ){
+                Log.info(tempQueryValue);
+            } else{
+                returnInfo = returnInfo.splice(x, 1)
+            }
+        }return returnInfo;
+    }
+
+    isEqualTo(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
+        //resultKeyArray[0] is basically "courses_avg"
+
+        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
+            var tempAtomicInfo = returnInfo[x];
+            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
+            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue == sortVal ){
+                Log.info(tempQueryValue);
+            } else{
+                returnInfo = returnInfo.splice(x, 1)
+            }
+        }return returnInfo;
+    }
+
+    isIsLOL(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:string){
+        //resultKeyArray[0] is basically "courses_avg"
+
+        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
+            var tempAtomicInfo = returnInfo[x];
+            var tempQueryValue:string = tempAtomicInfo[resultKeyArray[0]];
+            if(isString(sortVal) && sortVal.startsWith("*") && sortVal.endsWith("*") && tempQueryValue.includes(sortVal)){
+                Log.info(tempQueryValue);
+            } else if(isString(sortVal) && tempQueryValue == sortVal){
+                Log.info(tempQueryValue);
+            }else{
+                returnInfo = returnInfo.splice(x, 1);
+            }
+        }return returnInfo;
+    }
+
+    isNOT(returnInfo:any, tempReturnInfo:any){
+        for(let x in tempReturnInfo) { //removes all subsequent filter results
+            var tempAtomicInfo = tempReturnInfo[x];
+
+            if (returnInfo.includes(tempAtomicInfo)) {
+                returnInfo = returnInfo.splice(x, 1) //TODO: Possible error HERE!!!L
+            } else {
+                returnInfo = returnInfo;
+            }
+        }return returnInfo;
+    }
+
+    //Help Functions For querychecking
     isValid(query:QueryRequest):any{
         //checks for query provided is of valid syntax
         var keyArray = Object.keys(query); //an array of the keys, should only be WHERE and OPTIONS now
@@ -301,7 +595,8 @@ export default class InsightFacade implements IInsightFacade {
                                 columnsValidKeyArray[x].endsWith("_instructor") || columnsValidKeyArray[x].endsWith("_title") || columnsValidKeyArray[x].endsWith("_pass") ||
                                 columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid"))){
 
-                                invalidIdLists = columnsValidKeyArray.split("_");
+                                invalidIdLists = columnsValidKeyArray[x].split("_");
+
 
                                 if(invalidIdArray.includes(invalidIdLists[0])){
                                     invalidIdLists = [];
@@ -327,7 +622,8 @@ export default class InsightFacade implements IInsightFacade {
                             orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
                             orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))){
 
-                            invalidIdLists = columnsValidKeyArray.split("_");
+                            invalidIdLists = orderValidKey.split("_");
+
                             if(invalidIdArray.includes(invalidIdLists[0])){
                                 invalidIdLists = [];
                             } else {
@@ -414,11 +710,13 @@ export default class InsightFacade implements IInsightFacade {
 
     hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[]):boolean|string[]{
 
-            for(let x in filterArray){
-                if(this.hasFilter(filterArray[x], invalidIdArray) == false) {//checks if each element is actually FILTER
-                    return false
+            if(filterArray.length > 0) {
+                for (let x in filterArray) {
+                    if (this.hasFilter(filterArray[x], invalidIdArray) == false) {//checks if each element is actually FILTER
+                        return false
+                    }
                 }
-            }
+            } else return false
 
 
     }
