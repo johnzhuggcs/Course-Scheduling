@@ -253,9 +253,9 @@ export default class InsightFacade implements IInsightFacade {
 
                         contentDatasetResult = fs.readFileSync(testingResult, "utf8");
                     } else{//var nonLogicFilterVals = result[0];
-                        var nonLogicFilterKeys = Object.keys(result);
+                        var nonLogicFilterKeys = Object.keys(nonLogicFilter);
                         validKey = nonLogicFilterKeys[0].split("_");
-                        var testingResult = validKey[0]
+                        var testingResult:string = validKey[0]
                         contentDatasetResult = fs.readFileSync(testingResult, "utf8");}
 
                 } /**else if(keys[0] == "NOT"){
@@ -285,8 +285,8 @@ export default class InsightFacade implements IInsightFacade {
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
                         /**if(Number(x) >= 2503){
                             Log.info("start debug")
-                        }
-                        Log.info(x)*/
+                        }*/
+                        //Log.info(x)
                         if(Number(x) == datasetResultArray.length - 1 || Number(x) == 0){
                             Log.info("skip this white space")
                         }else {
@@ -497,6 +497,7 @@ export default class InsightFacade implements IInsightFacade {
         //returnInfo is now {atomicReturnInfo, atomicReturnInfo...}
         var sortVal:any;
         var resultKeyArray:any = Object.keys(resultOfWhere);
+        var sortKey = resultOfWhere[resultKeyArray[0]];
         sortVal = resultOfWhere[resultKeyArray[0]];
         if(keys[0] == "LT"){
 
@@ -534,6 +535,7 @@ export default class InsightFacade implements IInsightFacade {
             var newKeys;
             var newResult;
             var tempReturnInfo
+
             for(let x in resultOfWhere){
                 newFilter = resultOfWhere[x];
                 newKeys = Object.keys(newFilter);
@@ -552,16 +554,16 @@ export default class InsightFacade implements IInsightFacade {
             var newKeys;
             var newResult;
             var tempReturnInfo
-            for(let x in resultOfWhere){
-                newFilter = resultOfWhere[x];
-                newKeys = Object.keys(newFilter);
-                newResult = newFilter[newKeys[0]];
 
-                tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
 
-                returnInfo = this.isNOT(returnInfo, tempReturnInfo);
+            newKeys = Object.keys(resultOfWhere);
+            newResult = resultOfWhere[newKeys[0]];
 
-            }return returnInfo
+            tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+
+            returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey);
+
+            return returnInfo
         }else if(keys[0] == "IS"){
 
             returnInfo = this.isIsLOL(returnInfo, resultKeyArray, keys, sortVal);
@@ -593,6 +595,8 @@ export default class InsightFacade implements IInsightFacade {
             var tempAtomicValue = returnInfo[tempAtomicKey];
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal ){
                 returnInfo = returnInfo
+            } else if(isNumber(sortVal) && isNumber(tempAtomicValue)){
+                returnInfo = [] //TODO: Possible error HERE!!!
             } else{
                 returnInfo = returnInfo //TODO: Possible error HERE!!!
             }
@@ -624,6 +628,8 @@ export default class InsightFacade implements IInsightFacade {
             var tempAtomicValue = returnInfo[tempAtomicKey];
             if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal) {
                 returnInfo = returnInfo
+            } else if(isNumber(sortVal) && isNumber(tempAtomicValue)){
+                returnInfo = [] //TODO: Possible error HERE!!!
             } else {
                 returnInfo = returnInfo //TODO: Possible error HERE!!!
             }
@@ -639,25 +645,31 @@ export default class InsightFacade implements IInsightFacade {
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
-            if(isString(sortVal) &&  sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal) ){
+            if(isString(sortVal) &&  sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(1, sortVal.length - 2)) ){
                 returnInfo = returnInfo
             } else if(isString(sortVal) && tempAtomicValue == sortVal){
                 tempAtomicValue = tempAtomicValue
-            }else{
-                returnInfo = returnInfo //TODO: Possible error HERE!!!
+            } else if(isString(sortVal)){
+                returnInfo = [] //TODO: Possible error HERE!!!
+            } else{
+                returnInfo = returnInfo
             }
         }return returnInfo;
 
     }
 
-    isNOT(returnInfo:any, tempReturnInfo:any){
+    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any){
         var tempReturnInfoKeyArray = Object.keys(tempReturnInfo)
+        sortKey = Object.keys(sortKey)[0]
         for(let x in tempReturnInfoKeyArray) { //removes all subsequent filter results
-            var tempAtomicKey = tempReturnInfo[x];
+            var tempAtomicKey = tempReturnInfoKeyArray[x];
             var tempAtomicVal = tempReturnInfo[tempAtomicKey]
-
-            if(returnInfo.hasOwnProperty(tempAtomicKey) && returnInfo[tempAtomicKey] == tempAtomicVal){
-                returnInfo = returnInfo;
+            ;
+            var temp = tempAtomicKey.toString()
+            var temp2 = returnInfo[temp];
+            var bool = returnInfo.hasOwnProperty(tempAtomicKey);
+            if(returnInfo.hasOwnProperty(tempAtomicKey) && returnInfo[tempAtomicKey] == tempAtomicVal && tempAtomicKey == sortKey){
+                returnInfo = [];
             } else{
                 returnInfo = returnInfo;
             }
