@@ -136,17 +136,96 @@ export interface IInsightFacade {
      * @param query
      */
 
-    isValid(query:QueryRequest):boolean;
+    isValid(query:QueryRequest):any;
 
     /** Checks if query provided has filter
      * needed as LOGICCOMPARISON and NEGATION recursively contains FILTER
      * @param filter
      */
-    hasFilter(filter:FilterQuery):boolean;
+    hasFilter(filter:FilterQuery, invalidIdArray:string[]):boolean|string[];
 
     /** Used if encounters array of filter, iterates and calls hasFilter() for each element
      *
-     * @param filterArray
+     * @param filterArray, invalidIdArray
      */
-    hasArrayFilter(filterArray:FilterQuery[]):boolean;
+    hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[]):boolean|string[];
+
+    /** Used for iterating through logic comparisons
+     *
+     * @param logicFilter
+     */
+
+    getFilterArray(logicFilter:any):any;
+
+    /** Translates valid keys into database
+     *
+     * @param validKey
+     */
+    vocabValidKey(validKey:string):string|boolean;
+
+    /** General filter function that filters out unneeded fields in atomicReturnInfo
+     *
+     * @param returnInfo
+     * @param resultOfWherd, which is basically the "Filter"
+     * @param keys, which is the key in the filter, so {"LT":{"courses_avg":97)}
+     */
+
+    filterQueryRequest(returnInfo:any, resultOfWhere:any, keys:any):any;
+
+    /** is lessthan, returns a new returnInfo
+     *
+     * @param returnInfo
+     * @param resultKeyArray
+     * @param keys
+     * @param sortVal
+     */
+
+    isLessThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+
+    /** is greaterthan, returns a new returnInfo
+     *
+     * @param returnInfo
+     * @param resultKeyArray
+     * @param keys
+     * @param sortVal
+     */
+
+    isGreaterThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+
+    /** is equalTo, returns a new returnInfo
+     *
+     * @param returnInfo
+     * @param resultKeyArray
+     * @param keys
+     * @param sortVal
+     */
+
+    isEqualTo(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+
+    /** is IS, returns a new returnInfo, handles wildcard search strings
+     *
+     * @param returnInfo
+     * @param resultKeyArray
+     * @param keys
+     * @param sortVal
+     */
+
+    isIsLOL(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:string):any;
+
+    /** is NOT, removes atomicInfos in returnInfo from the subsequent filters returned with tempReturnInfos
+     *
+     * @param returnInfo
+     * @param tempReturnInfo
+
+     */
+
+    isNOT(returnInfo:any, tempReturnInfo:any):any;
+
+    /** merges and removes duplicates in each array
+     *
+     * @param theWaitingArray
+     * @param theIteratedArray
+     */
+
+    mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any;
 }
