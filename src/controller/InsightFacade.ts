@@ -288,9 +288,9 @@ export default class InsightFacade implements IInsightFacade {
                     var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        if(Number(x) >= 1671){
+                        /**if(Number(x) >= 1671){
                             Log.info("start debug")
-                        }
+                        }*/
                         //Log.info(x)
                         if(Number(x) == datasetResultArray.length - 1){
                             Log.info("skip this white space")
@@ -313,9 +313,9 @@ export default class InsightFacade implements IInsightFacade {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        if(Number(x) == 14){
+                                        /**if(Number(x) == 14){
                                             Log.info("continue debug")
-                                        }
+                                        }*/
                                         for (let x in columns) {
                                             singleColumnKey = columns[x].toString()
 
