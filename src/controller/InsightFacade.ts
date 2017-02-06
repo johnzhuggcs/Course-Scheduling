@@ -7,7 +7,7 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {isUndefined} from "util";
-
+//import {objectify} from "tslint/lib/utils";
 
 export default class InsightFacade implements IInsightFacade {
 
