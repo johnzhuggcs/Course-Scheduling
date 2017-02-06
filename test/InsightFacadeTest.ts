@@ -29,6 +29,7 @@ describe("InsightFacadeTest", function () {
 
     const fs = require('fs');
     it("204: addDataset should add a dataset to UBCInsight", function () {
+
         return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
 
             var ir: InsightResponse;
@@ -37,7 +38,24 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    });
+
+
+    it("204: initialize for us", function () {
+
+        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
             expect.fail();//should check the same name within the respairatory
         })
 
@@ -45,7 +63,9 @@ describe("InsightFacadeTest", function () {
     //my thing flipped (204 and 201 flipped)
 
     it("201: addDataset should add a dataset to UBCInsight", function () {
-        /*fs.writeFile('VirtualInsight', '{}', (err: Error) => {
+        /*
+
+        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
         fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
@@ -59,7 +79,7 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(201);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
             expect.fail();
         })
 
@@ -98,7 +118,7 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(204);
             expect(value.body).to.deep.equal({});
         }).catch(function (err) {
-            Log.test('Error: ' + err);
+            //Log.test('Error: ' + err);
             expect.fail();//should check the same name within the respairatory
         })
 
