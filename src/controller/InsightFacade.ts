@@ -7,6 +7,8 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {createGunzip} from "zlib";
+import {isUndefined} from "util";
+import {objectify} from "tslint/lib/utils";
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -175,11 +177,13 @@ export default class InsightFacade implements IInsightFacade {
         //perform query
         var fs = require("fs");
         var queryCheck = this.isValid(query);
+        var newThis = this;
+
         return new Promise(function (resolve, reject) {
             if(queryCheck == true){
                 var filter = query.WHERE
                 var columns = query.OPTIONS.COLUMNS;
-                var order =  query.OPTIONS.ORDER;
+                var order:any =  query.OPTIONS.ORDER;
                 var table = query.OPTIONS.FORM;
                 var keys = Object.keys(filter);
                 var result = filter[keys[0]]; //value of the WHERE Filters
@@ -193,10 +197,14 @@ export default class InsightFacade implements IInsightFacade {
 
 
                 if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
-                    var nonLogicFilter = this.getFilterArray(result);
+                    var nonLogicFilter;
+                    nonLogicFilter = newThis.getFilterArray(result);
                     var nonLogicFilterVals = nonLogicFilter[0];
                     var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                    validKey = nonLogicFilterVals(nonLogicFilterKeys[0]).split("_");
+                    var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
+                    var validTestKeyArray = Object.keys(validTestKeyValue)
+                    validKey = validTestKeyArray[0].split("_");
+
 
                     var testingResult = validKey[0]
 
@@ -221,14 +229,15 @@ export default class InsightFacade implements IInsightFacade {
                         // but you also get any other error
                     } */
 
-                    contentDatasetResult = fs.readFileSync(testingResult);
+                    contentDatasetResult = fs.readFileSync(testingResult, "utf8");
 
                 } else {
+
                     //var nonLogicFilterVals = result[0];
                     var nonLogicFilterKeys = Object.keys(result);
                     validKey = nonLogicFilterKeys[0].split("_");
-                    var testingResult:any = validKey[0]
-                    contentDatasetResult = fs.readFileSync(testingResult);
+                    var testingResult = validKey[0]
+                    contentDatasetResult = fs.readFileSync(testingResult, "utf8");
                 }
 
                 datasetResultArray = contentDatasetResult.split("\r\n")
@@ -241,64 +250,110 @@ export default class InsightFacade implements IInsightFacade {
                 if(datasetResultArray.length > 0) {
                     var lmaoWeDone;
                     var finalReturn = [];
-                    var returnInfo = [];
+                    var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        var singleCourse = datasetResultArray[x];
-                        var sectionArray;
-                        var singleSection;
-                        var singleColumnKey;
-                        var translatedKey; //translated key from query into the corresponding one into dataSet
+                        /**if(Number(x) >= 2503){
+                            Log.info("start debug")
+                        }
+                        Log.info(x)*/
+                        if(Number(x) == datasetResultArray.length - 1 || Number(x) == 0){
+                            Log.info("skip this white space")
+                        }else {
+                            var singleCourse = JSON.parse(datasetResultArray[x]);
+                            var sectionArray;
+                            var singleSection;
+                            var singleColumnKey;
+                            var translatedKey; //translated key from query into the corresponding one into dataSet
 
-                        sectionArray = singleCourse["result"]
-                        if(sectionArray.isUndefined()){
-                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with no result in array"}};
-                            reject(code400InvalidQuery);
-                        }else{
-                            if(sectionArray.length > 0){ //going into the arrays of sections and organizing them based on the OPTIONS
-                                for(let x in sectionArray){
-                                    singleSection = sectionArray[x]
-                                    for(let x in columns){
-                                        singleColumnKey = columns[x]
-                                        translatedKey = this.vocabValidKey(singleColumnKey);
-                                        /**if(translatedKey == false){
+                            sectionArray = singleCourse["result"]
+                            if (isUndefined(sectionArray)) {
+                                sectionArray = [];
+                                /**var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "malformed dataset with no result in array"}
+                                };
+                                reject(code400InvalidQuery);*/
+                            } else {
+                                if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
+                                    for (let x in sectionArray) {
+                                        singleSection = sectionArray[x]
+                                        /**if(Number(x) == 13){
+                                            Log.info("continue debug")
+                                        }*/
+                                        for (let x in columns) {
+                                            singleColumnKey = columns[x].toString()
+
+                                            translatedKey = newThis.vocabValidKey(singleColumnKey);
+                                            if(translatedKey == false){
                                             var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
                                             reject(code400InvalidQuery);
-                                        }*/
+                                        }   else if(translatedKey == true) {
 
-                                        atomicReturnInfo = {singleColumnKey:singleSection[translatedKey]}
-                                        if(singleSection[translatedKey].isUndefined()){
-                                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with no key in result"}};
-                                            reject(code400InvalidQuery);
-                                        } else {
-                                            returnInfo.push(atomicReturnInfo);
+                                            }else{
+
+                                                atomicReturnInfo = {[singleColumnKey]: singleSection[translatedKey]}
+                                                if (isUndefined(singleSection[translatedKey])) {
+                                                    var code400InvalidQuery: InsightResponse = {
+                                                        code: 400,
+                                                        body: {"error": "malformed dataset with no key in result"}
+                                                    };
+                                                    reject(code400InvalidQuery);
+                                                } else {
+
+
+                                                    returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                    //Log.info(returnInfo);
+                                                    //returnInfo = ["courses_avg":95, "courses_instructor":"bleh"] right now
+                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                                }
+                                            }
+                                            /**if(result instanceof Array && result.length == 0){
+                                                result = result[0]
+                                            }*/
+                                        } returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
+                                        //Log.info(returnInfo);
+                                        if(returnInfo.length == 0){
+                                            returnInfo = returnInfo
+                                        }else {
+                                                finalReturn.push(returnInfo);
                                         }
                                     }
+
+
+
+                                } else if(sectionArray instanceof Array && sectionArray.length ==0){
+                                    sectionArray = sectionArray
+                                    /**var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "malformed dataset with empty result in array"}
+                                    };
+                                    reject(code400InvalidQuery);*/
+                                } else{
+                                    var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "malformed dataset with empty result in array"}
+                                    };
+                                    reject(code400InvalidQuery)
                                 }
-                            } else {
-                                var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed dataset with empty result in array"}};
-                                reject(code400InvalidQuery);
+
+                                // TODO: then get the WHERE to decide which ones to keep
+
                             }
                         }
-                        // TODO: then get the WHERE to decide which ones to keep
-
-
-                        returnInfo = this.filterQueryRequest(returnInfo, result, keys)
-
-                        finalReturn.push(returnInfo);
-
                     }
                     // TODO: sort using order last
 
                     if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")){
+
                         finalReturn = finalReturn.sort(function (a, b) {
-                            return a.order - b.order;
+                            return a[order] - b[order];
                         });
 
                     } else if(order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")){
                         finalReturn = finalReturn.sort(function(a, b) {
-                            var nameA = a.order.toUpperCase(); // ignore upper and lowercase
-                            var nameB = b.order.toUpperCase(); // ignore upper and lowercase
+                            var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                            var nameB = b[order].toUpperCase(); // ignore upper and lowercase
                             if (nameA < nameB) {
                                 return -1;
                             }else if (nameA > nameB) {
@@ -316,7 +371,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     lmaoWeDone = {render:table, result:finalReturn}
 
-                    var code200Done:InsightResponse = {code:200, body:{lmaoWeDone}}
+                    var code200Done:InsightResponse = {code:200, body:lmaoWeDone}
                     resolve(code200Done);
 
 
@@ -357,13 +412,16 @@ export default class InsightFacade implements IInsightFacade {
 
             if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){
                 this.getFilterArray(innerResult);
-            } else return innerResult;
+                return innerResult;
+            } else
+                return innerResult;
 
         } else {
             var keys = Object.keys(logicFilter);
             var innerResult = logicFilter[keys[0]];
             if (keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT") {
                 this.getFilterArray(innerResult);
+                return innerResult;
             } else return innerResult;
         }
 
@@ -401,6 +459,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     filterQueryRequest(returnInfo:any, resultOfWhere:any, keys:any):any{
+        //returnInfo is now {atomicReturnInfo, atomicReturnInfo...}
         var sortVal:any;
         var resultKeyArray:any = Object.keys(resultOfWhere);
         sortVal = resultOfWhere[resultKeyArray[0]];
@@ -424,8 +483,8 @@ export default class InsightFacade implements IInsightFacade {
             var newKeys;
             var newResult;
             var tempReturnInfo
-            for(let x in resultKeyArray){
-                newFilter = resultKeyArray[x];
+            for(let x in resultOfWhere){
+                newFilter = resultOfWhere[x];
                 newKeys = Object.keys(newFilter);
                 newResult = newFilter[newKeys[0]];
 
@@ -440,8 +499,8 @@ export default class InsightFacade implements IInsightFacade {
             var newKeys;
             var newResult;
             var tempReturnInfo
-            for(let x in resultKeyArray){
-                newFilter = resultKeyArray[x];
+            for(let x in resultOfWhere){
+                newFilter = resultOfWhere[x];
                 newKeys = Object.keys(newFilter);
                 newResult = newFilter[newKeys[0]];
 
@@ -458,8 +517,8 @@ export default class InsightFacade implements IInsightFacade {
             var newKeys;
             var newResult;
             var tempReturnInfo
-            for(let x in resultKeyArray){
-                newFilter = resultKeyArray[x];
+            for(let x in resultOfWhere){
+                newFilter = resultOfWhere[x];
                 newKeys = Object.keys(newFilter);
                 newResult = newFilter[newKeys[0]];
 
@@ -476,82 +535,95 @@ export default class InsightFacade implements IInsightFacade {
         else return null
     }
 
-    mergeDeDuplicate(theWaitingArray:any, theIteratedArray:any):any{
-        for(let x in theIteratedArray){
-            if(theWaitingArray.includes(theIteratedArray[x])){
-                Log.info("merging duplicates"+theWaitingArray.toString()+theIteratedArray.toString())
+    mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any{
+        var theIteratedKeyArray = Object.keys(theIteratedKeyValue)
+        for(let x in theIteratedKeyArray){
+            var theIteratedKey = theIteratedKeyArray[x];
+            var theIteratedValue = theIteratedKeyValue[theIteratedKey];
+            if(theWaitingKeyValue.hasOwnProperty(theIteratedKey) && theWaitingKeyValue[theIteratedKey] == theIteratedValue){
+                //Log.info("merging duplicates"+theWaitingKeyValue.toString()+theIteratedKeyValue.toString())
             } else {
-                theWaitingArray.push(theIteratedArray[x]);
+                theWaitingKeyValue.assign({[theIteratedKey]:theIteratedValue});
             }
 
-        } return theWaitingArray
+        } return theWaitingKeyValue
     }
 
     isLessThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
         //resultKeyArray[0] is basically "courses_avg"
-
-        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
-            var tempAtomicInfo = returnInfo[x];
-            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
-            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue < sortVal ){
-                Log.info(tempQueryValue);
+        //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
+        var returnInfoKeyArray = Object.keys(returnInfo);
+        for(let x in returnInfoKeyArray){
+            var tempAtomicKey = returnInfoKeyArray[x]
+            var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal ){
+                returnInfo = returnInfo
             } else{
-                returnInfo = returnInfo.splice(x, 1) //TODO: Possible error HERE!!!
+                returnInfo = returnInfo //TODO: Possible error HERE!!!
             }
         }return returnInfo;
     }
 
     isGreaterThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
-        //resultKeyArray[0] is basically "courses_avg"
 
-        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
-            var tempAtomicInfo = returnInfo[x];
-            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
-            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue > sortVal ){
-                Log.info(tempQueryValue);
-            } else{
-                returnInfo = returnInfo.splice(x, 1)
-            }
+        //resultKeyArray[0] is basically "courses_avg"
+        //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
+        var returnInfoKeyArray = Object.keys(returnInfo);
+        for(let x in returnInfoKeyArray){
+            var tempAtomicKey = returnInfoKeyArray[x]
+            var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal ){
+                returnInfo = returnInfo
+            } else if(isNumber(sortVal) && isNumber(tempAtomicValue)){
+                returnInfo = [] //TODO: Possible error HERE!!!
+            } else{returnInfo = returnInfo}
         }return returnInfo;
     }
 
-    isEqualTo(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any){
+    isEqualTo(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any) {
         //resultKeyArray[0] is basically "courses_avg"
-
-        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
-            var tempAtomicInfo = returnInfo[x];
-            var tempQueryValue = tempAtomicInfo[resultKeyArray[0]];
-            if(isNumber(sortVal) && isNumber(tempQueryValue) && tempQueryValue == sortVal ){
-                Log.info(tempQueryValue);
-            } else{
-                returnInfo = returnInfo.splice(x, 1)
+        //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
+        var returnInfoKeyArray = Object.keys(returnInfo);
+        for (let x in returnInfoKeyArray) {
+            var tempAtomicKey = returnInfoKeyArray[x]
+            var tempAtomicValue = returnInfo[tempAtomicKey];
+            if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal) {
+                returnInfo = returnInfo
+            } else {
+                returnInfo = returnInfo //TODO: Possible error HERE!!!
             }
-        }return returnInfo;
+        }
+        return returnInfo;//resultKeyArray[0] is basically "courses_avg"
     }
+
 
     isIsLOL(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:string){
         //resultKeyArray[0] is basically "courses_avg"
-
-        for(let x in returnInfo){ //check if "courses_shit" matches, and filter out the ones based on values
-            var tempAtomicInfo = returnInfo[x];
-            var tempQueryValue:string = tempAtomicInfo[resultKeyArray[0]];
-            if(isString(sortVal) && sortVal.startsWith("*") && sortVal.endsWith("*") && tempQueryValue.includes(sortVal)){
-                Log.info(tempQueryValue);
-            } else if(isString(sortVal) && tempQueryValue == sortVal){
-                Log.info(tempQueryValue);
+        //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
+        var returnInfoKeyArray = Object.keys(returnInfo);
+        for(let x in returnInfoKeyArray){
+            var tempAtomicKey = returnInfoKeyArray[x]
+            var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(isString(sortVal) &&  sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal) ){
+                returnInfo = returnInfo
+            } else if(isString(sortVal) && tempAtomicValue == sortVal){
+                tempAtomicValue = tempAtomicValue
             }else{
-                returnInfo = returnInfo.splice(x, 1);
+                returnInfo = returnInfo //TODO: Possible error HERE!!!
             }
         }return returnInfo;
+
     }
 
     isNOT(returnInfo:any, tempReturnInfo:any){
-        for(let x in tempReturnInfo) { //removes all subsequent filter results
-            var tempAtomicInfo = tempReturnInfo[x];
+        var tempReturnInfoKeyArray = Object.keys(tempReturnInfo)
+        for(let x in tempReturnInfoKeyArray) { //removes all subsequent filter results
+            var tempAtomicKey = tempReturnInfo[x];
+            var tempAtomicVal = tempReturnInfo[tempAtomicKey]
 
-            if (returnInfo.includes(tempAtomicInfo)) {
-                returnInfo = returnInfo.splice(x, 1) //TODO: Possible error HERE!!!L
-            } else {
+            if(returnInfo.hasOwnProperty(tempAtomicKey) && returnInfo[tempAtomicKey] == tempAtomicVal){
+                returnInfo = returnInfo;
+            } else{
                 returnInfo = returnInfo;
             }
         }return returnInfo;

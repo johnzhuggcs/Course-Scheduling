@@ -227,5 +227,5 @@ export interface IInsightFacade {
      * @param theIteratedArray
      */
 
-    mergeDeDuplicate(theWaitingArray:any, theIteratedArray:any):any;
+    mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any;
 }

@@ -44,6 +44,23 @@ describe("InsightFacadeTest", function () {
 
     });
 
+
+    it("204: initialize for us", function () {
+
+        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    });
+
     it("201: addDataset should add a dataset to UBCInsight", function () {
 
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {

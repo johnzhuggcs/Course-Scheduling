@@ -13,6 +13,9 @@ describe("QueryTestSpec", function () {
 
     var insightFacade:InsightFacade = null;
     var testInvalidKeys:string[] = [];
+    var fs = require("fs")
+
+
     function sanityCheck(response: QueryRequest) {
         expect(response).to.have.property('WHERE');
         expect(response).to.have.property('OPTIONS');
@@ -527,6 +530,155 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
+
+
+    });
+
+    it("200 testing out simple query with NOT", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+                        }
+                    }
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                    ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
+
+
+    });
+
+    it("200 testing out complex query provided in deliverable", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "OR":[
+                    {
+                        "AND":[
+                            {
+                                "GT":{
+                                    "courses_avg":90
+                                }
+                            },
+                            {
+                                "IS":{
+                                    "courses_dept":"adhe"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "EQ":{
+                            "courses_avg":95
+                        }
+                    }
+                ]
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.02 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.16 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.17 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.18 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.5 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.72 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.82 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.85 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.29 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.48 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 92.54 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 93.33 },
+                    { courses_dept: 'rhsc', courses_id: '501', courses_avg: 95 },
+                    { courses_dept: 'bmeg', courses_id: '597', courses_avg: 95 },
+                    { courses_dept: 'bmeg', courses_id: '597', courses_avg: 95 },
+                    { courses_dept: 'cnps', courses_id: '535', courses_avg: 95 },
+                    { courses_dept: 'cnps', courses_id: '535', courses_avg: 95 },
+                    { courses_dept: 'cpsc', courses_id: '589', courses_avg: 95 },
+                    { courses_dept: 'cpsc', courses_id: '589', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'crwr', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'sowk', courses_id: '570', courses_avg: 95 },
+                    { courses_dept: 'econ', courses_id: '516', courses_avg: 95 },
+                    { courses_dept: 'edcp', courses_id: '473', courses_avg: 95 },
+                    { courses_dept: 'edcp', courses_id: '473', courses_avg: 95 },
+                    { courses_dept: 'epse', courses_id: '606', courses_avg: 95 },
+                    { courses_dept: 'epse', courses_id: '682', courses_avg: 95 },
+                    { courses_dept: 'epse', courses_id: '682', courses_avg: 95 },
+                    { courses_dept: 'kin', courses_id: '499', courses_avg: 95 },
+                    { courses_dept: 'kin', courses_id: '500', courses_avg: 95 },
+                    { courses_dept: 'kin', courses_id: '500', courses_avg: 95 },
+                    { courses_dept: 'math', courses_id: '532', courses_avg: 95 },
+                    { courses_dept: 'math', courses_id: '532', courses_avg: 95 },
+                    { courses_dept: 'mtrl', courses_id: '564', courses_avg: 95 },
+                    { courses_dept: 'mtrl', courses_id: '564', courses_avg: 95 },
+                    { courses_dept: 'mtrl', courses_id: '599', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'musc', courses_id: '553', courses_avg: 95 },
+                    { courses_dept: 'nurs', courses_id: '424', courses_avg: 95 },
+                    { courses_dept: 'nurs', courses_id: '424', courses_avg: 95 },
+                    { courses_dept: 'obst', courses_id: '549', courses_avg: 95 },
+                    { courses_dept: 'psyc', courses_id: '501', courses_avg: 95 },
+                    { courses_dept: 'psyc', courses_id: '501', courses_avg: 95 },
+                    { courses_dept: 'econ', courses_id: '516', courses_avg: 95 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 96.11 } ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
             //Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
@@ -534,6 +686,43 @@ describe("QueryTestSpec", function () {
 
 
     });
+/**
+    it("200 testing out simple query provided in deliverable", function () {
+
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "GT":{
+                    'courses_avg':80
+                }
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'aanb', courses_avg: 87.83 },
+                    { courses_dept: 'aanb', courses_avg: 87.83 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+ */
 
 
 
