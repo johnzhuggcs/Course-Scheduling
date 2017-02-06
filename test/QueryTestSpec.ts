@@ -67,6 +67,18 @@ describe("QueryTestSpec", function () {
 
     });
 
+    it("testing out merge", function () {
+        var queryTest:any = { courses_dept: 'epse', courses_avg: 98.45 }
+        var queryTest2:any = { courses_dept: 'epse', courses_avg: 98.45 }
+
+        var keyTest = Object.keys(queryTest);
+
+
+        expect(insightFacade.mergeDeDuplicate(queryTest, queryTest2)).to.equal(queryTest);
+
+
+    });
+
 
     it("testing out complex query provided in deliverable", function () {
         var queryTest:any =     {
