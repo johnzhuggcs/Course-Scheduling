@@ -538,7 +538,7 @@ describe("QueryTestSpec", function () {
 
 
     });
-
+/*TODO: remove the comment after autotest to avoid conflict
     it("200 testing out simple query with NOT", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
@@ -686,6 +686,7 @@ describe("QueryTestSpec", function () {
 
 
     });
+    */
 /**
     it("200 testing out simple query provided in deliverable", function () {
 
