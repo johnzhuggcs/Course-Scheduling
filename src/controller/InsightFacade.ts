@@ -252,7 +252,11 @@ export default class InsightFacade implements IInsightFacade {
                     } */
 
                         contentDatasetResult = fs.readFileSync(testingResult, "utf8");
-                    } else{//var nonLogicFilterVals = result[0];
+                    } else{ //this is for when keys[0] is NOT;
+                        //var nonLogicFilterVals = result[0];
+
+                        //var notKeys = Object.keys(nonLogicFilter);
+                        //var notResult = nonLogicFilter[notKeys[0]];
                         var nonLogicFilterKeys = Object.keys(nonLogicFilter);
                         validKey = nonLogicFilterKeys[0].split("_");
                         var testingResult:string = validKey[0]
@@ -283,7 +287,7 @@ export default class InsightFacade implements IInsightFacade {
                     var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        /**if(Number(x) >= 13){
+                        /**if(Number(x) >= 1671){
                             Log.info("start debug")
                         }*/
                         //Log.info(x)
@@ -308,7 +312,7 @@ export default class InsightFacade implements IInsightFacade {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        /**if(Number(x) == 7){
+                                        /**if(Number(x) == 14){
                                             Log.info("continue debug")
                                         }*/
                                         for (let x in columns) {
@@ -455,8 +459,11 @@ export default class InsightFacade implements IInsightFacade {
                 this.getFilterArray(innerResult);
                 return innerResult;
             } else if(keys[0] == "NOT"){
+
                 this.getFilterArray(innerResult);
-                return innerResult;
+                var innerResultKey = Object.keys(innerResult)
+                var innerResultValue = innerResult[innerResultKey[0]]
+                return innerResultValue;
             } else return innerResult;
         }
 
@@ -560,7 +567,13 @@ export default class InsightFacade implements IInsightFacade {
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo2 = this.filterQueryRequest(returnInfo, newResult, newKeys);
-                    returnInfo = this.mergeDeDuplicate(tempReturnInfo2, tempReturnInfo);
+                    if(tempReturnInfo2.length == 0){
+                        returnInfo = tempReturnInfo;
+                    }else if(tempReturnInfo.length == 0){
+                        returnInfo = tempReturnInfo2;
+                    }else {
+                        returnInfo = this.mergeDeDuplicate(tempReturnInfo2, tempReturnInfo);
+                    }
 
                 }
             }return returnInfo
@@ -568,15 +581,22 @@ export default class InsightFacade implements IInsightFacade {
             var newFilter;
             var newKeys;
             var newResult;
-            var tempReturnInfo
+            var tempReturnInfo;
+            var tempReturnInfo2;
+
+            //var tempSortKey = Object.keys(sortKey)
+            //sortKey = sortKey[tempSortKey[0]]
 
 
             newKeys = Object.keys(resultOfWhere);
             newResult = resultOfWhere[newKeys[0]];
 
             tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+            tempReturnInfo2 = returnInfo;
 
-            returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey);
+
+                returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);
+
 
             return returnInfo
         }else if(keys[0] == "IS"){
@@ -595,7 +615,7 @@ export default class InsightFacade implements IInsightFacade {
             if(theWaitingKeyValue.hasOwnProperty(theIteratedKey) && theWaitingKeyValue[theIteratedKey] == theIteratedValue){
                 //Log.info("merging duplicates"+theWaitingKeyValue.toString()+theIteratedKeyValue.toString())
             } else {
-                theWaitingKeyValue.assign({[theIteratedKey]:theIteratedValue});
+                theWaitingKeyValue.assign({}, {[theIteratedKey]:theIteratedValue});
             }
 
         } return theWaitingKeyValue
@@ -677,22 +697,27 @@ export default class InsightFacade implements IInsightFacade {
 
     }
 
-    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any){
-        var tempReturnInfoKeyArray = Object.keys(tempReturnInfo)
-        sortKey = Object.keys(sortKey)[0]
-        for(let x in tempReturnInfoKeyArray) { //removes all subsequent filter results
-            var tempAtomicKey = tempReturnInfoKeyArray[x];
-            var tempAtomicVal = tempReturnInfo[tempAtomicKey]
-            ;
-            var temp = tempAtomicKey.toString()
-            var temp2 = returnInfo[temp];
-            var bool = returnInfo.hasOwnProperty(tempAtomicKey);
-            if(returnInfo.hasOwnProperty(tempAtomicKey) && returnInfo[tempAtomicKey] == tempAtomicVal && tempAtomicKey == sortKey){
-                returnInfo = [];
-            } else{
-                returnInfo = returnInfo;
+    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any, resultKeyArray:any){
+        if(tempReturnInfo.length == 0){
+            return returnInfo
+        }else {
+            var tempReturnInfoKeyArray = Object.keys(tempReturnInfo)
+            sortKey = Object.keys(sortKey)[0]
+            for (let x in tempReturnInfoKeyArray) { //removes all subsequent filter results
+                var tempAtomicKey = tempReturnInfoKeyArray[x];
+                var tempAtomicVal = tempReturnInfo[tempAtomicKey]
+                    ;
+                var temp = tempAtomicKey.toString()
+                var temp2 = returnInfo[temp];
+                var bool = returnInfo.hasOwnProperty(tempAtomicKey);
+                if (returnInfo.hasOwnProperty(tempAtomicKey) && returnInfo[tempAtomicKey] == tempAtomicVal && tempAtomicKey == sortKey) {
+                    returnInfo = [];
+                } else {
+                    returnInfo = returnInfo;
+                }
             }
-        }return returnInfo;
+            return returnInfo;
+        }
     }
 
     //Help Functions For querychecking

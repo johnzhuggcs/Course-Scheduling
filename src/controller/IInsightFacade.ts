@@ -219,7 +219,7 @@ export interface IInsightFacade {
 
      */
 
-    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any   ):any;
+    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any, resultKeyArray:any):any;
 
     /** gets the id of dataset from valid keys
      *
