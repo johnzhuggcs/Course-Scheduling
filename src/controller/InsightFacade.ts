@@ -29,6 +29,7 @@ export default class InsightFacade implements IInsightFacade {
             var filesNotJsonCounter = 0;
             var noOfFiles = 0;
 
+
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
 
@@ -74,7 +75,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                     if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                        /*if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             fs.writeFile(id, parsedJSON, (err: Error) => {
                                 if (err) throw err;
                             });//write data file
@@ -83,37 +84,46 @@ export default class InsightFacade implements IInsightFacade {
                             }); //for new storage
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
-                        }
-                        else if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                        }*/
+                        if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
                             arrayOfId = data.split("\r\n");
-                            if (!arrayOfId.includes(id)) {
+                            //Log.info(arrayOfId.toString());
+                        }
+                        //Log.info('arrayOfId:' + arrayOfId.toString());
+                        //Log.info('fs.existSync(id):' + fs.existsSync(id));
+                        //Log.info('arrayOfId[i] == id');
+                            if (!arrayOfId.includes(id) && !fs.existsSync(id)) {
                                 {
                                     fs.writeFile(id, parsedJSON, (err: Error) => {
                                         if (err) throw err;
                                     });
-                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                                    data = data + id + "\r\n";
+                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
                                         if (err) throw err;
                                     });
                                     var ir4: InsightResponse = {code: 204, body: {}};
                                     fulfill(ir4);
                                 }
                             }
-                            else {
+                            else if (arrayOfId.includes(id) && fs.existsSync(id)) {
                                 var count = 0;
                                 for (let i in arrayOfId) {
-                                    if (arrayOfId.includes(id)||fs.existsSync(id)) {
+                                    if (arrayOfId[i]==(id)) {
+                                        //Log.info('arrayOfId[i] == id');
                                         //if id exists in arrayOfId
                                         // or id exists in the project folder
                                         count++;
-                                        id = id + "(" + count + ")";
+                                        //Log.info('count is:' + count);
                                     }
                                 }
+                                id = id + "(" + count + ")";
+                                //Log.info('id is:' + id);
 
                                 fs.writeFile(id, parsedJSON, (err: Error) => {
                                     if (err) throw err;
                                 });//datafile is written
-                                data += id + "\r\n";
+                                data = data + id + "\r\n";
                                 fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
                                     if (err) throw err;
                                 });
@@ -121,8 +131,9 @@ export default class InsightFacade implements IInsightFacade {
                                 var ir4: InsightResponse = {code: 201, body: {}};
                                 fulfill(ir4);
                             }
+
                         }
-                    }
+
                 });
             }).catch(function (e: any) {
                 var ir2: InsightResponse = {code: 400, body: {e}};
@@ -131,6 +142,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
 
+    //TODO:store all the ids within the datafile instead of making a separate file to store the ids
     removeDataset(id: string): Promise<InsightResponse> {
         //by providing the id, remove the dataset
         //delete the zip file by id
@@ -140,13 +152,23 @@ export default class InsightFacade implements IInsightFacade {
             var JSZip = require('jszip');
             var fs = require('fs');
             var zip = new JSZip();
+            var data = '';
 
+            //Log.info(id);
+            //Log.info(fs.existsSync(id));
             if (fs.existsSync(id)) {
                 //zip.remove(id);
 //DON'T use js zip, just use it for my own data structure and the ones I've created
                 //correct the counter so that it conserves all the ids
 
-                fs.unlinkSync(id);
+                data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
+                data = data.replace(id + '\r\n', '');
+                //Log.info(data);
+                fs.writeFileSync(id, data);
+
+                fs.unlink(id,(err: Error) => {
+                    if (err) throw err;
+                });
 
                 var ir4: InsightResponse = {code: 204, body: {}};
                 fulfill(ir4);

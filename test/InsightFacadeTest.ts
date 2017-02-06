@@ -60,16 +60,19 @@ describe("InsightFacadeTest", function () {
         })
 
     });
+    //my thing flipped (204 and 201 flipped)
 
     it("201: addDataset should add a dataset to UBCInsight", function () {
+        /*
 
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
         fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
             if (err) throw err;
-        });
-        return insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+        });*/
+        //insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64'));
+        return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
             //Log.test(JSON.stringify(value));
@@ -127,7 +130,7 @@ describe("InsightFacadeTest", function () {
     var JSZip = require('jszip');
     var zip = new JSZip();
     it("204: removeDataset should remove the dataset", function () {
-        return insight.removeDataset('VirtualInsight(1)').then(function (value: InsightResponse) {
+        return insight.removeDataset('testInsight').then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
             Log.test(JSON.stringify(value));
@@ -141,7 +144,7 @@ describe("InsightFacadeTest", function () {
     });
 
     it("404: removeDataset cannot find the added source", function () {
-        return insight.removeDataset('VirtualInsight(1)').then(function (value: InsightResponse) {
+        return insight.removeDataset('testInsight').then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
@@ -152,6 +155,23 @@ describe("InsightFacadeTest", function () {
         })
 
     });
+
+   /* it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
+        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
+         if (err) throw err;
+         });
+        return insight.addDataset('supposetofail',fs.readFileSync('VirtualInsight').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
+        })
+
+    });*/
+
 
 
     //ask them about: same name but diff format
