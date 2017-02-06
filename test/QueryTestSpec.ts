@@ -579,7 +579,9 @@ describe("QueryTestSpec", function () {
 
 
     });
+
     /**
+
     it("200 testing out complex query provided in deliverable", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
@@ -722,7 +724,65 @@ describe("QueryTestSpec", function () {
         })
 
 
-    });*/
+    }); */
+
+    it("200 testing out complex query provided in deliverable", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "GT":{
+                            "courses_avg":90
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"adhe"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.02 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.16 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.17 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.18 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.5 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.72 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.82 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.85 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.29 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.48 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 92.54 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 93.33 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 96.11 } ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
 
 
 
