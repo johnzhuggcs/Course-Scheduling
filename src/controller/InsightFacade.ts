@@ -6,7 +6,6 @@ import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery, TypeScriptSu
 import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
-import {createGunzip} from "zlib";
 import {isUndefined} from "util";
 //import {objectify} from "tslint/lib/utils";
 
@@ -221,14 +220,15 @@ export default class InsightFacade implements IInsightFacade {
                 if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
                     var nonLogicFilter;
                     nonLogicFilter = newThis.getFilterArray(result);
-                    var nonLogicFilterVals = nonLogicFilter[0];
-                    var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                    var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
-                    var validTestKeyArray = Object.keys(validTestKeyValue)
-                    validKey = validTestKeyArray[0].split("_");
+                    if(nonLogicFilter instanceof Array) {
+                        var nonLogicFilterVals = nonLogicFilter[0];
+                        var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
+                        var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
+                        var validTestKeyArray = Object.keys(validTestKeyValue)
+                        validKey = validTestKeyArray[0].split("_");
 
 
-                    var testingResult = validKey[0]
+                        var testingResult = validKey[0]
 
                         // for future projects
                         /**for(let x in cachedIdArray){
@@ -237,7 +237,7 @@ export default class InsightFacade implements IInsightFacade {
                             } else nonExistIdArray.push(validKey);
                         }*/
 
-                    /**try {
+                        /**try {
                         contentDatasetResult = fs.readFileSync(validKey);
                     } catch (err) {
                         if (err.code === 'ENOENT') {
@@ -251,9 +251,17 @@ export default class InsightFacade implements IInsightFacade {
                         // but you also get any other error
                     } */
 
-                    contentDatasetResult = fs.readFileSync(testingResult, "utf8");
+                        contentDatasetResult = fs.readFileSync(testingResult, "utf8");
+                    } else{//var nonLogicFilterVals = result[0];
+                        var nonLogicFilterKeys = Object.keys(result);
+                        validKey = nonLogicFilterKeys[0].split("_");
+                        var testingResult = validKey[0]
+                        contentDatasetResult = fs.readFileSync(testingResult, "utf8");}
 
-                } else {
+                } /**else if(keys[0] == "NOT"){
+
+                }*/
+                else {
 
                     //var nonLogicFilterVals = result[0];
                     var nonLogicFilterKeys = Object.keys(result);
@@ -439,9 +447,14 @@ export default class InsightFacade implements IInsightFacade {
                 return innerResult;
 
         } else {
+
             var keys = Object.keys(logicFilter);
             var innerResult = logicFilter[keys[0]];
-            if (keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT") {
+
+            if (keys[0] == "AND" || keys[0] == "OR") {
+                this.getFilterArray(innerResult);
+                return innerResult;
+            } else if(keys[0] == "NOT"){
                 this.getFilterArray(innerResult);
                 return innerResult;
             } else return innerResult;
