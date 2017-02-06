@@ -538,7 +538,7 @@ describe("QueryTestSpec", function () {
 
 
     });
-/*TODO: remove the comment after autotest to avoid conflict
+
     it("200 testing out simple query with NOT", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
@@ -579,6 +579,8 @@ describe("QueryTestSpec", function () {
 
 
     });
+
+
 
     it("200 testing out complex query provided in deliverable", function () {
         var queryTest:QueryRequest = {
@@ -686,14 +688,18 @@ describe("QueryTestSpec", function () {
 
 
     });
-    */
+
 /**
-    it("200 testing out simple query provided in deliverable", function () {
+    it("200 testing out Double Negative", function () {
 
         var queryTest:QueryRequest = {
             "WHERE":{
-                "GT":{
-                    'courses_avg':80
+                "NOT":{
+                    "NOT":{
+                        "GT":{
+                            "courses_avg":98
+                        }
+                    }
                 }
             },
             "OPTIONS":{
@@ -708,9 +714,33 @@ describe("QueryTestSpec", function () {
 
         var result = { render: 'TABLE',
             result:
-                [ { courses_dept: 'aanb', courses_avg: 87.83 },
-                    { courses_dept: 'aanb', courses_avg: 87.83 }
-                ] }
+                [   { courses_dept: 'crwr', courses_avg: 98 },
+                    { courses_dept: 'crwr', courses_avg: 98 },
+                    { courses_dept: 'epse', courses_avg: 98.08 },
+                    { courses_dept: 'nurs', courses_avg: 98.21 },
+                    { courses_dept: 'nurs', courses_avg: 98.21 },
+                    { courses_dept: 'epse', courses_avg: 98.36 },
+                    { courses_dept: 'epse', courses_avg: 98.45 },
+                    { courses_dept: 'epse', courses_avg: 98.45 },
+                    { courses_dept: 'nurs', courses_avg: 98.5 },
+                    { courses_dept: 'nurs', courses_avg: 98.5 },
+                    { courses_dept: 'epse', courses_avg: 98.58 },
+                    { courses_dept: 'nurs', courses_avg: 98.58 },
+                    { courses_dept: 'nurs', courses_avg: 98.58 },
+                    { courses_dept: 'epse', courses_avg: 98.58 },
+                    { courses_dept: 'epse', courses_avg: 98.7 },
+                    { courses_dept: 'nurs', courses_avg: 98.71 },
+                    { courses_dept: 'nurs', courses_avg: 98.71 },
+                    { courses_dept: 'eece', courses_avg: 98.75 },
+                    { courses_dept: 'eece', courses_avg: 98.75 },
+                    { courses_dept: 'epse', courses_avg: 98.76 },
+                    { courses_dept: 'epse', courses_avg: 98.76 },
+                    { courses_dept: 'epse', courses_avg: 98.8 },
+                    { courses_dept: 'spph', courses_avg: 98.98 },
+                    { courses_dept: 'spph', courses_avg: 98.98 },
+                    { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 } ] }
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
@@ -724,6 +754,119 @@ describe("QueryTestSpec", function () {
 
     });
  */
+
+    it("200 testing out AND", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "GT":{
+                            "courses_avg":90
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"adhe"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.02 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.16 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.17 },
+                    { courses_dept: 'adhe', courses_id: '412', courses_avg: 90.18 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.5 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.72 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 90.82 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 90.85 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.29 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.33 },
+                    { courses_dept: 'adhe', courses_id: '330', courses_avg: 91.48 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 92.54 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 93.33 },
+                    { courses_dept: 'adhe', courses_id: '329', courses_avg: 96.11 } ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out OR", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "OR":[
+                    {
+                        "GT":{
+                            "courses_avg":99
+                        }
+                    },
+                    {
+                        "GT":{
+                            "courses_fail":280
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_fail"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        /**courses_dept	courses_id	courses_avg	courses_fail
+        chem	121	68.2	287
+        cnps	574	99.19	0
+        math	527	99.78	0
+        math	527	99.78	0*/
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'chem', courses_id: '121', courses_avg: 68.2, courses_fail:287 },
+                    { courses_dept: 'cnps', courses_id: '574', courses_avg: 99.19, courses_fail:0 },
+                    { courses_dept: 'math', courses_id: '527', courses_avg: 99.78, courses_fail:0 },
+                    { courses_dept: 'math', courses_id: '527', courses_avg: 99.78, courses_fail:0 }
+                   ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
 
 
 
