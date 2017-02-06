@@ -9,4 +9,5 @@ Implementing performQuery() and related help functions
  *Commit*: [performQuery() code 400 and 424](https://github.com/CS310-2017Jan/cpsc310project_team45/commit/aad5d3f43e9221b1552c4c28a39da9b3b2db6d63)
  *Commit*: [performQuery() filtering](https://github.com/CS310-2017Jan/cpsc310project_team45/commit/3ac9b70b7d204cf32c37304113d77acdb2fe1559)
  *Commit*: [performQuery() debugging](https://github.com/CS310-2017Jan/cpsc310project_team45/commit/2a37ff9604827308bdebc151f5a05a99e3d1d487)
+ *Commit*: Last one at ~7:35 February 6th
 Tested and debugged the above methods.

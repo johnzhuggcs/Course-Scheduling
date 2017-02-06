@@ -689,7 +689,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-/**
+
     it("200 testing out Double Negative", function () {
 
         var queryTest:QueryRequest = {
@@ -714,9 +714,7 @@ describe("QueryTestSpec", function () {
 
         var result = { render: 'TABLE',
             result:
-                [   { courses_dept: 'crwr', courses_avg: 98 },
-                    { courses_dept: 'crwr', courses_avg: 98 },
-                    { courses_dept: 'epse', courses_avg: 98.08 },
+                [   { courses_dept: 'epse', courses_avg: 98.08 },
                     { courses_dept: 'nurs', courses_avg: 98.21 },
                     { courses_dept: 'nurs', courses_avg: 98.21 },
                     { courses_dept: 'epse', courses_avg: 98.36 },
@@ -726,8 +724,8 @@ describe("QueryTestSpec", function () {
                     { courses_dept: 'nurs', courses_avg: 98.5 },
                     { courses_dept: 'epse', courses_avg: 98.58 },
                     { courses_dept: 'nurs', courses_avg: 98.58 },
-                    { courses_dept: 'nurs', courses_avg: 98.58 },
                     { courses_dept: 'epse', courses_avg: 98.58 },
+                    { courses_dept: 'nurs', courses_avg: 98.58 },
                     { courses_dept: 'epse', courses_avg: 98.7 },
                     { courses_dept: 'nurs', courses_avg: 98.71 },
                     { courses_dept: 'nurs', courses_avg: 98.71 },
@@ -745,15 +743,11 @@ describe("QueryTestSpec", function () {
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
-        }).catch(function (err) {
-            //Log.test('Error: ' + err);
-            expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"invalid query"})
         })
 
 
     });
- */
+
 
     it("200 testing out AND", function () {
         var queryTest:QueryRequest = {
