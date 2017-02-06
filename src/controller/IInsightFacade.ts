@@ -221,6 +221,12 @@ export interface IInsightFacade {
 
     isNOT(returnInfo:any, tempReturnInfo:any):any;
 
+    /** gets the id of dataset from valid keys
+     *
+     * @param result
+     * @param keys
+     */
+
     /** merges and removes duplicates in each array
      *
      * @param theWaitingArray
