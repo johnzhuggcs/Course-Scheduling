@@ -8,7 +8,7 @@ import {isString} from "util";
 import {isNumber} from "util";
 import {createGunzip} from "zlib";
 import {isUndefined} from "util";
-import {objectify} from "tslint/lib/utils";
+//import {objectify} from "tslint/lib/utils";
 
 export default class InsightFacade implements IInsightFacade {
 
