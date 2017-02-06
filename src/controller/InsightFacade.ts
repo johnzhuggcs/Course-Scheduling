@@ -136,7 +136,8 @@ export default class InsightFacade implements IInsightFacade {
 
                 });
             }).catch(function (e: any) {
-                var ir2: InsightResponse = {code: 400, body: {e}};
+                e = {'Error': 'It\'s not a zip file'};
+                var ir2: InsightResponse = {code: 400, body: e};
                 reject(ir2);
             });
         });

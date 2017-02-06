@@ -98,7 +98,7 @@ describe("InsightFacadeTest", function () {
         })
 
     });
-    it("400: addDataset should detect empty zip", function () {
+    it("400/Bender: addDataset should detect empty zip", function () {
         return insight.addDataset('supposetofail',fs.readFileSync('empty_zip.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
@@ -156,21 +156,21 @@ describe("InsightFacadeTest", function () {
 
     });
 
-   /* it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
+   it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
          if (err) throw err;
          });
-        return insight.addDataset('supposetofail',fs.readFileSync('VirtualInsight').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('supposetofail',fs.readFileSync('testInsight(1)').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
             Log.test(JSON.stringify(value));
             expect(value.code).to.equal(400);
-            expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
+            //expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
         })
 
-    });*/
+    });
 
 
 
