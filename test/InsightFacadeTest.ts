@@ -63,16 +63,16 @@ describe("InsightFacadeTest", function () {
     //my thing flipped (204 and 201 flipped)
 
     it("201: addDataset should add a dataset to UBCInsight", function () {
-        /*
+
 
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
         fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
             if (err) throw err;
-        });*/
+        });
         //insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64'));
-        return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
             sanityCheck(value);
             //Log.test(JSON.stringify(value));
@@ -155,7 +155,7 @@ describe("InsightFacadeTest", function () {
         })
 
     });
-
+/**
    it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
          if (err) throw err;
@@ -170,7 +170,7 @@ describe("InsightFacadeTest", function () {
             //expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
         })
 
-    });
+    }); */
 
 
 

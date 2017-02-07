@@ -73,7 +73,7 @@ describe("QueryTestSpec", function () {
 
         var keyTest = Object.keys(queryTest);
 
-
+        
         expect(insightFacade.mergeDeDuplicate(queryTest, queryTest2)).to.equal(queryTest);
 
 
