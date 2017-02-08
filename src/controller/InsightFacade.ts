@@ -13,8 +13,10 @@ export default class InsightFacade implements IInsightFacade {
 
     constructor() {
         Log.trace('InsightFacadeImpl::init()');
-    } /**
-    //New code for big fish
+
+    }
+
+
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
         return new Promise(function (fulfill, reject) {
@@ -76,7 +78,9 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                     if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        /**if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+
+                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+
                             fs.writeFile(id, parsedJSON, (err: Error) => {
                                 if (err) throw err;
                             });//write data file
@@ -85,7 +89,7 @@ export default class InsightFacade implements IInsightFacade {
                             }); //for new storage
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
-                        }*/ /**
+                        }
                         if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
                             arrayOfId = data.split("\r\n");
@@ -183,11 +187,13 @@ export default class InsightFacade implements IInsightFacade {
             }
 
         });
-    }  */
 
-    //Old Code
 
-    addDataset(id: string, content: string): Promise<InsightResponse> {
+    }
+    //Old Code from February 3rd
+
+
+    /*addDataset(id: string, content: string): Promise<InsightResponse> {
 
         return new Promise(function (fulfill, reject) {
 
@@ -231,8 +237,11 @@ export default class InsightFacade implements IInsightFacade {
 
                         if (isTry) {
                             parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+
                         }
+
                     }
+
 
 
                     if (noOfFiles == 0) {
@@ -301,9 +310,9 @@ export default class InsightFacade implements IInsightFacade {
                 reject(ir2);
             });
         });
-    }
+    }*/
 
-    removeDataset(id: string): Promise<InsightResponse> {
+    /*removeDataset(id: string): Promise<InsightResponse> {
         //by providing the id, remove the dataset
         //delete the zip file by id
 
@@ -331,7 +340,7 @@ export default class InsightFacade implements IInsightFacade {
             }
 
         });
-    }
+    }*/
 
 
     //TODO: if (<key> not found in UBCInsight) {return promise 400 body: {invalid <key>}}

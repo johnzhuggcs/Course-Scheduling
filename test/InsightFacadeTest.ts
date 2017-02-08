@@ -171,12 +171,12 @@ describe("InsightFacadeTest", function () {
         })
 
     });
-/**
-   it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
+
+  it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
          if (err) throw err;
          });
-        return insight.addDataset('supposetofail',fs.readFileSync('testInsight(1)').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('VirtualInsight',fs.readFileSync('VirtualInsight(1)').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
@@ -185,8 +185,7 @@ describe("InsightFacadeTest", function () {
             expect(value.code).to.equal(400);
             //expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
         })
-
-    }); */
+    });
 
 
 
