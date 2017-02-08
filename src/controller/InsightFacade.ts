@@ -7,6 +7,7 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {isUndefined} from "util";
+
 //import {objectify} from "tslint/lib/utils";
 
 export default class InsightFacade implements IInsightFacade {
@@ -320,7 +321,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }*/
 
-    /*removeDataset(id: string): Promise<InsightResponse> {
+    /*removeDataset(id: string): Promise<InsightResponse>
         //by providing the id, remove the dataset
         //delete the zip file by id
 
@@ -386,7 +387,9 @@ export default class InsightFacade implements IInsightFacade {
 
                 if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
                     var nonLogicFilter;
+                    //console.time("testing get filter");
                     nonLogicFilter = newThis.getFilterArray(result);
+                    //console.timeEnd("testing get filter")
                     if(nonLogicFilter instanceof Array) {
                         var nonLogicFilterVals = nonLogicFilter[0];
                         var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
@@ -396,6 +399,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
                         var testingResult = validKey[0]
+
 
                         // for future projects
                         /**for(let x in cachedIdArray){
@@ -417,7 +421,7 @@ export default class InsightFacade implements IInsightFacade {
                         // Here you get the error when the file was not found,
                         // but you also get any other error
                     } */
-
+                        //console.time("testing read file AND OR")
                         try {
                             contentDatasetResult = fs.readFileSync(testingResult, "utf8")
                         }
@@ -430,11 +434,14 @@ export default class InsightFacade implements IInsightFacade {
                                 throw err;
                             }
                         }
+                        //console.timeEnd("testing read file AND OR")
+
                     } else{ //this is for when keys[0] is NOT;
                         //var nonLogicFilterVals = result[0];
 
                         //var notKeys = Object.keys(nonLogicFilter);
                         //var notResult = nonLogicFilter[notKeys[0]];
+                        //console.time("testing read file NOT")
                         var nonLogicFilterKeys = Object.keys(nonLogicFilter);
                         validKey = nonLogicFilterKeys[0].split("_");
                         var testingResult:string = validKey[0]
@@ -451,7 +458,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
 
-
+                        //console.timeEnd("testing read file NOT")
                 }} /**else if(keys[0] == "NOT"){
 
                 }*/
@@ -462,7 +469,10 @@ export default class InsightFacade implements IInsightFacade {
                     validKey = nonLogicFilterKeys[0].split("_");
                     var testingResult = validKey[0]
                         try {
+                            //console.time("testing read file filters general")
                             contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                            //console.timeEnd("testing read file filters general")
+
                         }
                         catch(err){
                             if (err.code === 'ENOENT') {
@@ -473,9 +483,11 @@ export default class InsightFacade implements IInsightFacade {
                                 throw err;
                             }
                         }
-                }
 
+                }
+                //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
+                //console.timeEnd("parse through extracted content")
                 // TODO: sort result Info
 
 
@@ -487,12 +499,13 @@ export default class InsightFacade implements IInsightFacade {
                     var finalReturn = [];
                     var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
+                    //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        /**if(Number(x) >= 1671){
+                        if(Number(x) >= 5943){
                             Log.info("start debug")
-                        }*/
+                        }
                         //Log.info(x)
-                        if(Number(x) == datasetResultArray.length - 1){
+                        if(datasetResultArray[x] == false){
                             Log.info("skip this white space")
                         }else {
                             var singleCourse = JSON.parse(datasetResultArray[x]);
@@ -511,6 +524,7 @@ export default class InsightFacade implements IInsightFacade {
                                 reject(code400InvalidQuery);*/
                             } else {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
+                                    //console.time("one course")
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
                                         /**if(Number(x) == 14){
@@ -553,7 +567,7 @@ export default class InsightFacade implements IInsightFacade {
                                         }else {
                                                 finalReturn.push(returnInfo);
                                         }
-                                    }
+                                    } //console.timeEnd("one course")
 
 
 
@@ -576,9 +590,10 @@ export default class InsightFacade implements IInsightFacade {
 
                             }
                         }
-                    }
+                    } //console.timeEnd("go through datasetResultArray overall")
                     // TODO: sort using order last
 
+                    //console.time("sort through result")
                     if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")){
 
                         finalReturn = finalReturn.sort(function (a, b) {
@@ -597,10 +612,11 @@ export default class InsightFacade implements IInsightFacade {
                             return 0;
                         });
 
+
                     } else {
                         var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"order error"}};
                         reject(code400InvalidQuery);
-                    }
+                    } //console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -661,10 +677,10 @@ export default class InsightFacade implements IInsightFacade {
                 return innerResult;
             } else if(keys[0] == "NOT"){
 
-                this.getFilterArray(innerResult);
+                innerResult = this.getFilterArray(innerResult);
                 var innerResultKey = Object.keys(innerResult)
                 var innerResultValue = innerResult[innerResultKey[0]]
-                return innerResultValue;
+                return innerResult;
             } else return innerResult;
         }
 
@@ -724,7 +740,7 @@ export default class InsightFacade implements IInsightFacade {
             returnInfo = this.isEqualTo(returnInfo, resultKeyArray, keys, sortVal);
             return returnInfo;
         }else if(keys[0] == "AND"){
-
+            //console.time("Go through AND")
             var newFilter;
             var newKeys;
             var newResult;
@@ -745,9 +761,11 @@ export default class InsightFacade implements IInsightFacade {
                     returnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
                 }
 
-            }return returnInfo
+            }//console.timeEnd("Go through AND")
+            return returnInfo
 
         }else if(keys[0] == "OR"){
+            //console.time("Go through OR")
 
             var newFilter;
             var newKeys;
@@ -777,8 +795,11 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                 }
-            }return returnInfo
+            }//console.timeEnd("Go through OR")
+            return returnInfo
+
         }else if(keys[0] == "NOT"){
+
             var newFilter;
             var newKeys;
             var newResult;
@@ -787,8 +808,7 @@ export default class InsightFacade implements IInsightFacade {
 
             var tempSortKey = Object.keys(sortKey)
             //sortKey = sortKey[tempSortKey[0]]
-
-
+            //console.time("Go through NOT")
             newKeys = Object.keys(resultOfWhere);
             newResult = resultOfWhere[newKeys[0]];
 
@@ -802,7 +822,7 @@ export default class InsightFacade implements IInsightFacade {
 
                 returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);
 
-
+            //console.timeEnd("Go through NOT")
             return returnInfo
         }else if(keys[0] == "IS"){
 

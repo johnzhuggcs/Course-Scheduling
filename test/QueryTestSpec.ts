@@ -12,6 +12,7 @@ import InsightFacade from "../src/controller/InsightFacade";
 describe("QueryTestSpec", function () {
 
     var insightFacade:InsightFacade = null;
+    var insight:InsightFacade = null;
     var testInvalidKeys:string[] = [];
     var fs = require("fs")
 
@@ -26,7 +27,8 @@ describe("QueryTestSpec", function () {
     before(function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
-        return insightFacade.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+        insight = new InsightFacade();
+        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -42,7 +44,7 @@ describe("QueryTestSpec", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         //insightFacade = null
-        return insightFacade.removeDataset('courses');
+        return insight.removeDataset('courses');
     });
 
     afterEach(function () {
