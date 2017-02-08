@@ -175,10 +175,10 @@ export default class InsightFacade implements IInsightFacade {
 //DON'T use js zip, just use it for my own data structure and the ones I've created
                 //correct the counter so that it conserves all the ids
 
-                data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
+                /*data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
                 data = data.replace(id + '\r\n', '');
                 //Log.info(data);
-                fs.writeFileSync(id, data);
+                fs.writeFileSync(id, data);*/
 
                 fs.unlink(id,(err: Error) => {
                     if (err) throw err;
