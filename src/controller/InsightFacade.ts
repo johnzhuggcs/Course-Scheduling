@@ -29,87 +29,97 @@ export default class InsightFacade implements IInsightFacade {
             var filesNotJsonCounter = 0;
             var noOfFiles = 0;
 
+            var arrayCounter = 0;
+            var data = '';
 
-            zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+            //setTimeout(function() {
+                zip.loadAsync(content, {'base64': true})
+                    .then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+                            zipasync.forEach(function (relativePath: any, file: any) {
+                                    //setTimeout(function () {
+                                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
+                                            var filecompressednoasync = file._data.compressedContent;
+                                            arrayOfUnparsedFileData.push(file.async("string"));
+                                        }
+                                    //}, 500);
+                                }
+                            );
+                    Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
+                        var parsedJSON = '';
+                        var isTry = true;
+                        for (let i in arrayofUnparsedFileDataAll) {
+                            //setTimeout(function() {
+                                noOfFiles++;
+                                try {
+                                    isTry = true;
+                                    var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
+                                    JSON.parse(x);//JSON.parse
+                                }
+                                catch (err) {
+                                    filesNotJsonCounter++;
+                                    isTry = false;
+                                    err;
+                                }
 
-
-                zipasync.forEach(function (relativePath: any, file: any) {
-                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
-                            var filecompressednoasync = file._data.compressedContent;
-                            arrayOfUnparsedFileData.push(file.async("string"));
+                                if (isTry) {
+                                    parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+                                }
+                            //},100000);
                         }
-                    }
-                );
-                Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
-                    var arrayCounter = 0;
-                    var parsedJSON = '';
-                    var data = '';
-                    var isTry = true;
-                    for (let i in arrayofUnparsedFileDataAll) {
-                        try {
-                            isTry = true;
-                            var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
-                            JSON.parse(x);//JSON.parse
+                        return parsedJSON;
+                    }).then(function(parsed) {
+                        if (noOfFiles == 0) {
+                            var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
+                            reject(ir2);
                         }
-                        catch (err) {
-                            filesNotJsonCounter++;
-                            isTry = false;
-                            err;
+
+                        if (filesNotJsonCounter == noOfFiles) {
+                            var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
+                            reject(ir2);
                         }
-                        noOfFiles++;
+                        return parsed;
+                    }).then(function(parsedJ) {
 
-                        if (isTry) {
-                            parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
-                        }
-                    }
+                        /*
+                         //if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
+                         if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                         fs.writeFile(id, parsedJ, (err: Error) => {
+                         if (err) throw err;
+                         });//write data file
+                         fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                         if (err) throw err;
+                         }); //for new storage
+                         var ir4: InsightResponse = {code: 204, body: {}};
+                         fulfill(ir4);
+                         }
+                         if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                         data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
+                         arrayOfId = data.split("\r\n");
+                         //Log.info(arrayOfId.toString());
+                         }
+                         //Log.info('arrayOfId:' + arrayOfId.toString());
+                         //Log.info('fs.existSync(id):' + fs.existsSync(id));
+                         //Log.info('arrayOfId[i] == id');
+                         */
+                        if (/*!arrayOfId.includes(id) && */!fs.existsSync(id)) {
 
-
-                    if (noOfFiles == 0) {
-                        var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
-                        reject(ir2);
-                    }
-
-                    if (filesNotJsonCounter == noOfFiles) {
-                        var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
-                        reject(ir2);
-                    }
-
-                    if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                            fs.writeFile(id, parsedJSON, (err: Error) => {
+                            fs.writeFile(id, parsedJ, (err: Error) => {
                                 if (err) throw err;
-                            });//write data file
-                            fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
-                                if (err) throw err;
-                            }); //for new storage
+                            });
+                            /*data = data + id + "\r\n";
+                             fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
+                             if (err) throw err;
+                             });*/
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
+
                         }
-                        if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                            data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
-                            arrayOfId = data.split("\r\n");
-                            //Log.info(arrayOfId.toString());
-                        }
-                        //Log.info('arrayOfId:' + arrayOfId.toString());
-                        //Log.info('fs.existSync(id):' + fs.existsSync(id));
-                        //Log.info('arrayOfId[i] == id');
-                            if (!arrayOfId.includes(id) && !fs.existsSync(id)) {
-                                {
-                                    fs.writeFile(id, parsedJSON, (err: Error) => {
-                                        if (err) throw err;
-                                    });
-                                    data = data + id + "\r\n";
-                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
-                                        if (err) throw err;
-                                    });
-                                    var ir4: InsightResponse = {code: 204, body: {}};
-                                    fulfill(ir4);
-                                }
-                            }
-                            else if (arrayOfId.includes(id) && fs.existsSync(id)) {
-                                var count = 0;
+                        return parsedJ
+                    }).then(function(parsedJ){
+                            if (/*arrayOfId.includes(id) && */fs.existsSync(id)) {
+                                /*var count = 0;
                                 for (let i in arrayOfId) {
-                                    if (arrayOfId[i]==(id)) {
+                                    if (arrayOfId[i] == (id)) {
                                         //Log.info('arrayOfId[i] == id');
                                         //if id exists in arrayOfId
                                         // or id exists in the project folder
@@ -119,27 +129,30 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                                 id = id + "(" + count + ")";
                                 //Log.info('id is:' + id);
+                                */
 
-                                fs.writeFile(id, parsedJSON, (err: Error) => {
+                                fs.writeFile(id, parsedJ, (err: Error) => {
                                     if (err) throw err;
                                 });//datafile is written
-                                data = data + id + "\r\n";
+                                /*data = data + id + "\r\n";
                                 fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
                                     if (err) throw err;
                                 });
                                 arrayOfId = [];
+                                */
                                 var ir4: InsightResponse = {code: 201, body: {}};
                                 fulfill(ir4);
                             }
 
-                        }
+                        //}
 
+                    });
+                }).catch(function (e: any) {
+                    e = {'Error': 'It\'s not a zip file'};
+                    var ir2: InsightResponse = {code: 400, body: e};
+                    reject(ir2);
                 });
-            }).catch(function (e: any) {
-                e = {'Error': 'It\'s not a zip file'};
-                var ir2: InsightResponse = {code: 400, body: e};
-                reject(ir2);
-            });
+            //},15000);
         });
     }
 
