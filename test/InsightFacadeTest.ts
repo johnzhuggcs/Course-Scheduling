@@ -84,9 +84,9 @@ describe("InsightFacadeTest", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
             if (err) throw err;
         });
-        fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
+        /*fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', 'VirtualInsight' + "\r\n", (err: Error) => {
             if (err) throw err;
-        });
+        });*/
         //insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64'));
         return insight.addDataset('VirtualInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             var ir: InsightResponse;
