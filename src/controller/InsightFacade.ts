@@ -13,8 +13,8 @@ export default class InsightFacade implements IInsightFacade {
 
     constructor() {
         Log.trace('InsightFacadeImpl::init()');
-    }
-    /**
+    } /**
+    //New code for big fish
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
         return new Promise(function (fulfill, reject) {
@@ -29,14 +29,15 @@ export default class InsightFacade implements IInsightFacade {
             var filesNotJsonCounter = 0;
             var noOfFiles = 0;
 
-
+            //loadAsync loads zip content asynchronously
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
-
+                //zip object contains zip files infos such as size as such
+                //zipasync is the converted file from base64 to zip file object
 
                 zipasync.forEach(function (relativePath: any, file: any) {
                         if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
                             var filecompressednoasync = file._data.compressedContent;
-                            arrayOfUnparsedFileData.push(file.async("string"));
+                            arrayOfUnparsedFileData.push(file.async("string")); //extracting data from file itself
                         }
                     }
                 );
@@ -75,7 +76,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                     if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        /*if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                        /**if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             fs.writeFile(id, parsedJSON, (err: Error) => {
                                 if (err) throw err;
                             });//write data file
@@ -141,8 +142,8 @@ export default class InsightFacade implements IInsightFacade {
                 reject(ir2);
             });
         });
-    } */
-    /**
+    }
+
     //TODO:store all the ids within the datafile instead of making a separate file to store the ids
     removeDataset(id: string): Promise<InsightResponse> {
         //by providing the id, remove the dataset
@@ -182,9 +183,9 @@ export default class InsightFacade implements IInsightFacade {
             }
 
         });
-    } */
+    }  */
 
-    //Old Code from February 3rd
+    //Old Code
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
@@ -521,7 +522,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                                     returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                     //Log.info(returnInfo);
-                                                    //returnInfo = ["courses_avg":95, "courses_instructor":"bleh"] right now
+
                                                     //should look like {"courses_avg":95, "courses_instructor":"bleh"]
                                                 }
                                             }

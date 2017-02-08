@@ -43,7 +43,23 @@ describe("InsightFacadeTest", function () {
         })
 
     });
+/**
+    //testing different addDataset
+    it.only("Jon 204: initialize for us", function () {
 
+        return insight.addDataset('courses','courses.zip').then(function (value: InsightResponse) {
+
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(204);
+            expect(value.body).to.deep.equal({});
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect.fail();//should check the same name within the respairatory
+        })
+
+    }); */
 
     it("204: initialize for us", function () {
 
