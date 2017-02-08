@@ -75,7 +75,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
                     if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        /*if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             fs.writeFile(id, parsedJSON, (err: Error) => {
                                 if (err) throw err;
                             });//write data file
@@ -84,7 +84,7 @@ export default class InsightFacade implements IInsightFacade {
                             }); //for new storage
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
-                        }*/
+                        }
                         if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
                             data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
                             arrayOfId = data.split("\r\n");
@@ -183,6 +183,156 @@ export default class InsightFacade implements IInsightFacade {
 
         });
     }
+    //Old Code from February 3rd
+
+    /*addDataset(id: string, content: string): Promise<InsightResponse> {
+
+        return new Promise(function (fulfill, reject) {
+
+            var request = require('request');
+            var JSZip = require('jszip');
+            var fs = require('fs');
+            var zip = new JSZip();
+            var arrayOfId: string[] = [];
+            var arrayOfUnparsedFileData: any = [];
+
+            var filesNotJsonCounter = 0;
+            var noOfFiles = 0;
+
+            zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+
+
+                zipasync.forEach(function (relativePath: any, file: any) {
+                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
+                            var filecompressednoasync = file._data.compressedContent;
+                            arrayOfUnparsedFileData.push(file.async("string"));
+                        }
+                    }
+                );
+                Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
+                    var arrayCounter = 0;
+                    var parsedJSON = '';
+                    var data = '';
+                    var isTry = true;
+                    for (let i in arrayofUnparsedFileDataAll) {
+                        try {
+                            isTry = true;
+                            var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
+                            JSON.parse(x);//JSON.parse
+                        }
+                        catch (err) {
+                            filesNotJsonCounter++;
+                            isTry = false;
+                            err;
+                        }
+                        noOfFiles++;
+
+                        if (isTry) {
+                            parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+
+                        }
+
+                    }
+
+
+
+                    if (noOfFiles == 0) {
+                        var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
+                        reject(ir2);
+                    }
+
+                    if (filesNotJsonCounter == noOfFiles) {
+                        var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
+                        reject(ir2);
+                    }
+
+                    if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
+                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                            fs.writeFile(id, parsedJSON, (err: Error) => {
+                                if (err) throw err;
+                            });//write data file
+                            fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                                if (err) throw err;
+                            }); //for new storage
+                            var ir4: InsightResponse = {code: 204, body: {}};
+                            fulfill(ir4);
+                        }
+                        else if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
+                            data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
+                            arrayOfId = data.split("\r\n");
+                            if (!arrayOfId.includes(id)) {
+                                {
+                                    fs.writeFile(id, parsedJSON, (err: Error) => {
+                                        if (err) throw err;
+                                    });
+                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
+                                        if (err) throw err;
+                                    });
+                                    var ir4: InsightResponse = {code: 204, body: {}};
+                                    fulfill(ir4);
+                                }
+                            }
+                            else {
+                                var count = 0;
+                                for (let i in arrayOfId) {
+                                    if (arrayOfId.includes(id)||fs.existsSync(id)) {
+                                        //if id exists in arrayOfId
+                                        // or id exists in the project folder
+                                        count++;
+                                        id = id + "(" + count + ")";
+                                    }
+                                }
+
+                                fs.writeFile(id, parsedJSON, (err: Error) => {
+                                    if (err) throw err;
+                                });//datafile is written
+                                data += id + "\r\n";
+                                fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
+                                    if (err) throw err;
+                                });
+                                arrayOfId = [];
+                                var ir4: InsightResponse = {code: 201, body: {}};
+                                fulfill(ir4);
+                            }
+                        }
+                    }
+                });
+            }).catch(function (e: any) {
+                var ir2: InsightResponse = {code: 400, body: {e}};
+                reject(ir2);
+            });
+        });
+    }*/
+
+    /*removeDataset(id: string): Promise<InsightResponse> {
+        //by providing the id, remove the dataset
+        //delete the zip file by id
+
+        return new Promise(function (fulfill,reject) {
+            var request = require('request');
+            var JSZip = require('jszip');
+            var fs = require('fs');
+            var zip = new JSZip();
+
+            if (fs.existsSync(id)) {
+                //zip.remove(id);
+//DON'T use js zip, just use it for my own data structure and the ones I've created
+                //correct the counter so that it conserves all the ids
+
+                fs.unlinkSync(id);
+
+                var ir4: InsightResponse = {code: 204, body: {}};
+                fulfill(ir4);
+
+
+
+            } else {
+                var ir4: InsightResponse = {code: 400, body: {'Error': 'Delete was a resource that was not previously added'}};
+                reject(ir4);
+            }
+
+        });
+    }*/
 
 
     //TODO: if (<key> not found in UBCInsight) {return promise 400 body: {invalid <key>}}
@@ -252,7 +402,18 @@ export default class InsightFacade implements IInsightFacade {
                         // but you also get any other error
                     } */
 
-                        contentDatasetResult = fs.readFileSync(testingResult, "utf8");
+                        try {
+                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                        }
+                         catch(err){
+                            if (err.code === 'ENOENT') {
+                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
+                                reject(code424InvalidQuery);
+
+                            } else {
+                                throw err;
+                            }
+                        }
                     } else{ //this is for when keys[0] is NOT;
                         //var nonLogicFilterVals = result[0];
 
@@ -261,9 +422,21 @@ export default class InsightFacade implements IInsightFacade {
                         var nonLogicFilterKeys = Object.keys(nonLogicFilter);
                         validKey = nonLogicFilterKeys[0].split("_");
                         var testingResult:string = validKey[0]
-                        contentDatasetResult = fs.readFileSync(testingResult, "utf8");}
+                        try {
+                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                        }
+                        catch(err){
+                            if (err.code === 'ENOENT') {
+                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
+                                reject(code424InvalidQuery);
 
-                } /**else if(keys[0] == "NOT"){
+                            } else {
+                                throw err;
+                            }
+                        }
+
+
+                }} /**else if(keys[0] == "NOT"){
 
                 }*/
                 else {
@@ -272,7 +445,18 @@ export default class InsightFacade implements IInsightFacade {
                     var nonLogicFilterKeys = Object.keys(result);
                     validKey = nonLogicFilterKeys[0].split("_");
                     var testingResult = validKey[0]
-                    contentDatasetResult = fs.readFileSync(testingResult, "utf8");
+                        try {
+                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                        }
+                        catch(err){
+                            if (err.code === 'ENOENT') {
+                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
+                                reject(code424InvalidQuery);
+
+                            } else {
+                                throw err;
+                            }
+                        }
                 }
 
                 datasetResultArray = contentDatasetResult.split("\r\n")
@@ -585,7 +769,7 @@ export default class InsightFacade implements IInsightFacade {
             var tempReturnInfo;
             var tempReturnInfo2;
 
-            //var tempSortKey = Object.keys(sortKey)
+            var tempSortKey = Object.keys(sortKey)
             //sortKey = sortKey[tempSortKey[0]]
 
 
@@ -595,6 +779,10 @@ export default class InsightFacade implements IInsightFacade {
             tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
             tempReturnInfo2 = returnInfo;
 
+
+            if(tempSortKey[0] == "GT" || tempSortKey[0] == "LT" || tempSortKey[0] == "EQ" || tempSortKey[0] == "IS"){
+                sortKey = sortKey[tempSortKey[0]]
+            }
 
                 returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);
 

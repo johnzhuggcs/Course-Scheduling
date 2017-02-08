@@ -76,4 +76,13 @@ describe("EchoSpec", function () {
         expect(out.body).to.deep.equal({error: 'Message not provided'});
     });
 
+    /**it("Should be able to handle a null echo message sensibly", function () {
+        Server.echo(null, null, null)
+        let out = Server.performEcho(null);
+        Log.test(JSON.stringify(out));
+        sanityCheck(out);
+        expect(out.code).to.equal(400);
+        expect(out.body).to.have.property('error');
+        expect(out.body).to.deep.equal({error: 'Message not provided'});
+    });*/
 });
