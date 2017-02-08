@@ -13,7 +13,9 @@ export default class InsightFacade implements IInsightFacade {
 
     constructor() {
         Log.trace('InsightFacadeImpl::init()');
+
     }
+
 
     addDataset(id: string, content: string): Promise<InsightResponse> {
 
@@ -33,37 +35,37 @@ export default class InsightFacade implements IInsightFacade {
             var data = '';
 
             //setTimeout(function() {
-                zip.loadAsync(content, {'base64': true})
-                    .then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
-                            zipasync.forEach(function (relativePath: any, file: any) {
-                                    //setTimeout(function () {
-                                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
-                                            var filecompressednoasync = file._data.compressedContent;
-                                            arrayOfUnparsedFileData.push(file.async("string"));
-                                        }
-                                    //}, 500);
-                                }
-                            );
+            zip.loadAsync(content, {'base64': true})
+                .then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+                    zipasync.forEach(function (relativePath: any, file: any) {
+                            //setTimeout(function () {
+                            if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
+                                var filecompressednoasync = file._data.compressedContent;
+                                arrayOfUnparsedFileData.push(file.async("string"));
+                            }
+                            //}, 500);
+                        }
+                    );
                     Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
                         var parsedJSON = '';
                         var isTry = true;
                         for (let i in arrayofUnparsedFileDataAll) {
                             //setTimeout(function() {
-                                noOfFiles++;
-                                try {
-                                    isTry = true;
-                                    var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
-                                    JSON.parse(x);//JSON.parse
-                                }
-                                catch (err) {
-                                    filesNotJsonCounter++;
-                                    isTry = false;
-                                    err;
-                                }
+                            noOfFiles++;
+                            try {
+                                isTry = true;
+                                var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
+                                JSON.parse(x);//JSON.parse
+                            }
+                            catch (err) {
+                                filesNotJsonCounter++;
+                                isTry = false;
+                                err;
+                            }
 
-                                if (isTry) {
-                                    parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
-                                }
+                            if (isTry) {
+                                parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+                            }
                             //},100000);
                         }
                         return parsedJSON;
@@ -116,42 +118,42 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         return parsedJ
                     }).then(function(parsedJ){
-                            if (/*arrayOfId.includes(id) && */fs.existsSync(id)) {
-                                /*var count = 0;
-                                for (let i in arrayOfId) {
-                                    if (arrayOfId[i] == (id)) {
-                                        //Log.info('arrayOfId[i] == id');
-                                        //if id exists in arrayOfId
-                                        // or id exists in the project folder
-                                        count++;
-                                        //Log.info('count is:' + count);
-                                    }
-                                }
-                                id = id + "(" + count + ")";
-                                //Log.info('id is:' + id);
-                                */
+                        if (/*arrayOfId.includes(id) && */fs.existsSync(id)) {
+                            /*var count = 0;
+                             for (let i in arrayOfId) {
+                             if (arrayOfId[i] == (id)) {
+                             //Log.info('arrayOfId[i] == id');
+                             //if id exists in arrayOfId
+                             // or id exists in the project folder
+                             count++;
+                             //Log.info('count is:' + count);
+                             }
+                             }
+                             id = id + "(" + count + ")";
+                             //Log.info('id is:' + id);
+                             */
 
-                                fs.writeFile(id, parsedJ, (err: Error) => {
-                                    if (err) throw err;
-                                });//datafile is written
-                                /*data = data + id + "\r\n";
-                                fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
-                                    if (err) throw err;
-                                });
-                                arrayOfId = [];
-                                */
-                                var ir4: InsightResponse = {code: 201, body: {}};
-                                fulfill(ir4);
-                            }
+                            fs.writeFile(id, parsedJ, (err: Error) => {
+                                if (err) throw err;
+                            });//datafile is written
+                            /*data = data + id + "\r\n";
+                             fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
+                             if (err) throw err;
+                             });
+                             arrayOfId = [];
+                             */
+                            var ir4: InsightResponse = {code: 201, body: {}};
+                            fulfill(ir4);
+                        }
 
                         //}
 
                     });
                 }).catch(function (e: any) {
-                    e = {'Error': 'It\'s not a zip file'};
-                    var ir2: InsightResponse = {code: 400, body: e};
-                    reject(ir2);
-                });
+                e = {'Error': 'It\'s not a zip file'};
+                var ir2: InsightResponse = {code: 400, body: e};
+                reject(ir2);
+            });
             //},15000);
         });
     }
@@ -176,9 +178,9 @@ export default class InsightFacade implements IInsightFacade {
                 //correct the counter so that it conserves all the ids
 
                 /*data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
-                data = data.replace(id + '\r\n', '');
-                //Log.info(data);
-                fs.writeFileSync(id, data);*/
+                 data = data.replace(id + '\r\n', '');
+                 //Log.info(data);
+                 fs.writeFileSync(id, data);*/
 
                 fs.unlink(id,(err: Error) => {
                     if (err) throw err;
@@ -197,6 +199,7 @@ export default class InsightFacade implements IInsightFacade {
         });
     }
     //Old Code from February 3rd
+
 
     /*addDataset(id: string, content: string): Promise<InsightResponse> {
 
@@ -536,7 +539,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                                     returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                     //Log.info(returnInfo);
-                                                    //returnInfo = ["courses_avg":95, "courses_instructor":"bleh"] right now
+
                                                     //should look like {"courses_avg":95, "courses_instructor":"bleh"]
                                                 }
                                             }

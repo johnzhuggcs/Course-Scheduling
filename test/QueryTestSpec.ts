@@ -25,21 +25,31 @@ describe("QueryTestSpec", function () {
 
     before(function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
+        insightFacade = new InsightFacade();
+        return insightFacade.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+
 
     });
 
     beforeEach(function () {
         Log.test('BeforeTest: ' + (<any>this).currentTest.title);
-        insightFacade = new InsightFacade();
+        //insightFacade = new InsightFacade();
+        //return insightFacade.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+       // return insightFacade.removeDataset('courses');
+
     });
 
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
-        insightFacade = null;
+        //insightFacade = null
+        return insightFacade.removeDataset('courses');
     });
 
     afterEach(function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
+
+
+
     });
 
 
@@ -554,12 +564,12 @@ describe("QueryTestSpec", function () {
     it("200 testing out simple query with NOT", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
-                "NOT":
+                "NOT":{"NOT":{"NOT":{"NOT":{"NOT":{"NOT":{"NOT":
                     {
                         "LT":{
                             "courses_avg":99
                         }
-                    }
+                    }}}}}}}
 
             },
             "OPTIONS":{
