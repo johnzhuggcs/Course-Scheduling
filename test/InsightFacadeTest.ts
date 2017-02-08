@@ -176,7 +176,7 @@ describe("InsightFacadeTest", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
          if (err) throw err;
          });
-        return insight.addDataset('VirtualInsight',fs.readFileSync('VirtualInsight(1)').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('VirtualInsight',fs.readFileSync('VirtualInsight').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
