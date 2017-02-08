@@ -156,7 +156,7 @@ describe("InsightFacadeTest", function () {
 
     });
 
-   it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
+   it.only("BigFish: Should not be able to set a dataset that is not a zip file", function () {
         fs.writeFile('VirtualInsight', '{}', (err: Error) => {
          if (err) throw err;
          });
