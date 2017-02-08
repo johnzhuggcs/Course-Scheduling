@@ -31,7 +31,6 @@ describe("InsightFacadeTest", function () {
     it("204: addDataset should add a dataset to UBCInsight", function () {
 
         return insight.addDataset('testInsight',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
-
             var ir: InsightResponse;
             sanityCheck(value);
             //Log.test(JSON.stringify(value));
@@ -173,9 +172,6 @@ describe("InsightFacadeTest", function () {
     });
 
   it("BigFish: Should not be able to set a dataset that is not a zip file", function () {
-        fs.writeFile('VirtualInsight', '{}', (err: Error) => {
-         if (err) throw err;
-         });
         return insight.addDataset('VirtualInsight',fs.readFileSync('VirtualInsight').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {

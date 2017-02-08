@@ -21,10 +21,13 @@ export default class InsightFacade implements IInsightFacade {
 
         return new Promise(function (fulfill, reject) {
 
+            /*console.time("testingRequest");
             var request = require('request');
+            console.timeEnd("testingRequest");*/
             var JSZip = require('jszip');
             var fs = require('fs');
             var zip = new JSZip();
+
             var arrayOfId: string[] = [];
             var arrayOfUnparsedFileData: any = [];
 
@@ -34,15 +37,19 @@ export default class InsightFacade implements IInsightFacade {
             var arrayCounter = 0;
             var data = '';
 
+
             //setTimeout(function() {
-            zip.loadAsync(content, {'base64': true})
-                .then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+
+            zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
+
                     zipasync.forEach(function (relativePath: any, file: any) {
                             //setTimeout(function () {
+                            //console.time("testingn");
                             if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
-                                var filecompressednoasync = file._data.compressedContent;
+                                //var filecompressednoasync = file._data.compressedContent;
                                 arrayOfUnparsedFileData.push(file.async("string"));
-                            }
+                           }
+                            //console.timeEnd("testingn");
                             //}, 500);
                         }
                     );
@@ -82,79 +89,29 @@ export default class InsightFacade implements IInsightFacade {
                         return parsed;
                     }).then(function(parsedJ) {
 
-                        /*
-                         //if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                         if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                         fs.writeFile(id, parsedJ, (err: Error) => {
-                         if (err) throw err;
-                         });//write data file
-                         fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
-                         if (err) throw err;
-                         }); //for new storage
-                         var ir4: InsightResponse = {code: 204, body: {}};
-                         fulfill(ir4);
-                         }
-                         if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                         data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
-                         arrayOfId = data.split("\r\n");
-                         //Log.info(arrayOfId.toString());
-                         }
-                         //Log.info('arrayOfId:' + arrayOfId.toString());
-                         //Log.info('fs.existSync(id):' + fs.existsSync(id));
-                         //Log.info('arrayOfId[i] == id');
-                         */
-                        if (/*!arrayOfId.includes(id) && */!fs.existsSync(id)) {
+                        if (!fs.existsSync(id)) {
 
-                            fs.writeFile(id, parsedJ, (err: Error) => {
-                                if (err) throw err;
-                            });
-                            /*data = data + id + "\r\n";
-                             fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
-                             if (err) throw err;
-                             });*/
+                            fs.writeFileSync(id, parsedJ);
+
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
 
                         }
                         return parsedJ
                     }).then(function(parsedJ){
-                        if (/*arrayOfId.includes(id) && */fs.existsSync(id)) {
-                            /*var count = 0;
-                             for (let i in arrayOfId) {
-                             if (arrayOfId[i] == (id)) {
-                             //Log.info('arrayOfId[i] == id');
-                             //if id exists in arrayOfId
-                             // or id exists in the project folder
-                             count++;
-                             //Log.info('count is:' + count);
-                             }
-                             }
-                             id = id + "(" + count + ")";
-                             //Log.info('id is:' + id);
-                             */
+                        if (fs.existsSync(id)) {
+                            fs.writeFileSync(id, parsedJ);//datafile is written
 
-                            fs.writeFile(id, parsedJ, (err: Error) => {
-                                if (err) throw err;
-                            });//datafile is written
-                            /*data = data + id + "\r\n";
-                             fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
-                             if (err) throw err;
-                             });
-                             arrayOfId = [];
-                             */
                             var ir4: InsightResponse = {code: 201, body: {}};
                             fulfill(ir4);
                         }
 
-                        //}
-
                     });
-                }).catch(function (e: any) {
-                e = {'Error': 'It\'s not a zip file'};
-                var ir2: InsightResponse = {code: 400, body: e};
+                })
+                .catch(function (e: Error) {
+                var ir2: InsightResponse = {code: 400, body: {'Error':'It\'s not a zip file'}};
                 reject(ir2);
             });
-            //},15000);
         });
     }
 
@@ -164,27 +121,20 @@ export default class InsightFacade implements IInsightFacade {
         //delete the zip file by id
 
         return new Promise(function (fulfill,reject) {
-            var request = require('request');
+            //var request = require('request');
             var JSZip = require('jszip');
             var fs = require('fs');
             var zip = new JSZip();
             var data = '';
 
-            //Log.info(id);
-            //Log.info(fs.existsSync(id));
             if (fs.existsSync(id)) {
-                //zip.remove(id);
-//DON'T use js zip, just use it for my own data structure and the ones I've created
-                //correct the counter so that it conserves all the ids
-
-                /*data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
-                 data = data.replace(id + '\r\n', '');
-                 //Log.info(data);
-                 fs.writeFileSync(id, data);*/
-
-                fs.unlink(id,(err: Error) => {
-                    if (err) throw err;
-                });
+                //Log.info("before unlink");
+                try {
+                    fs.unlinkSync(id);
+                } catch (e) {
+                    Log.info(e);
+                }
+               // Log.info("after unlink");
 
                 var ir4: InsightResponse = {code: 204, body: {}};
                 fulfill(ir4);
