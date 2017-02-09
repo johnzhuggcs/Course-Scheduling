@@ -101,7 +101,7 @@ describe("InsightFacadeTest", function () {
     });
 
 
-    it("400: addDataset should detect invalid JSON", function () {
+    it("400: addDataset should detect non-real data files (e.g., Array, invalid JSON, etc.)", function () {
         return insight.addDataset('supposetofail',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
@@ -109,7 +109,7 @@ describe("InsightFacadeTest", function () {
             sanityCheck(value);
             //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(400);
-            expect(value.body).to.deep.equal({'Error': 'Could not parse JSON'});
+            expect(value.body).to.deep.equal({'error': 'cannot set a valid zip that does not contain any real data.'});
         })
 
     });
@@ -121,7 +121,7 @@ describe("InsightFacadeTest", function () {
             sanityCheck(value);
             //Log.test(JSON.stringify(value));
             expect(value.code).to.equal(400);
-            expect(value.body).to.deep.equal({'Error': 'No datafile is found'});
+            expect(value.body).to.deep.equal({'error': 'no datafile is found'});
         })
 
     });
@@ -165,8 +165,8 @@ describe("InsightFacadeTest", function () {
             var ir: InsightResponse;
             sanityCheck(value);
             Log.test(JSON.stringify(value));
-            expect(value.code).to.equal(400);
-            expect(value.body).to.deep.equal({'Error': 'Delete was a resource that was not previously added'});
+            expect(value.code).to.equal(404);
+            expect(value.body).to.deep.equal({'error': 'delete was a resource that was not previously added'});
         })
 
     });
