@@ -32,13 +32,14 @@ export default class InsightFacade implements IInsightFacade {
             var arrayOfId: string[] = [];
             var arrayOfUnparsedFileData: any = [];
 
-            var filesNotJsonCounter = 0;
+            var filesNotJsonOrArrayCounter = 0;
             var noOfFiles = 0;
 
             var arrayCounter = 0;
             var data = '';
 
 
+            //returns data if it's empty
             //setTimeout(function() {
 
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
@@ -66,9 +67,15 @@ export default class InsightFacade implements IInsightFacade {
                                 JSON.parse(x);//JSON.parse
                             }
                             catch (err) {
-                                filesNotJsonCounter++;
+                                //filesNotJsonCounter++;
                                 isTry = false;
+                                filesNotJsonOrArrayCounter++;
                                 err;
+                            }
+
+                            if (isTry != false && JSON.parse(String(arrayofUnparsedFileDataAll[i])) instanceof Array) {
+                                isTry = false;
+                                filesNotJsonOrArrayCounter++;
                             }
 
                             if (isTry) {
@@ -79,12 +86,12 @@ export default class InsightFacade implements IInsightFacade {
                         return parsedJSON;
                     }).then(function(parsed) {
                         if (noOfFiles == 0) {
-                            var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
+                            var ir2: InsightResponse = {code: 400, body: {'error': 'no datafile is found'}};
                             reject(ir2);
                         }
 
-                        if (filesNotJsonCounter == noOfFiles) {
-                            var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
+                        if (filesNotJsonOrArrayCounter == noOfFiles) {
+                            var ir2: InsightResponse = {code: 400, body: {'error': 'cannot set a valid zip that does not contain any real data.'}};
                             reject(ir2);
                         }
                         return parsed;
@@ -110,7 +117,7 @@ export default class InsightFacade implements IInsightFacade {
                     });
                 })
                 .catch(function (e: Error) {
-                var ir2: InsightResponse = {code: 400, body: {'Error':'It\'s not a zip file'}};
+                var ir2: InsightResponse = {code: 400, body: {'error':'it\'s not a zip file'}}; //error is in lower case
                 reject(ir2);
             });
         });
@@ -143,7 +150,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else {
-                var ir4: InsightResponse = {code: 400, body: {'Error': 'Delete was a resource that was not previously added'}};
+                var ir4: InsightResponse = {code: 404, body: {'error': 'delete was a resource that was not previously added'}};
                 reject(ir4);
             }
 
