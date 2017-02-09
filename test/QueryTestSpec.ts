@@ -562,7 +562,7 @@ describe("QueryTestSpec", function () {
 
 
     });
-
+/**
     it("200 testing out simple query with NOT", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
@@ -602,7 +602,7 @@ describe("QueryTestSpec", function () {
         })
 
 
-    });
+    }); */
 
     it("200 testing out simple query with NOT ORDER alphabet", function () {
         var queryTest:QueryRequest = {
