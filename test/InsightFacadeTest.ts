@@ -102,7 +102,7 @@ describe("InsightFacadeTest", function () {
 
 
     it("400: addDataset should detect non-real data files (e.g., Array, invalid JSON, etc.)", function () {
-        return insight.addDataset('supposetofail',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('supposetounparse',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
@@ -114,7 +114,7 @@ describe("InsightFacadeTest", function () {
 
     });
     it("400/Bender: addDataset should detect empty zip", function () {
-        return insight.addDataset('supposetofail',fs.readFileSync('empty_zip.zip').toString('base64')).then(function (value: InsightResponse) {
+        return insight.addDataset('supposetoempty',fs.readFileSync('empty_zip.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
             var ir: InsightResponse;
