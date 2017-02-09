@@ -163,6 +163,12 @@ export interface IInsightFacade {
      */
     vocabValidKey(validKey:string):string|boolean;
 
+    /** Translates database keys into validkey
+     *
+     * @param validKey
+     */
+    vocabDataBase(databaseKey:string):string|boolean;
+
     /** General filter function that filters out unneeded fields in atomicReturnInfo
      *
      * @param returnInfo

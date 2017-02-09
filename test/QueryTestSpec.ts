@@ -36,7 +36,7 @@ describe("QueryTestSpec", function () {
     beforeEach(function () {
         Log.test('BeforeTest: ' + (<any>this).currentTest.title);
         //insightFacade = new InsightFacade();
-        //return insightFacade.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+        //return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
        // return insightFacade.removeDataset('courses');
 
     });
@@ -49,7 +49,7 @@ describe("QueryTestSpec", function () {
 
     afterEach(function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
-
+        //return insight.removeDataset('courses');
 
 
     });
@@ -555,6 +555,7 @@ describe("QueryTestSpec", function () {
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
             Log.test('Error: ' + err);
+            //return JSON.parse(err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
 
@@ -607,12 +608,12 @@ describe("QueryTestSpec", function () {
     it("200 testing out simple query with NOT ORDER alphabet", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
-                "NOT":
-                    {
-                        "LT":{
+                /*"NOT":
+                    {*/
+                        "GT":{
                             "courses_avg":98.9
                         }
-                    }
+                    //}
 
             },
             "OPTIONS":{

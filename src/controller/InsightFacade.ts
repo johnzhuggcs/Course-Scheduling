@@ -480,19 +480,19 @@ export default class InsightFacade implements IInsightFacade {
                                         /**if(Number(x) == 14){
                                             Log.info("continue debug")
                                         }*/
-                                        for (let x in columns) {
-                                            singleColumnKey = columns[x].toString()
+                                        for(var sectionValidKey in singleSection) {
+                                            if(!singleSection.hasOwnProperty(sectionValidKey)){
+                                                continue;
+                                            }
 
-                                            translatedKey = newThis.vocabValidKey(singleColumnKey);
+                                            translatedKey = newThis.vocabDataBase(sectionValidKey)
                                             if(translatedKey == false){
-                                            var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
-                                            reject(code400InvalidQuery);
-                                        }   else if(translatedKey == true) {
-
-                                            }else{
-
-                                                atomicReturnInfo = {[singleColumnKey]: singleSection[translatedKey]}
-                                                if (isUndefined(singleSection[translatedKey])) {
+                                                translatedKey = translatedKey
+                                            }   else if(translatedKey == true) {
+                                                translatedKey = translatedKey
+                                            }else {
+                                                atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
+                                                if (isUndefined(singleSection[sectionValidKey])) {
                                                     var code400InvalidQuery: InsightResponse = {
                                                         code: 400,
                                                         body: {"error": "malformed dataset with no key in result"}
@@ -504,19 +504,58 @@ export default class InsightFacade implements IInsightFacade {
                                                     returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                     //Log.info(returnInfo);
 
-                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"}
                                                 }
                                             }
-                                            /**if(result instanceof Array && result.length == 0){
-                                                result = result[0]
-                                            }*/
-                                        } returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
+                                        }returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
                                         //Log.info(returnInfo);
                                         if(returnInfo.length == 0){
                                             returnInfo = returnInfo
                                         }else {
-                                                finalReturn.push(returnInfo);
+                                            var cachedReturnInfo;
+                                            //returnInfo = {}
+                                            for (let x in columns) {
+                                                singleColumnKey = columns[x].toString()
+
+                                                //translatedKey = newThis.vocabValidKey(singleColumnKey);
+                                                /**if(translatedKey == false){
+                                                    var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
+                                                    reject(code400InvalidQuery);
+                                                }   else if(translatedKey == true) {
+                                                    continue;
+                                                }else{*/
+
+                                                    if(returnInfo.hasOwnProperty(singleColumnKey)){
+                                                        /**if(Number(x) == 0){
+                                                            returnInfo = {};
+                                                        }*/
+
+
+                                                        cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                                    } else
+                                                    if (isUndefined(returnInfo[singleColumnKey])) {
+                                                        var code400InvalidQuery: InsightResponse = {
+                                                            code: 400,
+                                                            body: {"error": "malformed dataset with no key in result"}
+                                                        };
+                                                        reject(code400InvalidQuery);
+                                                    } else {
+
+                                                        returnInfo = returnInfo
+                                                        //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        //Log.info(returnInfo);
+
+                                                        //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                                    }
+                                                //}
+                                                /**if(result instanceof Array && result.length == 0){
+                                                result = result[0]
+                                            }*/
+                                            }
+                                            finalReturn.push(cachedReturnInfo);
                                         }
+
+
                                     } //console.timeEnd("one course")
 
 
@@ -664,6 +703,28 @@ export default class InsightFacade implements IInsightFacade {
             return "Audit"
         } else if(validKey == "courses_uuid"){
             return "id"
+        } else return false;
+    }
+
+    vocabDataBase(databaseKey:string):string|boolean{
+        if(databaseKey == "Subject"){
+            return "courses_dept"
+        } else if(databaseKey == "Course"){
+            return "courses_id"
+        } else if(databaseKey == "Avg"){
+            return "courses_avg"
+        } else if(databaseKey == "Professor"){
+            return "courses_instructor"
+        } else if(databaseKey == "Title"){
+            return "courses_title"
+        } else if(databaseKey == "Pass"){
+            return "courses_pass"
+        } else if(databaseKey == "Fail"){
+            return "courses_fail"
+        } else if(databaseKey == "Audit"){
+            return "courses_audit"
+        } else if(databaseKey == "id"){
+            return "courses_uuid"
         } else return false;
     }
 
