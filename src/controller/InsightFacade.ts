@@ -619,11 +619,15 @@ export default class InsightFacade implements IInsightFacade {
                     } //console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
+                    if(finalReturn.length > 0) {
+                        lmaoWeDone = {render: table, result: finalReturn}
 
-                    lmaoWeDone = {render:table, result:finalReturn}
-
-                    var code200Done:InsightResponse = {code:200, body:lmaoWeDone}
-                    resolve(code200Done);
+                        var code200Done: InsightResponse = {code: 200, body: lmaoWeDone}
+                        resolve(code200Done);
+                    }else {
+                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"no data matches query"}};
+                        reject(code400InvalidQuery);
+                    }
 
 
 
@@ -695,27 +699,7 @@ export default class InsightFacade implements IInsightFacade {
      ** courses_audit: number; The number of students that audited the course offering. = "Audit"
      ** courses_uuid: string; The unique id of a course offering. = "id"
      */
-    vocabValidKey(validKey:string):string|boolean{
-        if(validKey == "courses_dept"){
-            return "Subject"
-        } else if(validKey == "courses_id"){
-            return "Course"
-        } else if(validKey == "courses_avg"){
-            return "Avg"
-        } else if(validKey == "courses_instructor"){
-            return "Professor"
-        } else if(validKey == "courses_title"){
-            return "Title"
-        } else if(validKey == "courses_pass"){
-            return "Pass"
-        } else if(validKey == "courses_fail"){
-            return "Fail"
-        } else if(validKey == "courses_audit"){
-            return "Audit"
-        } else if(validKey == "courses_uuid"){
-            return "id"
-        } else return false;
-    }
+    //vocabValidKey(validKey:string):string|boolean
 
     vocabDataBase(databaseKey:string):string|boolean{
         if(databaseKey == "Subject"){
@@ -933,8 +917,8 @@ export default class InsightFacade implements IInsightFacade {
             var tempAtomicValue = returnInfo[tempAtomicKey];
             if(isString(sortVal) && isString(tempAtomicValue) &&
                 ((sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(1, sortVal.length - 1).toString())) ||
-                (sortVal.startsWith("*") && !(sortVal.endsWith("*")) && tempAtomicValue.includes(sortVal.slice(1).toString())) ||
-                (!(sortVal.startsWith("*")) && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(0, sortVal.length - 1).toString())))
+                (sortVal.startsWith("*") && !(sortVal.endsWith("*")) && tempAtomicValue.endsWith(sortVal.slice(1).toString())) ||
+                (!(sortVal.startsWith("*")) && sortVal.endsWith("*") && tempAtomicValue.startsWith(sortVal.slice(0, sortVal.length - 1).toString())))
                 && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isString(sortVal) && tempAtomicValue == sortVal && sortKey == tempAtomicKey){

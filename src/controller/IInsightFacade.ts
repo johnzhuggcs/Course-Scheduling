@@ -161,7 +161,7 @@ export interface IInsightFacade {
      *
      * @param validKey
      */
-    vocabValidKey(validKey:string):string|boolean;
+    //vocabValidKey(validKey:string):string|boolean;
 
     /** Translates database keys into validkey
      *

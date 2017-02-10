@@ -938,6 +938,300 @@ describe("QueryTestSpec", function () {
 
     });
 
+    it("200 testing out Fireball", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_id":"383"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"*in"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+        /** courses_dept	courses_id	courses_avg
+         kin	383	80.19
+         kin	383	80.19
+         kin	383	80.51
+         kin	383	80.51
+         kin	383	81.26
+         kin	383	81.26
+         kin	383	82.49
+         kin	383	82.49 */
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'kin', courses_id: '383', courses_avg: 80.19 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 80.19 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 80.51 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 80.51 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 81.26 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 81.26 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 82.49 },
+                    { courses_dept: 'kin', courses_id: '383', courses_avg: 82.49 }
+                    ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out partial prof name", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"yang*"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"comm"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'comm', courses_id: '293', courses_avg: 63.61, courses_instructor: "yang, shuo" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out complex partial prof name", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"*john*"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"*chem"
+                        }
+                    },
+                    {
+                        "LT":{
+                            "courses_avg":63
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+        /** courses_dept	courses_id	courses_avg	courses_instructor
+         chem	313	74.62	sherman, john
+         chem	123	74.63	grant, edward;lekhi, priya;love, jennifer ann;sherman, john
+         chem	123	75.7	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	313	75.96	sherman, john
+         chem	123	77.74	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	123	81.25	johnson, kayli;lindenberg, erin */
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'chem', courses_id: '233', courses_avg: 62.77, courses_instructor: "ruddick, john n r;stewart, jaclyn" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("400 testing out complex partial prof name", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"*john"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"*chem"
+                        }
+                    },
+                    {
+                        "LT":{
+                            "courses_avg":63
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+        /** courses_dept	courses_id	courses_avg	courses_instructor
+         chem	313	74.62	sherman, john
+         chem	123	74.63	grant, edward;lekhi, priya;love, jennifer ann;sherman, john
+         chem	123	75.7	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	313	75.96	sherman, john
+         chem	123	77.74	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	123	81.25	johnson, kayli;lindenberg, erin */
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'chem', courses_id: '233', courses_avg: 62.77, courses_instructor: "ruddick, john n r;stewart, jaclyn" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"no data matches query"})
+        })
+
+
+    });
+
+    it("200 testing out complex partial prof name middle", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"*john*"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"*chem"
+                        }
+                    },
+                    {
+                        "GT":{
+                            "courses_avg":74
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+        /** courses_dept	courses_id	courses_avg	courses_instructor
+         chem	313	74.62	sherman, john
+         chem	123	74.63	grant, edward;lekhi, priya;love, jennifer ann;sherman, john
+         chem	123	75.7	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	313	75.96	sherman, john
+         chem	123	77.74	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
+         chem	123	81.25	johnson, kayli;lindenberg, erin */
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'chem', courses_id: '313', courses_avg: 74.62, courses_instructor: "sherman, john" },
+                    { courses_dept: 'chem', courses_id: '123', courses_avg: 74.63, courses_instructor: "grant, edward;lekhi, priya;love, jennifer ann;sherman, john" },
+                    { courses_dept: 'chem', courses_id: '123', courses_avg: 75.7, courses_instructor: "lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john" },
+                    { courses_dept: 'chem', courses_id: '313', courses_avg: 75.96, courses_instructor: "sherman, john" },
+                    { courses_dept: 'chem', courses_id: '123', courses_avg: 77.74, courses_instructor: "lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john" },
+                    { courses_dept: 'chem', courses_id: '123', courses_avg: 81.25, courses_instructor: "johnson, kayli;lindenberg, erin" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
     it("200 testing out OR", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
