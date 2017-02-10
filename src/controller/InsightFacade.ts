@@ -97,7 +97,7 @@ export default class InsightFacade implements IInsightFacade {
                         return parsed;
                     }).then(function(parsedJ) {
 
-                        if (!fs.existsSync(id)) {
+                        if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
 
                             fs.writeFileSync(id, parsedJ);
 
@@ -107,7 +107,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         return parsedJ
                     }).then(function(parsedJ){
-                        if (fs.existsSync(id)) {
+                        if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
                             fs.writeFileSync(id, parsedJ);//datafile is written
 
                             var ir4: InsightResponse = {code: 201, body: {}};
