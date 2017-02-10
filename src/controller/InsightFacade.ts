@@ -498,20 +498,24 @@ export default class InsightFacade implements IInsightFacade {
                                             }   else if(translatedKey == true) {
                                                 translatedKey = translatedKey
                                             }else {
-                                                atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
-                                                if (isUndefined(singleSection[sectionValidKey])) {
-                                                    var code400InvalidQuery: InsightResponse = {
-                                                        code: 400,
-                                                        body: {"error": "malformed dataset with no key in result"}
-                                                    };
-                                                    reject(code400InvalidQuery);
-                                                } else {
+                                                if(translatedKey == "courses_uuid" && typeof singleSection[sectionValidKey] == "number"){
+                                                    atomicReturnInfo = {[translatedKey]:singleSection[sectionValidKey].toString}
+                                                }else {
+                                                    atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
+                                                    if (isUndefined(singleSection[sectionValidKey])) {
+                                                        var code400InvalidQuery: InsightResponse = {
+                                                            code: 400,
+                                                            body: {"error": "malformed dataset with no key in result"}
+                                                        };
+                                                        reject(code400InvalidQuery);
+                                                    } else {
 
 
-                                                    returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
-                                                    //Log.info(returnInfo);
+                                                        returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        //Log.info(returnInfo);
 
-                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"}
+                                                        //should look like {"courses_avg":95, "courses_instructor":"bleh"}
+                                                    }
                                                 }
                                             }
                                         }returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
@@ -927,7 +931,11 @@ export default class InsightFacade implements IInsightFacade {
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
-            if(isString(sortVal) &&  sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(1, sortVal.length - 2)) && sortKey == tempAtomicKey){
+            if(isString(sortVal) && isString(tempAtomicValue) &&
+                ((sortVal.startsWith("*") && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(1, sortVal.length - 1).toString())) ||
+                (sortVal.startsWith("*") && !(sortVal.endsWith("*")) && tempAtomicValue.includes(sortVal.slice(1).toString())) ||
+                (!(sortVal.startsWith("*")) && sortVal.endsWith("*") && tempAtomicValue.includes(sortVal.slice(0, sortVal.length - 1).toString())))
+                && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isString(sortVal) && tempAtomicValue == sortVal && sortKey == tempAtomicKey){
                 tempAtomicValue = tempAtomicValue
