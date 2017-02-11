@@ -350,11 +350,11 @@ describe("QueryTestSpec", function () {
         sanityCheck(queryTest);
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(424);
-            expect(value.body).to.deep.equal({"error":["fake", "sham"]})
+            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
         }).catch(function (err) {
             //Log.test('Error: ' + err);
             expect(err.code).to.equal(424);
-            expect(err.body).to.deep.equal({"error":["fake", "sham"]})
+            expect(err.body).to.deep.equal({"missing":["fake", "sham"]})
         })
 
 
@@ -409,11 +409,11 @@ describe("QueryTestSpec", function () {
         sanityCheck(queryTest);
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(424);
-            expect(value.body).to.deep.equal({"error":["fake", "sham"]})
+            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
         }).catch(function (err) {
             //Log.test('Error: ' + err);
             expect(err.code).to.equal(424);
-            expect(err.body).to.deep.equal({"error":["fake", "sham"]})
+            expect(err.body).to.deep.equal({"missing":["fake", "sham"]})
         })
 
 
@@ -602,8 +602,161 @@ describe("QueryTestSpec", function () {
             expect(err.body).to.deep.equal({"error":"invalid query"})
 
         })
+    });
+
+    it("400 invalid order", function () {
+        var queryTest:QueryRequest = {
+            "WHERE"://{
+            //"NOT":{"NOT":{"NOT":{"NOT":
+                {"NOT":{"NOT":{"NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+                            //}
+                        }}}}//}}}
+
+                },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_av",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(400);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
+    });
+
+    it("400 invalid order", function () {
+        var queryTest:QueryRequest = {
+            "WHERE"://{
+            //"NOT":{"NOT":{"NOT":{"NOT":
+                {"NOT":{"NOT":{"NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+                            //}
+                        }}}}//}}}
+
+                },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"fake_stuff",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(400);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
+    });
+
+    it("400 invalid order", function () {
+        var queryTest:QueryRequest = {
+            "WHERE"://{
+            //"NOT":{"NOT":{"NOT":{"NOT":
+                {"NOT":{"NOT":{"NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+                            //}
+                        }}}}//}}}
+
+                },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_instructor",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(400);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"order not in column"})
+
+        })
+    });
 
 
+    it("200 testing out AND samething", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {"GT" : {"courses_avg":99}},
+                    {"GT" : {"courses_avg":99}}
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
     });
 
     it("200 testing out simple query with NOT ORDER alphabet", function () {
@@ -1034,6 +1187,60 @@ describe("QueryTestSpec", function () {
         var result = { render: 'TABLE',
             result:
                 [ { courses_dept: 'comm', courses_id: '293', courses_avg: 63.61, courses_instructor: "yang, shuo" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out partial uuid, prof everything", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"yang*"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"comm"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_uuid":"19116"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor",
+                    "courses_uuid"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'comm', courses_id: '293', courses_avg: 63.61, courses_instructor: "yang, shuo", courses_uuid:"19116" }
                 ] }
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){

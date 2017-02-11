@@ -488,9 +488,9 @@ export default class InsightFacade implements IInsightFacade {
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        if(Number(x) >= 5943){
+                        /**if(Number(x) >= 935){
                             Log.info("start debug")
-                        }
+                        }*/
                         //Log.info(x)
                         if(datasetResultArray[x] == false){
                             Log.info("skip this white space")
@@ -514,7 +514,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //console.time("one course")
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        /**if(Number(x) == 14){
+                                        /**if(Number(x) == 6){
                                             Log.info("continue debug")
                                         }*/
                                         for(var sectionValidKey in singleSection) {
@@ -529,7 +529,23 @@ export default class InsightFacade implements IInsightFacade {
                                                 translatedKey = translatedKey
                                             }else {
                                                 if(translatedKey == "courses_uuid" && typeof singleSection[sectionValidKey] == "number"){
-                                                    atomicReturnInfo = {[translatedKey]:singleSection[sectionValidKey].toString}
+                                                    var uuid = singleSection[sectionValidKey];
+                                                    var stringUuid = uuid.toString();
+
+                                                    if (isUndefined(uuid)) {
+                                                        var code400InvalidQuery: InsightResponse = {
+                                                            code: 400,
+                                                            body: {"error": "malformed dataset with no key in result"}
+                                                        };
+                                                        reject(code400InvalidQuery);
+                                                    } else {
+                                                        atomicReturnInfo = {[translatedKey]:stringUuid}
+
+                                                        returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        //Log.info(returnInfo);
+
+                                                        //should look like {"courses_avg":95, "courses_instructor":"bleh"}
+                                                    }
                                                 }else {
                                                     atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
                                                     if (isUndefined(singleSection[sectionValidKey])) {
@@ -624,29 +640,35 @@ export default class InsightFacade implements IInsightFacade {
                     // TODO: sort using order last
 
                     //console.time("sort through result")
-                    if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")){
+                    if(columns.includes(order)) {
+                        if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")) {
 
-                        finalReturn = finalReturn.sort(function (a, b) {
-                            return a[order] - b[order];
-                        });
+                            finalReturn = finalReturn.sort(function (a, b) {
+                                return a[order] - b[order];
+                            });
 
-                    } else if(order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")){
-                        finalReturn = finalReturn.sort(function(a, b) {
-                            var nameA = a[order].toUpperCase(); // ignore upper and lowercase
-                            var nameB = b[order].toUpperCase(); // ignore upper and lowercase
-                            if (nameA < nameB) {
-                                return -1;
-                            }else if (nameA > nameB) {
-                                return 1;
-                            }else
-                            return 0;
-                        });
+                        } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")) {
+                            finalReturn = finalReturn.sort(function (a, b) {
+                                var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                                var nameB = b[order].toUpperCase(); // ignore upper and lowercase
+                                if (nameA < nameB) {
+                                    return -1;
+                                } else if (nameA > nameB) {
+                                    return 1;
+                                } else
+                                    return 0;
+                            });
 
 
-                    } else {
-                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"order error"}};
+                        } else {
+                            var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
+                            reject(code400InvalidQuery);
+                        }
+                    } else{
+                        var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order not in column"}};
                         reject(code400InvalidQuery);
-                    } //console.timeEnd("sort through result")
+                    }
+                    //console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -668,7 +690,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else if(queryCheck instanceof Array){
-                var code424InvalidQuery:InsightResponse = {code:424, body:{"error":queryCheck}};
+                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":queryCheck}};
                 reject(code424InvalidQuery);
 
             }
