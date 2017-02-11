@@ -619,15 +619,12 @@ export default class InsightFacade implements IInsightFacade {
                     } //console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
-                    if(finalReturn.length > 0) {
+
                         lmaoWeDone = {render: table, result: finalReturn}
 
                         var code200Done: InsightResponse = {code: 200, body: lmaoWeDone}
                         resolve(code200Done);
-                    }else {
-                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"no data matches query"}};
-                        reject(code400InvalidQuery);
-                    }
+
 
 
 
@@ -824,6 +821,8 @@ export default class InsightFacade implements IInsightFacade {
 
             if(tempSortKey[0] == "GT" || tempSortKey[0] == "LT" || tempSortKey[0] == "EQ" || tempSortKey[0] == "IS"){
                 sortKey = sortKey[tempSortKey[0]]
+            } else if(tempSortKey[0] == "NOT"){
+                sortKey = this.getFilterArray(resultOfWhere);
             }
 
                 returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);

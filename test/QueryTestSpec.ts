@@ -563,16 +563,17 @@ describe("QueryTestSpec", function () {
 
 
     });
-/**
+
     it("200 testing out simple query with NOT", function () {
         var queryTest:QueryRequest = {
-            "WHERE":{
-                "NOT":{"NOT":{"NOT":{"NOT":{"NOT":{"NOT":{"NOT":
+            "WHERE"://{
+                //"NOT":{"NOT":{"NOT":{"NOT":
+                    {"NOT":{"NOT":{"NOT":
                     {
                         "LT":{
                             "courses_avg":99
-                        }
-                    }}}}}}}
+                        //}
+                    }}}}//}}}
 
             },
             "OPTIONS":{
@@ -603,7 +604,7 @@ describe("QueryTestSpec", function () {
         })
 
 
-    }); */
+    });
 
     it("200 testing out simple query with NOT ORDER alphabet", function () {
         var queryTest:QueryRequest = {
@@ -1150,10 +1151,9 @@ describe("QueryTestSpec", function () {
          chem	123	77.74	lekhi, priya;love, jennifer ann;macfarlane, william andrew;patey, grenfell;sherman, john
          chem	123	81.25	johnson, kayli;lindenberg, erin */
 
+        var emptyArray:any[] = []
         var result = { render: 'TABLE',
-            result:
-                [ { courses_dept: 'chem', courses_id: '233', courses_avg: 62.77, courses_instructor: "ruddick, john n r;stewart, jaclyn" }
-                ] }
+            result:emptyArray }
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
