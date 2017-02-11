@@ -61,6 +61,11 @@ export default class InsightFacade implements IInsightFacade {
                         for (let i in arrayofUnparsedFileDataAll) {
                             //setTimeout(function() {
                             noOfFiles++;
+                            //Log.info(String(arrayofUnparsedFileDataAll[i]));
+                            //It can pass to a list of pictures,  and zip
+
+                            //should reject {"result":[],"rank":0} here as well (because it hasn't contain any courses info)
+                            //if not result for first key and rank for second key
                             try {
                                 isTry = true;
                                 var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
@@ -76,6 +81,22 @@ export default class InsightFacade implements IInsightFacade {
                             if (isTry != false && JSON.parse(String(arrayofUnparsedFileDataAll[i])) instanceof Array) {
                                 isTry = false;
                                 filesNotJsonOrArrayCounter++;
+                            }
+
+                            if (isTry != false) {
+                                var arrayOfKeys = Object.keys(JSON.parse(String(arrayofUnparsedFileDataAll[i])));
+
+                                if (arrayOfKeys[0] == "result" && arrayOfKeys[1] == "rank") {
+                                    //Log.info(JSON.parse(String(arrayofUnparsedFileDataAll[i])).result.length);
+                                    if (JSON.parse(String(arrayofUnparsedFileDataAll[i])).result.length == 0
+                                    /*TODO: And it's an integer*/) {
+                                        isTry = false;
+                                        filesNotJsonOrArrayCounter++;
+                                    }
+                                } else {
+                                    isTry = false;
+                                    filesNotJsonOrArrayCounter++;
+                                }
                             }
 
                             if (isTry) {
@@ -98,8 +119,12 @@ export default class InsightFacade implements IInsightFacade {
                     }).then(function(parsedJ) {
 
                         if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
-
-                            fs.writeFileSync(id, parsedJ);
+                            try {
+                                fs.writeFileSync(id, parsedJ);
+                            } catch (e) {
+                                var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                reject(ir2);
+                            }
 
                             var ir4: InsightResponse = {code: 204, body: {}};
                             fulfill(ir4);
@@ -108,7 +133,12 @@ export default class InsightFacade implements IInsightFacade {
                         return parsedJ
                     }).then(function(parsedJ){
                         if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
-                            fs.writeFileSync(id, parsedJ);//datafile is written
+                            try {
+                                fs.writeFileSync(id, parsedJ);
+                            } catch (e) {
+                                var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                reject(ir2);
+                            }
 
                             var ir4: InsightResponse = {code: 201, body: {}};
                             fulfill(ir4);
