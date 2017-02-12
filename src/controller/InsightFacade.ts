@@ -640,49 +640,54 @@ export default class InsightFacade implements IInsightFacade {
                     // TODO: sort using order last
 
                     //console.time("sort through result")
-                    if(columns.includes(order)) {
-                        if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")) {
+                    if(!(isUndefined(order))) {
+                        if (columns.includes(order)) {
+                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")) {
 
-                            finalReturn = finalReturn.sort(function (a, b) {
-                                return a[order] - b[order];
-                            });
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    return a[order] - b[order];
+                                });
 
-                        } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
-                            finalReturn = finalReturn.sort(function (a, b) {
-                                var nameA = a[order].toUpperCase(); // ignore upper and lowercase
-                                var nameB = b[order].toUpperCase(); // ignore upper and lowercase
-                                if (nameA < nameB) {
+                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                                    var nameB = b[order].toUpperCase(); // ignore upper and lowercase
+                                    if (nameA < nameB) {
+                                        return -1;
+                                    } else if (nameA > nameB) {
+                                        return 1;
+                                    } else
+                                        return 0;
+                                });
+
+
+                            } else if (order.endsWith("_uuid")) {
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    var numA = Number(a[order]); // ignore upper and lowercase
+                                    var numB = Number(b[order]); // ignore upper and lowercase
+                                    /**if (nameA < nameB) {
                                     return -1;
                                 } else if (nameA > nameB) {
                                     return 1;
                                 } else
-                                    return 0;
-                            });
+                                     return 0;*/
+                                    return numA - numB;
+                                });
 
 
-                        } else if (order.endsWith("_uuid")) {
-                            finalReturn = finalReturn.sort(function (a, b) {
-                                var numA = Number(a[order]); // ignore upper and lowercase
-                                var numB = Number(b[order]); // ignore upper and lowercase
-                                /**if (nameA < nameB) {
-                                    return -1;
-                                } else if (nameA > nameB) {
-                                    return 1;
-                                } else
-                                    return 0;*/
-                                return numA - numB;
-                            });
-
-
+                            } else {
+                                var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
+                                reject(code400InvalidQuery);
+                            }
                         } else {
-                            var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
+                            var code400InvalidQuery: InsightResponse = {
+                                code: 400,
+                                body: {"error": "order not in column"}
+                            };
                             reject(code400InvalidQuery);
                         }
-                    } else{
-                        var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order not in column"}};
-                        reject(code400InvalidQuery);
+                        //console.timeEnd("sort through result")
                     }
-                    //console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -1044,7 +1049,8 @@ export default class InsightFacade implements IInsightFacade {
                 if(temp != false && invalidIdArray.length == 0) { //check if FILTER is valid, needed as FILTER is recursively nested
                     optionsValue = query[Options]; //gets all values from OPTIONS
                     columnsEtcKey = Object.keys(optionsValue); //gets all the "key" within the value from OPTIONS, such as COLUMNS and etc...
-                    if(columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM"){
+                    if((columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM") ||
+                        (columnsEtcKey.length == 2 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "FORM")){
                         columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
                         for(let x in columnsValidKeyArray){
                             if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
@@ -1080,43 +1086,48 @@ export default class InsightFacade implements IInsightFacade {
 
                             }else
                                 return false
-                        }
-                        orderValidKey = optionsValue[columnsEtcKey[1]];
-                        if(columnsValidKeyArray.includes(orderValidKey)) {//gets ORDER key
-                            if (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
-                                || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
-                                || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
-                                || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                || orderValidKey == "courses_uuid") { //checks for valid key
-                                Table = optionsValue[columnsEtcKey[2]];
-                                if (Table == "TABLE") { //if value of FORM is TABLE
-                                    return true
-                                } else return false;
-                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
-                                (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
-                                orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))) {
+                        } if(columnsEtcKey[1] == "ORDER") {
+                            orderValidKey = optionsValue[columnsEtcKey[1]];
+                            if (columnsValidKeyArray.includes(orderValidKey)) {//gets ORDER key
+                                if (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+                                    || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
+                                    || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
+                                    || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
+                                    || orderValidKey == "courses_uuid") { //checks for valid key
+                                    Table = optionsValue[columnsEtcKey[2]];
+                                    if (Table == "TABLE") { //if value of FORM is TABLE
+                                        return true
+                                    } else return false;
+                                } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
+                                    (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
+                                    orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
+                                    orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))) {
 
-                                invalidIdLists = orderValidKey.split("_");
+                                    invalidIdLists = orderValidKey.split("_");
 
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                return invalidIdArray;
-                            } else if (typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses") && orderValidKey.includes("_"))) {
+                                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                                        invalidIdLists = [];
+                                    } else {
+                                        invalidIdArray.push(invalidIdLists[0]);
+                                    }
+                                    return invalidIdArray;
+                                } else if (typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses") && orderValidKey.includes("_"))) {
 
-                                invalidIdLists = orderValidKey.split("_");
+                                    invalidIdLists = orderValidKey.split("_");
 
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                return invalidIdArray;
+                                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                                        invalidIdLists = [];
+                                    } else {
+                                        invalidIdArray.push(invalidIdLists[0]);
+                                    }
+                                    return invalidIdArray;
+                                } else return false
                             } else return false
-                        } else return false
+                        } else { Table = optionsValue[columnsEtcKey[1]];
+                            if (Table == "TABLE") { //if value of FORM is TABLE
+                                return true
+                            } else return false;
+                        }
                     } else return false;
                 } else if(invalidIdArray.length > 0){
                     Log.error(typeof invalidIdArray)

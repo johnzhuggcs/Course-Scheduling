@@ -48,7 +48,7 @@ export interface SCompare{
 
 export interface ColumnsQuery{
     COLUMNS:[string];
-    ORDER:string;
+    ORDER?:string;
     FORM:"TABLE";
 }
 
