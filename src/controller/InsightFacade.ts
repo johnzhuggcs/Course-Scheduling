@@ -647,7 +647,7 @@ export default class InsightFacade implements IInsightFacade {
                                 return a[order] - b[order];
                             });
 
-                        } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")) {
+                        } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
                             finalReturn = finalReturn.sort(function (a, b) {
                                 var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                 var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -657,6 +657,20 @@ export default class InsightFacade implements IInsightFacade {
                                     return 1;
                                 } else
                                     return 0;
+                            });
+
+
+                        } else if (order.endsWith("_uuid")) {
+                            finalReturn = finalReturn.sort(function (a, b) {
+                                var numA = Number(a[order]); // ignore upper and lowercase
+                                var numB = Number(b[order]); // ignore upper and lowercase
+                                /**if (nameA < nameB) {
+                                    return -1;
+                                } else if (nameA > nameB) {
+                                    return 1;
+                                } else
+                                    return 0;*/
+                                return numA - numB;
                             });
 
 
@@ -690,7 +704,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else if(queryCheck instanceof Array){
-                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":queryCheck}};
+                var code424InvalidQuery:InsightResponse = {code:424, body:{'missing':queryCheck}};
                 reject(code424InvalidQuery);
 
             }
@@ -1039,7 +1053,7 @@ export default class InsightFacade implements IInsightFacade {
                                 || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
                                 || columnsValidKeyArray[x] == "courses_uuid")){ //checks for valid keys
                                 Where = keyArray[0] //dummy line of code so further check would be done outside of for-loop
-                            } else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses")) &&
+                            } else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses")) && (this.occurrences(columnsValidKeyArray[x], "_", true)) == 1&&
                                 (columnsValidKeyArray[x].endsWith("_dept") || columnsValidKeyArray[x].endsWith("_id") || columnsValidKeyArray[x].endsWith("_avg") ||
                                 columnsValidKeyArray[x].endsWith("_instructor") || columnsValidKeyArray[x].endsWith("_title") || columnsValidKeyArray[x].endsWith("_pass") ||
                                 columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid"))){
@@ -1053,33 +1067,56 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
 
+                            }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses") && columnsValidKeyArray[x].includes("_"))){
+
+                                invalidIdLists = columnsValidKeyArray[x].split("_");
+
+
+                                if(invalidIdArray.includes(invalidIdLists[0])){
+                                    invalidIdLists = [];
+                                } else {
+                                    invalidIdArray.push(invalidIdLists[0]);
+                                }
+
                             }else
                                 return false
                         }
-                        orderValidKey = optionsValue[columnsEtcKey[1]]; //gets ORDER key
-                        if(orderValidKey == "courses_dept" || orderValidKey == "courses_id"
-                            || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
-                            || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
-                            || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                            || orderValidKey == "courses_uuid"){ //checks for valid key
+                        orderValidKey = optionsValue[columnsEtcKey[1]];
+                        if(columnsValidKeyArray.includes(orderValidKey)) {//gets ORDER key
+                            if (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+                                || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
+                                || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
+                                || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
+                                || orderValidKey == "courses_uuid") { //checks for valid key
                                 Table = optionsValue[columnsEtcKey[2]];
-                                if(Table == "TABLE"){ //if value of FORM is TABLE
-                                        return true
-                                }else return false;
-                        } else if(typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses")) &&
-                            (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
-                            orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                            orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))){
+                                if (Table == "TABLE") { //if value of FORM is TABLE
+                                    return true
+                                } else return false;
+                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
+                                (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
+                                orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
+                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))) {
 
-                            invalidIdLists = orderValidKey.split("_");
+                                invalidIdLists = orderValidKey.split("_");
 
-                            if(invalidIdArray.includes(invalidIdLists[0])){
-                                invalidIdLists = [];
-                            } else {
-                                invalidIdArray.push(invalidIdLists[0]);
-                            }
-                            return invalidIdArray;
-                        }else return false
+                                if (invalidIdArray.includes(invalidIdLists[0])) {
+                                    invalidIdLists = [];
+                                } else {
+                                    invalidIdArray.push(invalidIdLists[0]);
+                                }
+                                return invalidIdArray;
+                            } else if (typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses") && orderValidKey.includes("_"))) {
+
+                                invalidIdLists = orderValidKey.split("_");
+
+                                if (invalidIdArray.includes(invalidIdLists[0])) {
+                                    invalidIdLists = [];
+                                } else {
+                                    invalidIdArray.push(invalidIdLists[0]);
+                                }
+                                return invalidIdArray;
+                            } else return false
+                        } else return false
                     } else return false;
                 } else if(invalidIdArray.length > 0){
                     Log.error(typeof invalidIdArray)
@@ -1112,9 +1149,19 @@ export default class InsightFacade implements IInsightFacade {
                             return true;
                         }else
                     return false;
-                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) &&
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) && (this.occurrences(validProjectKey[0], "_", true)) == 1 &&
                     (validProjectKey[0].endsWith("_avg") || validProjectKey[0].endsWith("_pass") ||
                     validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit"))){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    return invalidIdArray;
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")&& validProjectKey[0].includes("_"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1130,7 +1177,7 @@ export default class InsightFacade implements IInsightFacade {
             } else if (comparisonKey[0] == "IS"){ //SComparator
                 validProjectKey = Object.keys(comparisonValue);
                 sComparisonString = comparisonValue[validProjectKey[0]];
-                if(validProjectKey.length == 1  && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
+                if(validProjectKey.length == 1  && (this.occurrences(validProjectKey[0], "_", true)) == 1 && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
                     if(isString(sComparisonString)||(sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                         isString(sComparisonString))){
                         return true;
@@ -1138,6 +1185,16 @@ export default class InsightFacade implements IInsightFacade {
                 } else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) &&
                     (validProjectKey[0].endsWith("_dept") || validProjectKey[0].endsWith("_id") ||
                     validProjectKey[0].endsWith("_instructor") || validProjectKey[0].endsWith("_title")|| validProjectKey[0].endsWith("_uuid"))){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    return invalidIdArray;
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses") && validProjectKey[0].includes("_"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1168,6 +1225,26 @@ export default class InsightFacade implements IInsightFacade {
             } else return false
 
 
+    }
+
+    occurrences(string:string, subString:string, allowOverlapping:boolean) {
+
+        string += "";
+        subString += "";
+        if (subString.length <= 0) return (string.length + 1);
+
+        var n = 0,
+            pos = 0,
+            step = allowOverlapping ? 1 : subString.length;
+
+        while (true) {
+            pos = string.indexOf(subString, pos);
+            if (pos >= 0) {
+                ++n;
+                pos += step;
+            } else break;
+        }
+        return n;
     }
 
 }

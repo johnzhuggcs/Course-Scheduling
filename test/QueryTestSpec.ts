@@ -412,8 +412,8 @@ describe("QueryTestSpec", function () {
             expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
         }).catch(function (err) {
             //Log.test('Error: ' + err);
-            expect(err.code).to.equal(424);
-            expect(err.body).to.deep.equal({"missing":["fake", "sham"]})
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
         })
 
 
@@ -716,7 +716,46 @@ describe("QueryTestSpec", function () {
         }).catch(function (err) {
             Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"order not in column"})
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+
+        })
+    });
+
+    it("400 conflict with 424 invalid order", function () {
+        var queryTest:any = {
+            "WHERE"://{
+            //"NOT":{"NOT":{"NOT":{"NOT":
+                {"NOT":{"NOT":{"NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+                            //}
+                        }}}}//}}}
+
+                },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "course_test",
+                    "courses_avg"
+                ],
+                "ORDER":"course_test",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'cnps', courses_avg: 99.19 },
+                    { courses_dept: 'math', courses_avg: 99.78 },
+                    { courses_dept: 'math', courses_avg: 99.78 }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(400);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["course"]})
 
         })
     });
@@ -1242,6 +1281,277 @@ describe("QueryTestSpec", function () {
             result:
                 [ { courses_dept: 'comm', courses_id: '293', courses_avg: 63.61, courses_instructor: "yang, shuo", courses_uuid:"19116" }
                 ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out partial *yang* uuid, prof everything", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_instructor":"*yang, *"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_dept":"*comm"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_uuid":"*19116*"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg",
+                    "courses_instructor",
+                    "courses_uuid"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        // comm	293	63.61	yang, shuo
+
+        var result = { render: 'TABLE',
+            result:
+                [ { courses_dept: 'comm', courses_id: '293', courses_avg: 63.61, courses_instructor: "yang, shuo", courses_uuid:"19116" }
+                ] }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out partial name return all prof", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+
+                "IS":{
+                    "courses_instructor":"*yang*"
+                }
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_uuid"
+                ],
+                "ORDER":"courses_uuid",
+                "FORM":"TABLE"
+            }
+        }
+
+
+        var result = { render: 'TABLE',
+            result:
+                [{courses_uuid:"2063"},
+                {courses_uuid:"2065"},
+                {courses_uuid:"2067"},
+                {courses_uuid:"2069"},
+                {courses_uuid:"2840"},
+                {courses_uuid:"9415"},
+                {courses_uuid:"9437"},
+                {courses_uuid:"9439"},
+                {courses_uuid:"9441"},
+                {courses_uuid:"9443"},
+                {courses_uuid:"10736"},
+                {courses_uuid:"14615"},
+                {courses_uuid:"19116"},
+                {courses_uuid:"23236"},
+                {courses_uuid:"23238"},
+                {courses_uuid:"23240"},
+                {courses_uuid:"23242"},
+                {courses_uuid:"26967"},
+                {courses_uuid:"28444"},
+                {courses_uuid:"30750"},
+                {courses_uuid:"30752"},
+                {courses_uuid:"30754"},
+                {courses_uuid:"30756"},
+                {courses_uuid:"39485"},
+                {courses_uuid:"45016"},
+                {courses_uuid:"45108"},
+                {courses_uuid:"47872"},
+                {courses_uuid:"47967"},
+                {courses_uuid:"53254"},
+                {courses_uuid:"56357"},
+                {courses_uuid:"58867"},
+                {courses_uuid:"58877"},
+                {courses_uuid:"66311"},
+                {courses_uuid:"66313"},
+                {courses_uuid:"66315"},
+                {courses_uuid:"66317"},
+                {courses_uuid:"73371"},
+                {courses_uuid:"73373"},
+                {courses_uuid:"73375"},
+                {courses_uuid:"73377"},
+                {courses_uuid:"79527"},
+                {courses_uuid:"79615"},
+                {courses_uuid:"83176"},
+                {courses_uuid:"83178"},
+                {courses_uuid:"83180"},
+                {courses_uuid:"83182"},
+                {courses_uuid:"83577"},
+                {courses_uuid:"84805"},
+                {courses_uuid:"84891"}]
+        }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            //Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out partial name just names", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+
+                "IS":{
+                    "courses_instructor":"*yang*"
+                }
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_instructor",
+                "FORM":"TABLE"
+            }
+        }
+
+        /** bodolec, jacques;o'brien, juliet;yang, wenyan
+         bodolec, jacques;o'brien, juliet;yang, wenyan
+         o'brien, juliet;yang, wenyan
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, liqiong
+         yang, meng-hsuan
+         yang, shuo
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, tsung-yuan
+         yang, zeng*/
+
+        var result = { render: 'TABLE',
+            result:
+                [{courses_instructor:"bodolec, jacques;o'brien, juliet;yang, wenyan"},
+        {courses_instructor:"bodolec, jacques;o'brien, juliet;yang, wenyan"},
+        {courses_instructor:"o'brien, juliet;yang, wenyan"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, liqiong"},
+        {courses_instructor:"yang, meng-hsuan"},
+        {courses_instructor:"yang, shuo"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, tsung-yuan"},
+        {courses_instructor:"yang, zeng"}]
+        }
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
