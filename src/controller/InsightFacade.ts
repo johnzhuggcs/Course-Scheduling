@@ -22,9 +22,6 @@ export default class InsightFacade implements IInsightFacade {
 
         return new Promise(function (fulfill, reject) {
 
-            /*console.time("testingRequest");
-            var request = require('request');
-            console.timeEnd("testingRequest");*/
             var JSZip = require('jszip');
             var fs = require('fs');
             var zip = new JSZip();
@@ -32,7 +29,7 @@ export default class InsightFacade implements IInsightFacade {
             var arrayOfId: string[] = [];
             var arrayOfUnparsedFileData: any = [];
 
-            var filesNotJsonOrArrayCounter = 0;
+            var filesNotJsonOrArrayOrHTMLCounter = 0;
             var noOfFiles = 0;
 
             var arrayCounter = 0;
@@ -59,50 +56,63 @@ export default class InsightFacade implements IInsightFacade {
                         var parsedJSON = '';
                         var isTry = true;
                         for (let i in arrayofUnparsedFileDataAll) {
+                            //Log.info(String(arrayofUnparsedFileDataAll[i]));
                             //setTimeout(function() {
                             noOfFiles++;
-                            //Log.info(String(arrayofUnparsedFileDataAll[i]));
                             //It can pass to a list of pictures,  and zip
 
                             //should reject {"result":[],"rank":0} here as well (because it hasn't contain any courses info)
                             //if not result for first key and rank for second key
-                            try {
-                                isTry = true;
-                                var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
-                                JSON.parse(x);//JSON.parse
-                            }
-                            catch (err) {
-                                //filesNotJsonCounter++;
-                                isTry = false;
-                                filesNotJsonOrArrayCounter++;
-                                err;
-                            }
-
-                            if (isTry != false && JSON.parse(String(arrayofUnparsedFileDataAll[i])) instanceof Array) {
-                                isTry = false;
-                                filesNotJsonOrArrayCounter++;
-                            }
-
-                            if (isTry != false) {
-                                var arrayOfKeys = Object.keys(JSON.parse(String(arrayofUnparsedFileDataAll[i])));
-
-                                if (arrayOfKeys[0] == "result" && arrayOfKeys[1] == "rank") {
-                                    //Log.info(JSON.parse(String(arrayofUnparsedFileDataAll[i])).result.length);
-                                    if (JSON.parse(String(arrayofUnparsedFileDataAll[i])).result.length == 0
-                                    /*TODO: And it's an integer*/) {
-                                        isTry = false;
-                                        filesNotJsonOrArrayCounter++;
-                                    }
-                                } else {
-                                    isTry = false;
-                                    filesNotJsonOrArrayCounter++;
+                            if (!String(arrayofUnparsedFileDataAll[i]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")) {
+                                try {
+                                    isTry = true;
+                                    var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
+                                    JSON.parse(x);//JSON.parse
                                 }
-                            }
+                                catch (err) {
+                                    //filesNotJsonCounter++;
+                                    isTry = false;
+                                    filesNotJsonOrArrayOrHTMLCounter++;
+                                    err;
+                                }
 
-                            if (isTry) {
-                                parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+
+                                // case 2: if it's a JSON array, don't store its info
+                                if (isTry != false && JSON.parse(String(arrayofUnparsedFileDataAll[i])) instanceof Array) {
+                                    isTry = false;
+                                    filesNotJsonOrArrayOrHTMLCounter++;
+                                }
+
+                                //case 3: if result is blank, don't store its info
+                                if (isTry != false) {
+                                    var arrayOfKeys = Object.keys(JSON.parse(String(arrayofUnparsedFileDataAll[i])));
+
+                                    if (arrayOfKeys[0] == "result" && arrayOfKeys[1] == "rank") {
+                                        if (JSON.parse(String(arrayofUnparsedFileDataAll[i])).result.length == 0) {
+                                            isTry = false;
+                                            filesNotJsonOrArrayOrHTMLCounter++;
+                                        }
+                                    } else {
+                                        isTry = false;
+                                        filesNotJsonOrArrayOrHTMLCounter++;
+                                    }
+                                }
+
+                                if (isTry) {
+                                    parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
+                                }
+                                //},100000);
+                            } else {
+                                Log.info(String(String(arrayofUnparsedFileDataAll[i]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")));
+                                var div = document.createElement('div');
+                                div.innerHTML = String(arrayofUnparsedFileDataAll[i]);
+                                var htmlData = div.childNodes;
+                                //Log.info(typeof htmlData);
+
+                                //TODO: parsedJSON will return {result:[...]}
+                                parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";
+
                             }
-                            //},100000);
                         }
                         return parsedJSON;
                     }).then(function(parsed) {
@@ -111,14 +121,14 @@ export default class InsightFacade implements IInsightFacade {
                             reject(ir2);
                         }
 
-                        if (filesNotJsonOrArrayCounter == noOfFiles) {
+                        if (filesNotJsonOrArrayOrHTMLCounter == noOfFiles) {
                             var ir2: InsightResponse = {code: 400, body: {'error': 'cannot set a valid zip that does not contain any real data.'}};
                             reject(ir2);
                         }
                         return parsed;
                     }).then(function(parsedJ) {
 
-                        if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
+                        if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
                             try {
                                 fs.writeFileSync(id, parsedJ);
                             } catch (e) {
@@ -132,7 +142,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         return parsedJ
                     }).then(function(parsedJ){
-                        if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayCounter < noOfFiles) {
+                        if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
                             try {
                                 fs.writeFileSync(id, parsedJ);
                             } catch (e) {
