@@ -498,9 +498,9 @@ export default class InsightFacade implements IInsightFacade {
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        if(Number(x) >= 5943){
+                        /**if(Number(x) >= 935){
                             Log.info("start debug")
-                        }
+                        }*/
                         //Log.info(x)
                         if(datasetResultArray[x] == false){
                             Log.info("skip this white space")
@@ -524,7 +524,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //console.time("one course")
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        /**if(Number(x) == 14){
+                                        /**if(Number(x) == 6){
                                             Log.info("continue debug")
                                         }*/
                                         for(var sectionValidKey in singleSection) {
@@ -539,7 +539,23 @@ export default class InsightFacade implements IInsightFacade {
                                                 translatedKey = translatedKey
                                             }else {
                                                 if(translatedKey == "courses_uuid" && typeof singleSection[sectionValidKey] == "number"){
-                                                    atomicReturnInfo = {[translatedKey]:singleSection[sectionValidKey].toString}
+                                                    var uuid = singleSection[sectionValidKey];
+                                                    var stringUuid = uuid.toString();
+
+                                                    if (isUndefined(uuid)) {
+                                                        var code400InvalidQuery: InsightResponse = {
+                                                            code: 400,
+                                                            body: {"error": "malformed dataset with no key in result"}
+                                                        };
+                                                        reject(code400InvalidQuery);
+                                                    } else {
+                                                        atomicReturnInfo = {[translatedKey]:stringUuid}
+
+                                                        returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        //Log.info(returnInfo);
+
+                                                        //should look like {"courses_avg":95, "courses_instructor":"bleh"}
+                                                    }
                                                 }else {
                                                     atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
                                                     if (isUndefined(singleSection[sectionValidKey])) {
@@ -634,40 +650,62 @@ export default class InsightFacade implements IInsightFacade {
                     // TODO: sort using order last
 
                     //console.time("sort through result")
-                    if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")){
+                    if(!(isUndefined(order))) {
+                        if (columns.includes(order)) {
+                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")) {
 
-                        finalReturn = finalReturn.sort(function (a, b) {
-                            return a[order] - b[order];
-                        });
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    return a[order] - b[order];
+                                });
 
-                    } else if(order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_uuid")){
-                        finalReturn = finalReturn.sort(function(a, b) {
-                            var nameA = a[order].toUpperCase(); // ignore upper and lowercase
-                            var nameB = b[order].toUpperCase(); // ignore upper and lowercase
-                            if (nameA < nameB) {
-                                return -1;
-                            }else if (nameA > nameB) {
-                                return 1;
-                            }else
-                            return 0;
-                        });
+                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                                    var nameB = b[order].toUpperCase(); // ignore upper and lowercase
+                                    if (nameA < nameB) {
+                                        return -1;
+                                    } else if (nameA > nameB) {
+                                        return 1;
+                                    } else
+                                        return 0;
+                                });
 
 
-                    } else {
-                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"order error"}};
-                        reject(code400InvalidQuery);
-                    } //console.timeEnd("sort through result")
+                            } else if (order.endsWith("_uuid")) {
+                                finalReturn = finalReturn.sort(function (a, b) {
+                                    var numA = Number(a[order]); // ignore upper and lowercase
+                                    var numB = Number(b[order]); // ignore upper and lowercase
+                                    /**if (nameA < nameB) {
+                                    return -1;
+                                } else if (nameA > nameB) {
+                                    return 1;
+                                } else
+                                     return 0;*/
+                                    return numA - numB;
+                                });
+
+
+                            } else {
+                                var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
+                                reject(code400InvalidQuery);
+                            }
+                        } else {
+                            var code400InvalidQuery: InsightResponse = {
+                                code: 400,
+                                body: {"error": "order not in column"}
+                            };
+                            reject(code400InvalidQuery);
+                        }
+                        //console.timeEnd("sort through result")
+                    }
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
-                    if(finalReturn.length > 0) {
+
                         lmaoWeDone = {render: table, result: finalReturn}
 
                         var code200Done: InsightResponse = {code: 200, body: lmaoWeDone}
                         resolve(code200Done);
-                    }else {
-                        var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"no data matches query"}};
-                        reject(code400InvalidQuery);
-                    }
+
 
 
 
@@ -681,7 +719,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else if(queryCheck instanceof Array){
-                var code424InvalidQuery:InsightResponse = {code:424, body:{"error":queryCheck}};
+                var code424InvalidQuery:InsightResponse = {code:424, body:{'missing':queryCheck}};
                 reject(code424InvalidQuery);
 
             }
@@ -864,6 +902,8 @@ export default class InsightFacade implements IInsightFacade {
 
             if(tempSortKey[0] == "GT" || tempSortKey[0] == "LT" || tempSortKey[0] == "EQ" || tempSortKey[0] == "IS"){
                 sortKey = sortKey[tempSortKey[0]]
+            } else if(tempSortKey[0] == "NOT"){
+                sortKey = this.getFilterArray(resultOfWhere);
             }
 
                 returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);
@@ -1019,7 +1059,8 @@ export default class InsightFacade implements IInsightFacade {
                 if(temp != false && invalidIdArray.length == 0) { //check if FILTER is valid, needed as FILTER is recursively nested
                     optionsValue = query[Options]; //gets all values from OPTIONS
                     columnsEtcKey = Object.keys(optionsValue); //gets all the "key" within the value from OPTIONS, such as COLUMNS and etc...
-                    if(columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM"){
+                    if((columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM") ||
+                        (columnsEtcKey.length == 2 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "FORM")){
                         columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
                         for(let x in columnsValidKeyArray){
                             if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
@@ -1028,7 +1069,7 @@ export default class InsightFacade implements IInsightFacade {
                                 || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
                                 || columnsValidKeyArray[x] == "courses_uuid")){ //checks for valid keys
                                 Where = keyArray[0] //dummy line of code so further check would be done outside of for-loop
-                            } else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses")) &&
+                            } else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses")) && (this.occurrences(columnsValidKeyArray[x], "_", true)) == 1&&
                                 (columnsValidKeyArray[x].endsWith("_dept") || columnsValidKeyArray[x].endsWith("_id") || columnsValidKeyArray[x].endsWith("_avg") ||
                                 columnsValidKeyArray[x].endsWith("_instructor") || columnsValidKeyArray[x].endsWith("_title") || columnsValidKeyArray[x].endsWith("_pass") ||
                                 columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid"))){
@@ -1042,33 +1083,61 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
 
+                            }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses") && columnsValidKeyArray[x].includes("_"))){
+
+                                invalidIdLists = columnsValidKeyArray[x].split("_");
+
+
+                                if(invalidIdArray.includes(invalidIdLists[0])){
+                                    invalidIdLists = [];
+                                } else {
+                                    invalidIdArray.push(invalidIdLists[0]);
+                                }
+
                             }else
                                 return false
-                        }
-                        orderValidKey = optionsValue[columnsEtcKey[1]]; //gets ORDER key
-                        if(orderValidKey == "courses_dept" || orderValidKey == "courses_id"
-                            || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
-                            || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
-                            || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                            || orderValidKey == "courses_uuid"){ //checks for valid key
-                                Table = optionsValue[columnsEtcKey[2]];
-                                if(Table == "TABLE"){ //if value of FORM is TABLE
+                        } if(columnsEtcKey[1] == "ORDER") {
+                            orderValidKey = optionsValue[columnsEtcKey[1]];
+                            if (columnsValidKeyArray.includes(orderValidKey)) {//gets ORDER key
+                                if (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+                                    || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
+                                    || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
+                                    || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
+                                    || orderValidKey == "courses_uuid") { //checks for valid key
+                                    Table = optionsValue[columnsEtcKey[2]];
+                                    if (Table == "TABLE") { //if value of FORM is TABLE
                                         return true
-                                }else return false;
-                        } else if(typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses")) &&
-                            (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
-                            orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                            orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))){
+                                    } else return false;
+                                } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
+                                    (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
+                                    orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
+                                    orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))) {
 
-                            invalidIdLists = orderValidKey.split("_");
+                                    invalidIdLists = orderValidKey.split("_");
 
-                            if(invalidIdArray.includes(invalidIdLists[0])){
-                                invalidIdLists = [];
-                            } else {
-                                invalidIdArray.push(invalidIdLists[0]);
-                            }
-                            return invalidIdArray;
-                        }else return false
+                                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                                        invalidIdLists = [];
+                                    } else {
+                                        invalidIdArray.push(invalidIdLists[0]);
+                                    }
+                                    return invalidIdArray;
+                                } else if (typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses") && orderValidKey.includes("_"))) {
+
+                                    invalidIdLists = orderValidKey.split("_");
+
+                                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                                        invalidIdLists = [];
+                                    } else {
+                                        invalidIdArray.push(invalidIdLists[0]);
+                                    }
+                                    return invalidIdArray;
+                                } else return false
+                            } else return false
+                        } else { Table = optionsValue[columnsEtcKey[1]];
+                            if (Table == "TABLE") { //if value of FORM is TABLE
+                                return true
+                            } else return false;
+                        }
                     } else return false;
                 } else if(invalidIdArray.length > 0){
                     Log.error(typeof invalidIdArray)
@@ -1101,9 +1170,19 @@ export default class InsightFacade implements IInsightFacade {
                             return true;
                         }else
                     return false;
-                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) &&
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) && (this.occurrences(validProjectKey[0], "_", true)) == 1 &&
                     (validProjectKey[0].endsWith("_avg") || validProjectKey[0].endsWith("_pass") ||
                     validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit"))){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    return invalidIdArray;
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")&& validProjectKey[0].includes("_"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1119,7 +1198,7 @@ export default class InsightFacade implements IInsightFacade {
             } else if (comparisonKey[0] == "IS"){ //SComparator
                 validProjectKey = Object.keys(comparisonValue);
                 sComparisonString = comparisonValue[validProjectKey[0]];
-                if(validProjectKey.length == 1  && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
+                if(validProjectKey.length == 1  && (this.occurrences(validProjectKey[0], "_", true)) == 1 && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
                     if(isString(sComparisonString)||(sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                         isString(sComparisonString))){
                         return true;
@@ -1127,6 +1206,16 @@ export default class InsightFacade implements IInsightFacade {
                 } else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) &&
                     (validProjectKey[0].endsWith("_dept") || validProjectKey[0].endsWith("_id") ||
                     validProjectKey[0].endsWith("_instructor") || validProjectKey[0].endsWith("_title")|| validProjectKey[0].endsWith("_uuid"))){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    return invalidIdArray;
+                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses") && validProjectKey[0].includes("_"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1157,6 +1246,26 @@ export default class InsightFacade implements IInsightFacade {
             } else return false
 
 
+    }
+
+    occurrences(string:string, subString:string, allowOverlapping:boolean) {
+
+        string += "";
+        subString += "";
+        if (subString.length <= 0) return (string.length + 1);
+
+        var n = 0,
+            pos = 0,
+            step = allowOverlapping ? 1 : subString.length;
+
+        while (true) {
+            pos = string.indexOf(subString, pos);
+            if (pos >= 0) {
+                ++n;
+                pos += step;
+            } else break;
+        }
+        return n;
     }
 
 }

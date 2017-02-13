@@ -47,8 +47,8 @@ export interface SCompare{
    }
 
 export interface ColumnsQuery{
-    COLUMNS:[string, string];
-    ORDER:string;
+    COLUMNS:[string];
+    ORDER?:string;
     FORM:"TABLE";
 }
 
@@ -240,4 +240,16 @@ export interface IInsightFacade {
      */
 
     mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any;
+
+    /** Function that count occurrences of a substring in a string;
+     * @param {String} string               The string
+     * @param {String} subString            The sub string to search for
+     * @param {Boolean} [allowOverlapping]  Optional. (Default:false)
+     *
+     * @author Vitim.us https://gist.github.com/victornpb/7736865
+     * @see Unit Test https://jsfiddle.net/Victornpb/5axuh96u/
+     * @see http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string/7924240#7924240
+     */
+
+    occurrences(string:string, subString:string, allowOverlapping:boolean):any;
 }
