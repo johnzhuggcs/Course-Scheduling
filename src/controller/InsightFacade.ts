@@ -415,7 +415,7 @@ export default class InsightFacade implements IInsightFacade {
                          catch(err){
                             if (err.code === 'ENOENT') {
                                 var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
-                                reject(code424InvalidQuery);
+                                return reject(code424InvalidQuery);
 
                             } else {
                                 throw err;
@@ -438,7 +438,7 @@ export default class InsightFacade implements IInsightFacade {
                         catch(err){
                             if (err.code === 'ENOENT') {
                                 var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
-                                reject(code424InvalidQuery);
+                                return (code424InvalidQuery);
 
                             } else {
                                 throw err;
@@ -464,7 +464,7 @@ export default class InsightFacade implements IInsightFacade {
                         catch(err){
                             if (err.code === 'ENOENT') {
                                 var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":"courses"}};
-                                reject(code424InvalidQuery);
+                                return reject(code424InvalidQuery);
 
                             } else {
                                 throw err;
@@ -537,7 +537,7 @@ export default class InsightFacade implements IInsightFacade {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
-                                                        reject(code400InvalidQuery);
+                                                        return reject(code400InvalidQuery);
                                                     } else {
                                                         atomicReturnInfo = {[translatedKey]:stringUuid}
 
@@ -553,7 +553,7 @@ export default class InsightFacade implements IInsightFacade {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
-                                                        reject(code400InvalidQuery);
+                                                        return reject(code400InvalidQuery);
                                                     } else {
 
 
@@ -573,6 +573,7 @@ export default class InsightFacade implements IInsightFacade {
                                             //returnInfo = {}
                                             for (let x in columns) {
                                                 singleColumnKey = columns[x].toString()
+
 
                                                 //translatedKey = newThis.vocabValidKey(singleColumnKey);
                                                 /**if(translatedKey == false){
@@ -595,7 +596,7 @@ export default class InsightFacade implements IInsightFacade {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
-                                                        reject(code400InvalidQuery);
+                                                        return reject(code400InvalidQuery);
                                                     } else {
 
                                                         returnInfo = returnInfo
@@ -629,7 +630,7 @@ export default class InsightFacade implements IInsightFacade {
                                         code: 400,
                                         body: {"error": "malformed dataset with empty result in array"}
                                     };
-                                    reject(code400InvalidQuery)
+                                    return reject(code400InvalidQuery)
                                 }
 
                                 // TODO: then get the WHERE to decide which ones to keep
@@ -642,7 +643,7 @@ export default class InsightFacade implements IInsightFacade {
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
                         if (columns.includes(order)) {
-                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit")) {
+                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")) {
 
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     return a[order] - b[order];
@@ -684,7 +685,7 @@ export default class InsightFacade implements IInsightFacade {
                                 code: 400,
                                 body: {"error": "order not in column"}
                             };
-                            reject(code400InvalidQuery);
+                            return reject(code400InvalidQuery);
                         }
                         //console.timeEnd("sort through result")
                     }
@@ -694,7 +695,7 @@ export default class InsightFacade implements IInsightFacade {
                         lmaoWeDone = {render: table, result: finalReturn}
 
                         var code200Done: InsightResponse = {code: 200, body: lmaoWeDone}
-                        resolve(code200Done);
+                        return resolve(code200Done);
 
 
 
@@ -702,7 +703,7 @@ export default class InsightFacade implements IInsightFacade {
 
                 } else{
                     var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"empty dataset"}};
-                    reject(code400InvalidQuery);
+                    return reject(code400InvalidQuery);
                 }
 
 
@@ -710,12 +711,12 @@ export default class InsightFacade implements IInsightFacade {
 
             } else if(queryCheck instanceof Array){
                 var code424InvalidQuery:InsightResponse = {code:424, body:{'missing':queryCheck}};
-                reject(code424InvalidQuery);
+                return reject(code424InvalidQuery);
 
             }
                 else{
                 var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"invalid query"}};
-                reject(code400InvalidQuery);
+                return reject(code400InvalidQuery);
             }
         });
 
@@ -734,7 +735,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
             if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){
-                this.getFilterArray(innerResult);
+                innerResult = this.getFilterArray(innerResult);
                 return innerResult;
             } else
                 return innerResult;
@@ -788,6 +789,8 @@ export default class InsightFacade implements IInsightFacade {
             return "courses_audit"
         } else if(databaseKey == "id"){
             return "courses_uuid"
+        } else if(databaseKey == "Year"){
+            return "courses_year"
         } else return false;
     }
 
@@ -1057,12 +1060,13 @@ export default class InsightFacade implements IInsightFacade {
                                 || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                                 || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
                                 || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
-                                || columnsValidKeyArray[x] == "courses_uuid")){ //checks for valid keys
+                                || columnsValidKeyArray[x] == "courses_uuid" || columnsValidKeyArray[x] == "courses_year")){ //checks for valid keys
                                 Where = keyArray[0] //dummy line of code so further check would be done outside of for-loop
                             } else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses")) && (this.occurrences(columnsValidKeyArray[x], "_", true)) == 1&&
                                 (columnsValidKeyArray[x].endsWith("_dept") || columnsValidKeyArray[x].endsWith("_id") || columnsValidKeyArray[x].endsWith("_avg") ||
                                 columnsValidKeyArray[x].endsWith("_instructor") || columnsValidKeyArray[x].endsWith("_title") || columnsValidKeyArray[x].endsWith("_pass") ||
-                                columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid"))){
+                                columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid")
+                                || columnsValidKeyArray[x].endsWith("_year"))){
 
                                 invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -1073,7 +1077,7 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
 
-                            }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].startsWith("courses") && columnsValidKeyArray[x].includes("_"))){
+                            }else if(typeof columnsValidKeyArray[x] == "string" && (!(columnsValidKeyArray[x].startsWith("courses") && !(columnsValidKeyArray[x].startsWith("rooms"))) && columnsValidKeyArray[x].includes("_"))){
 
                                 invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -1093,7 +1097,7 @@ export default class InsightFacade implements IInsightFacade {
                                     || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
                                     || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
                                     || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                    || orderValidKey == "courses_uuid") { //checks for valid key
+                                    || orderValidKey == "courses_uuid" || orderValidKey == "courses_year") { //checks for valid key
                                     Table = optionsValue[columnsEtcKey[2]];
                                     if (Table == "TABLE") { //if value of FORM is TABLE
                                         return true
@@ -1101,7 +1105,7 @@ export default class InsightFacade implements IInsightFacade {
                                 } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
                                     (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
                                     orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                                    orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid"))) {
+                                    orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year"))) {
 
                                     invalidIdLists = orderValidKey.split("_");
 
@@ -1111,7 +1115,7 @@ export default class InsightFacade implements IInsightFacade {
                                         invalidIdArray.push(invalidIdLists[0]);
                                     }
                                     return invalidIdArray;
-                                } else if (typeof orderValidKey == "string" && !(orderValidKey.startsWith("courses") && orderValidKey.includes("_"))) {
+                                } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses") && !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_"))) {
 
                                     invalidIdLists = orderValidKey.split("_");
 
@@ -1155,14 +1159,14 @@ export default class InsightFacade implements IInsightFacade {
                 validProjectKey = Object.keys(comparisonValue);
                 mComparisonNumber = comparisonValue[validProjectKey[0]];
                 if(validProjectKey.length == 1 && (validProjectKey[0] == "courses_avg" || validProjectKey[0] == "courses_pass" ||
-                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit")){ //make sure only a valid key exists
+                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit" || validProjectKey[0] == "courses_year")){ //make sure only a valid key exists
                         if (isNumber(mComparisonNumber)){ //makes sure the valid keys are mapped to a number
                             return true;
                         }else
                     return false;
                 }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) && (this.occurrences(validProjectKey[0], "_", true)) == 1 &&
                     (validProjectKey[0].endsWith("_avg") || validProjectKey[0].endsWith("_pass") ||
-                    validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit"))){
+                    validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit") || validProjectKey[0].endsWith("_year"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
