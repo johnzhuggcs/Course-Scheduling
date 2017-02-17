@@ -142,13 +142,13 @@ export interface IInsightFacade {
      * needed as LOGICCOMPARISON and NEGATION recursively contains FILTER
      * @param filter
      */
-    hasFilter(filter:FilterQuery, invalidIdArray:string[]):boolean|string[];
+    hasFilter(filter:FilterQuery, invalidIdArray:string[], isOneDataset:any):any;
 
     /** Used if encounters array of filter, iterates and calls hasFilter() for each element
      *
      * @param filterArray, invalidIdArray
      */
-    hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[]):boolean|string[];
+    hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[], isOneDataset:any):boolean|string[];
 
     /** Used for iterating through logic comparisons
      *
