@@ -1239,7 +1239,7 @@ export default class InsightFacade implements IInsightFacade {
                             } else return false
                         } else { Table = optionsValue[columnsEtcKey[1]];
                             if (Table == "TABLE") { //if value of FORM is TABLE
-                                return true
+                                return isOneDataset;
                             } else return false;
                         }
                     } else return false;

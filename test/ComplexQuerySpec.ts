@@ -7,7 +7,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("QueryTestSpec", function () {
+describe("ComplexQuerySpec", function () {
 
     var insightFacade:InsightFacade = null;
     var insight:InsightFacade = null;
