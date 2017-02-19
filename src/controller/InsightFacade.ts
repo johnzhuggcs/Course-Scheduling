@@ -7,6 +7,7 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {isUndefined} from "util";
+import {read} from "fs";
 
 //import {objectify} from "tslint/lib/utils";
 
@@ -18,9 +19,12 @@ export default class InsightFacade implements IInsightFacade {
     }
 
 
-    addDataset(id: string, content: string): Promise<InsightResponse> {
+    //set 'that' to higher level because the scope is limited within the promise if it's within the promise
 
+    addDataset(id: string, content: string): Promise<InsightResponse> {
+        let that = this;
         return new Promise(function (fulfill, reject) {
+
 
             var JSZip = require('jszip');
             var fs = require('fs');
@@ -35,6 +39,8 @@ export default class InsightFacade implements IInsightFacade {
             var arrayCounter = 0;
             var data = '';
 
+            //TODO: For D2
+            var parse5 = require('parse5');
 
             //returns data if it's empty
             //setTimeout(function() {
@@ -55,6 +61,7 @@ export default class InsightFacade implements IInsightFacade {
                     Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
                         var parsedJSON = '';
                         var isTry = true;
+
                         for (let i in arrayofUnparsedFileDataAll) {
                             //Log.info(String(arrayofUnparsedFileDataAll[i]));
                             //setTimeout(function() {
@@ -103,17 +110,279 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                                 //},100000);
                             } else {
-                                Log.info(String(String(arrayofUnparsedFileDataAll[i]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")));
-                                var div = document.createElement('div');
-                                div.innerHTML = String(arrayofUnparsedFileDataAll[i]);
-                                var htmlData = div.childNodes;
-                                //Log.info(typeof htmlData);
 
-                                //TODO: parsedJSON will return {result:[...]}
-                                parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";
+                                var listOfValidShortNames: string[] = [];
+                                var listOfValidFullNames: string[] = [];
+                                var listOfValidAddresses: string[] = [];
+                                var listOfValidUrls: string[] = [];
 
-                            }
-                        }
+                                    that.validStringListOfBuildings(that, listOfValidShortNames, listOfValidFullNames, listOfValidAddresses, listOfValidUrls);
+
+                                        var htmlData = parse5.parse(String(arrayofUnparsedFileDataAll[i]));
+                                        var rooms_fullname = "";
+                                        var rooms_shortname = "";
+                                        var rooms_number = ""; //it can be a string (e.g., A101)
+                                        var rooms_name = "";
+                                        var rooms_address = "";
+                                        var rooms_lat = "";
+                                        var rooms_lon = "";
+                                        var rooms_seats = 0;
+                                        var rooms_type = "";
+                                        var rooms_furniture = "";
+                                        var rooms_href = "";
+
+                                        var readyToBeZoomedInHtmlData;
+
+                                        readyToBeZoomedInHtmlData = htmlData;
+
+                                        readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'html');
+                                        readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'body');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'full-width-container');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'main');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'content');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'block-system-main');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-buildings-and-classrooms');
+
+                                try {
+                                        var htmlDataFromTable = readyToBeZoomedInHtmlData;
+
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-content');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'views-row');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'buildings-wrapper');
+                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'building-info');
+
+
+                                        var htmlDataForFullname = readyToBeZoomedInHtmlData;
+                                        htmlDataForFullname = that.setZoomToTagName(htmlDataForFullname, 'h2');
+                                        htmlDataForFullname = that.setZoomToClassOrId(htmlDataForFullname, 'field-content');
+
+                                        //rooms_fullname = htmlDataForFullname.childNodes[0].value;
+                                    if (!isUndefined(htmlDataForFullname.childNodes)) {
+                                        if (listOfValidFullNames.includes(htmlDataForFullname.childNodes[0].value)) {
+                                            rooms_fullname = htmlDataForFullname.childNodes[0].value;
+                                        }
+                                         }
+                                } catch (e) {
+                                    Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
+                                } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
+
+                                    if (listOfValidFullNames.includes(rooms_fullname)) {
+                                        Log.info(rooms_fullname);
+
+                                        var htmlDataForAddress = readyToBeZoomedInHtmlData;
+                                        htmlDataForAddress = that.setZoomToClassOrId(htmlDataForAddress, 'building-field');
+                                        htmlDataForAddress = that.setZoomToClassOrId(htmlDataForAddress, 'field-content');
+                                        rooms_address = htmlDataForAddress.childNodes[0].value;
+                                        Log.info(rooms_address);
+
+                                        //start to grab latlon from here:
+                                        /*var request = require('request');
+                                        var requestedString = request.get('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address,function(data:any) {
+                                            return data;
+                                        });
+                                        Log.info("requestedString" + JSON.stringify(requestedString));*/
+
+
+
+                                       //requestedString;
+
+                                        var aList:any[] = [];
+                                        var beet = "";
+                                        var newString = that.getLatLon(rooms_address).then(function(result) {
+                                            console.log(result);
+                                        });
+                                        Promise.all(aList).then(function(final) {
+                                            for (let i in final) {
+                                                var newbeet= final[i];
+                                            }
+                                            beet = JSON.stringify(newbeet);
+                                        });
+
+
+                                        Log.info('rooms_latlon:' + newString);
+                                        Log.info('rooms_latlon2:' + beet);
+
+                                       Log.info('rooms_lat:' + String(rooms_lat));
+                                        Log.info('rooms_lon:' + String(rooms_lon));
+
+
+
+                                        //Log.info("requested:" + JSON.stringify(requestedString));
+
+                                        /*var cache:any[] = [];
+                                        var hi = JSON.stringify(requestedString, function(key, value) {
+                                            if (typeof value === 'object' && value !== null) {
+                                                if (cache.indexOf(value) !== -1) {
+                                                    // Circular reference found, discard key
+                                                    return;
+                                                }
+                                                // Store value in our collection
+                                                cache.push(value);
+                                            }
+                                            return value;
+                                        });
+                                        cache = null; // Enable garbage collection
+
+                                        Log.info("requestedString2" + hi);
+                                        try {
+                                            Log.info("requestedString" + JSON.stringify(requestedString));
+                                        } catch (e) {
+                                            Log.info("problem is:" + e)
+                                        }*/
+
+                                        /*var rp = require('request-promise-native');
+
+                                        try {
+                                            var arrayOfAddr: any[] = [];
+                                            var arrayOfHtml: any[] = [];
+                                            var p = new Promise((fulfill, reject) => {
+
+                                                var htmlStr = "gg";
+                                                Log.info("does this even run?");
+                                                var html = 'http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address;
+                                                var options = {
+                                                    uri: html,
+                                                    json: true // Automatically parses the JSON string in the response
+                                                };
+
+
+                                                rp(html)
+                                                    .then(function (htmlString: any) {
+                                                        Log.info("does this even run2?");
+                                                        Log.info("requestedString" + JSON.stringify(htmlString));
+                                                        htmlStr = JSON.stringify(htmlString);
+
+                                                    })
+                                                    .catch(function (err: Error) {
+                                                    Log.info("any error?" + err);
+                                                    reject(err);
+                                                });
+                                                fulfill(htmlStr);
+                                            });
+                                        } catch (e) {
+                                            Log.info("wtf" + e);
+                                        }
+
+                                        arrayOfAddr.push(p);
+
+                                        Promise.all(arrayOfAddr).then(value => {
+                                            for (let i in value) {
+                                                Log.info("requestedString1" + value[i]);
+                                            }
+                                        });*/
+
+                                        /*var latLonData = parse5.parse('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address);
+                                        Log.info ("data is: " + JSON.stringify(latLonData));*/
+
+
+
+
+
+                                        try {
+                                            Log.info("list3:" + listOfValidAddresses.toString());
+                                        } catch (e) {
+                                            Log.info("initial:" + e);
+                                        }
+
+                                        if (listOfValidAddresses.includes(rooms_address)) {
+
+                                            rooms_shortname = listOfValidShortNames[listOfValidFullNames.indexOf(rooms_fullname)].replace(/^\s+|\s+$/g, "");
+                                            rooms_href = "http://students.ubc.ca" + listOfValidUrls[listOfValidFullNames.indexOf(rooms_fullname)].replace(".", "");
+
+                                            //TODO: parsedJSON will return {result:[...]}
+                                            htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-footer');
+                                            htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-buildings-and-classrooms');
+//TODO: Uncomment this
+                                            if (!isUndefined(that.setZoomToClassOrId(htmlDataFromTable, 'view-content'))) {
+                                                htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-content');
+                                                htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'views-table');
+                                                htmlDataFromTable = that.setZoomToTagName(htmlDataFromTable, 'tbody');
+                                                //Log.info(htmlDataFromTable);
+
+                                                for (let i in htmlDataFromTable.childNodes) {
+                                                    //Log.info("a");
+                                                    try {
+                                                        if (!isUndefined(htmlDataFromTable.childNodes[i].attrs)
+                                                            || htmlDataFromTable.childNodes[i].nodeName == "#text") {
+
+
+                                                            for (let a in htmlDataFromTable.childNodes[i].attrs) {
+                                                                if (htmlDataFromTable.childNodes[i].attrs[a].value.includes("odd")
+                                                                    || htmlDataFromTable.childNodes[i].attrs[a].value.includes("even")) {
+                                                                    var rowHtml = htmlDataFromTable.childNodes[i].childNodes;
+
+                                                                    var roomNumInitial = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-number");
+                                                                    var roomNumberNode = that.scanRowForInfoWithoutChildNodes(roomNumInitial, "Room Details");
+                                                                    rooms_number = roomNumberNode[0].value.replace(/^\s+|\s+$/g, "");
+                                                                    Log.info("rooms_number:" + rooms_number);
+
+                                                                    var roomCapacityNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-capacity");
+                                                                    rooms_seats = roomCapacityNode[0].value.replace(/^\s+|\s+$/g, "");
+                                                                    Log.info("rooms_seats:" + rooms_seats);
+
+                                                                    var roomsFurnitureNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-furniture");
+                                                                    rooms_furniture = roomsFurnitureNode[0].value.replace(/^\s+|\s+$/g, "");
+                                                                    Log.info("rooms_furniture:" + rooms_furniture);
+
+                                                                    var roomsTypeNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-type");
+                                                                    rooms_type = roomsTypeNode[0].value.replace(/^\s+|\s+$/g, "");
+                                                                    Log.info("rooms_type:" + rooms_type);
+
+                                                                    var roomsHrefInitial = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-nothing");
+                                                                    var roomHrefNode = that.getInnerAttrInsteadOfChildNode(roomsHrefInitial, "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/");
+                                                                    //hardcode here:
+                                                                    rooms_href = roomHrefNode[0].value.replace(/^\s+|\s+$/g, "");
+                                                                    Log.info("rooms_href:" + rooms_href);
+                                                                    //var legitRoomNumber = that.setZoomToClassOrId(roomNumInitial, 'Room Details');
+                                                                    //tableRowCounter++;
+                                                                    //Log.info(String(tableRowCounter));
+                                                                    rooms_name = rooms_shortname + "_" + rooms_number;
+
+                                                                    parsedJSON += '{\"result\":[' +
+                                                                        '{\"rooms_fullname\":\"' + rooms_fullname + '\",' +
+                                                                        '\"rooms_shortname\":\"' + rooms_shortname + '\",' +
+                                                                        '\"rooms_number\":\"' + rooms_number + '\",' +
+                                                                        '\"rooms_name\":\"' + rooms_name + '\",' +
+                                                                        '\"rooms_address\":\"' + rooms_address + '\",' +
+                                                                        '\"rooms_lat\":' + rooms_lat + ',' +
+                                                                        '\"rooms_lon\":' + rooms_lon + ',' +
+                                                                        '\"rooms_seats\":' + rooms_seats + ',' +
+                                                                        '\"rooms_type\":\"' + rooms_type + '\",' +
+                                                                        '\"rooms_furniture\":\"' + rooms_furniture + '\",' +
+                                                                        '\"rooms_href\":\"' + rooms_href + '\"}' +
+                                                                        '],\"rank\":0}' + '\r\n';
+                                                                }
+                                                            }
+                                                        }
+                                                    } catch (e) {
+                                                        Log.info(e);
+                                                    }
+
+                                                }
+
+                                            } else {
+
+                                                rooms_name = rooms_shortname;
+
+                                                parsedJSON += '{\"result\":[' +
+                                                    '{\"rooms_fullname\":\"' + rooms_fullname + '\",' +
+                                                    '\"rooms_shortname\":\"' + rooms_shortname + '\",' +
+                                                    '\"rooms_name\":\"' + rooms_name + '\",' +
+                                                    '\"rooms_address\":\"' + rooms_address + '\",' +
+                                                    '\"rooms_lat\":' + rooms_lat + ',' +
+                                                    '\"rooms_lon\":' + rooms_lon + ',' +
+                                                    '\"rooms_href\":\"' + rooms_href + '\"}' +
+                                                    '],\"rank\":0}' + '\r\n';
+                                            }
+
+                                        }
+                                    }
+                                }
+
+
+                            //Log.info(parsedJSON);
+                       }
+                        //Log.info(parsedJSON);
                         return parsedJSON;
                     }).then(function(parsed) {
                         if (noOfFiles == 0) {
@@ -162,6 +431,183 @@ export default class InsightFacade implements IInsightFacade {
             });
         });
     }
+
+    setZoomToTagName(dataToZoom: any, destination:string): any {
+        for (let ic in dataToZoom.childNodes) {
+            if (!isUndefined(dataToZoom.childNodes[ic].tagName)) {
+                if (dataToZoom.childNodes[ic].tagName == destination) {
+                    return dataToZoom.childNodes[ic];
+                }
+            }
+        }
+    }
+
+    //TODO: Get class from attrs array if (attrs[n].name == class), value =
+    setZoomToClassOrId(dataToZoom: any, htmlClassOrId:string): any {
+        for (let ic in dataToZoom.childNodes) {
+            if (!isUndefined(dataToZoom.childNodes[ic].attrs) && dataToZoom.childNodes[ic].attrs instanceof Array) {
+                for (let a in dataToZoom.childNodes[ic].attrs) {
+                    if (dataToZoom.childNodes[ic].attrs[a].value.includes(htmlClassOrId)) {
+                        return dataToZoom.childNodes[ic];
+                    }
+                }
+            }
+        }
+    }
+    scanRowForInfoWithoutChildNodes(row:any,valueToGet:string):any {
+        for (let ic in row) {
+            if (!isUndefined(row[ic].attrs) && row[ic].attrs instanceof Array) {
+                for (let a in row[ic].attrs) {
+                    if (row[ic].attrs[a].value.includes(valueToGet)) {
+                        return row[ic].childNodes;
+                    }
+                }
+
+            }
+        }
+    }
+
+    getInnerAttrInsteadOfChildNode(row:any,valueToGet:string):any {
+        for (let ic in row) {
+            if (!isUndefined(row[ic].attrs) && row[ic].attrs instanceof Array) {
+                for (let a in row[ic].attrs) {
+                    if (row[ic].attrs[a].value.includes(valueToGet)) {
+                        return row[ic].attrs;
+                    }
+                }
+
+            }
+        }
+    }
+
+    getLatLon(rooms_address:string):Promise<any> {
+        return new Promise(function(fulfill,reject) {
+            var latlonString = "";
+            var http = require('http');
+            try {
+                var parse1 = http.get('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address, (res: any) => {
+                    const statusCode = res.statusCode;
+                    const contentType = res.headers['content-type'];
+
+                    let error;
+                    if (statusCode !== 200) {
+                        error = new Error(`Request Failed.\n` +
+                            `Status Code: ${statusCode}`);
+                    } else if (!/^application\/json/.test(contentType)) {
+                        error = new Error(`Invalid content-type.\n` +
+                            `Expected application/json but received ${contentType}`);
+                    }
+                    if (error) {
+                        console.log(error.message);
+                        // consume response data to free up memory
+                        res.resume();
+                        return;
+                    }
+
+                    res.setEncoding('utf8');
+                    try {
+                        let rawData = '';
+                        try {
+                            res.on('data', (chunk: any) => rawData += chunk);
+                        } catch (e) {
+                            "Error is?" + e;
+                        }
+                        res.on('end', () => {
+                            try {
+                                let parsedData = JSON.parse(rawData);
+                                let lat = parsedData.lat;
+                                let lon = parsedData.lon;
+                                latlonString = latlonString + lat;
+                                latlonString = latlonString + lon;
+                                console.log(parsedData);
+                                console.log(lat);
+                                console.log(lon);
+                                Log.info("lat is:" + lat);
+                                Log.info("lon is:" + lon);
+                                fulfill(latlonString);
+                            } catch (e) {
+                                console.log(`problem with request: ${e.message}`);
+                            }
+                        });
+                    } catch (e) {
+                        Log.info("err is:" + e);
+                    }
+
+                }).on('error', (e: Error) => {
+                    //console.log(`Got error: ${e.message}`);
+                    Log.info("got error:" + e.message);
+
+                });
+
+                //var js = JSON.stringify(parse1);
+
+
+
+
+            } catch (err) {
+                Log.info("error is:" + err);
+            }
+        });
+    }
+
+
+    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[]): any {
+       // Log.info("it runs?");
+        var fs = require('fs');
+        var parse5 = require('parse5');
+        var htmlData = parse5.parse(fs.readFileSync('index.htm',{encoding: 'utf8'}));
+        var readyToBeZoomedInHtmlData;
+
+        readyToBeZoomedInHtmlData = htmlData;
+        readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'html');
+        readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'body');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'full-width-container');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'main');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'content');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'block-system-main');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-buildings-and-classrooms');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-content');
+        readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'views-table');
+        readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'tbody');
+
+        //Log.info("it runs2?");
+        for (let i in readyToBeZoomedInHtmlData.childNodes) {
+
+                    for (let a in readyToBeZoomedInHtmlData.childNodes[i].attrs) {
+                        if (readyToBeZoomedInHtmlData.childNodes[i].attrs[a].value.includes("odd")
+                            || readyToBeZoomedInHtmlData.childNodes[i].attrs[a].value.includes("even")) {
+                            var rowHtml = readyToBeZoomedInHtmlData.childNodes[i].childNodes;
+
+                        //    Log.info("it runs3?");
+                            var shortNameNode = isthis.scanRowForInfoWithoutChildNodes(rowHtml,"views-field-field-building-code");
+                            var shortName = shortNameNode[0].value;
+                            //try {shortName} catch(e) {Log.info("sth happened" + e);}
+                            try {shortNameList.push(shortName);} catch(e) {Log.info("it is:" + e);}
+
+                            var fullNameInitial = isthis.scanRowForInfoWithoutChildNodes(rowHtml,"views-field-title");
+                            var fullNameNode = isthis.scanRowForInfoWithoutChildNodes(fullNameInitial,"Building Details and Map");
+                            var fullName = fullNameNode[0].value;
+                            fullNameList.push(fullName);
+
+                            var addressNode = isthis.scanRowForInfoWithoutChildNodes(rowHtml,"views-field-field-building-address");
+                            var address = addressNode[0].value;
+                            addressList.push(address.replace(/^\s+|\s+$/g, ""));
+
+                            var hrefInitial = isthis.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-nothing");
+                            var hrefNode = isthis.getInnerAttrInsteadOfChildNode(hrefInitial, "./campus/discover/buildings-and-classrooms/");
+                            //hardcode here:
+                            hrefList.push(hrefNode[0].value.replace(/^\s+|\s+$/g, ""));
+
+                            //accumString = accumString + "," + shortName + "," + fullName + "," + address; //array starts from A[1]
+                        }
+                    }
+                }
+
+        }
+
+    //TODO: New function called GetPreciseData to eliminate bug due to hard-coding and varied data structure
+
+
 
     //TODO:store all the ids within the datafile instead of making a separate file to store the ids
     removeDataset(id: string): Promise<InsightResponse> {
