@@ -53,7 +53,7 @@ describe("ComplexQuerySpec", function () {
     });
 
     it("200 testing out Firetruck", function () {
-        var queryTest:QueryRequest = {
+        var queryTest:any = {
             "WHERE":{
                 "AND":[
                     {
@@ -155,7 +155,7 @@ describe("ComplexQuerySpec", function () {
 
     });
 
-    it("200 testing out Excalibur", function () {
+    it.only("200 testing out Excalibur", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
 
@@ -173,7 +173,7 @@ describe("ComplexQuerySpec", function () {
                     "courses_pass",
                     "courses_avg"
                 ],
-                "ORDER":"courses_id",
+                "ORDER":"courses_uuid",
                 "FORM":"TABLE"
             }
         }

@@ -645,13 +645,17 @@ export default class InsightFacade implements IInsightFacade {
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
                         if (columns.includes(order)) {
-                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")) {
+                            /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
+                             validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
+                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
+                            || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     return a[order] - b[order];
                                 });
 
-                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
+                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
+                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address")) {
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                     var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1175,7 +1179,7 @@ export default class InsightFacade implements IInsightFacade {
                                     || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
                                     || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
                                     || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture") { //checks for valid key
-                                    if(yesOrNo == "true" && (dataSet[0] == "roomss" || dataSet.length == 0)) {
+                                    if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
                                         Table = optionsValue[columnsEtcKey[2]];
                                         if (Table == "TABLE") { //if value of FORM is TABLE
                                             isOneDataset = {"true":["rooms"]}
