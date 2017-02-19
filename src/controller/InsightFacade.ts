@@ -163,17 +163,18 @@ export default class InsightFacade implements IInsightFacade {
                                         }
                                          }
                                 } catch (e) {
-                                    Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
+                                    e
+                                    //Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
                                 } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
 
                                     if (listOfValidFullNames.includes(rooms_fullname)) {
-                                        Log.info(rooms_fullname);
+                                        //Log.info(rooms_fullname);
 
                                         var htmlDataForAddress = readyToBeZoomedInHtmlData;
                                         htmlDataForAddress = that.setZoomToClassOrId(htmlDataForAddress, 'building-field');
                                         htmlDataForAddress = that.setZoomToClassOrId(htmlDataForAddress, 'field-content');
                                         rooms_address = htmlDataForAddress.childNodes[0].value;
-                                        Log.info(rooms_address);
+                                        //Log.info(rooms_address);
 
                                         //start to grab latlon from here:
                                         /*var request = require('request');
@@ -189,7 +190,9 @@ export default class InsightFacade implements IInsightFacade {
                                         var aList:any[] = [];
                                         var beet = "";
                                         var newString = that.getLatLon(rooms_address).then(function(result) {
+                                            /*TODO: uncomment this
                                             console.log(result);
+                                             */
                                         });
                                         Promise.all(aList).then(function(final) {
                                             for (let i in final) {
@@ -199,11 +202,11 @@ export default class InsightFacade implements IInsightFacade {
                                         });
 
 
-                                        Log.info('rooms_latlon:' + newString);
-                                        Log.info('rooms_latlon2:' + beet);
+                                        //Log.info('rooms_latlon:' + newString);
+                                        //Log.info('rooms_latlon2:' + beet);
 
-                                       Log.info('rooms_lat:' + String(rooms_lat));
-                                        Log.info('rooms_lon:' + String(rooms_lon));
+                                       //Log.info('rooms_lat:' + String(rooms_lat));
+                                        //Log.info('rooms_lon:' + String(rooms_lon));
 
 
 
@@ -278,12 +281,12 @@ export default class InsightFacade implements IInsightFacade {
 
 
 
-                                        try {
+                                        /*try {
                                             Log.info("list3:" + listOfValidAddresses.toString());
                                         } catch (e) {
                                             Log.info("initial:" + e);
                                         }
-
+*/
                                         if (listOfValidAddresses.includes(rooms_address)) {
 
                                             rooms_shortname = listOfValidShortNames[listOfValidFullNames.indexOf(rooms_fullname)].replace(/^\s+|\s+$/g, "");
@@ -314,25 +317,25 @@ export default class InsightFacade implements IInsightFacade {
                                                                     var roomNumInitial = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-number");
                                                                     var roomNumberNode = that.scanRowForInfoWithoutChildNodes(roomNumInitial, "Room Details");
                                                                     rooms_number = roomNumberNode[0].value.replace(/^\s+|\s+$/g, "");
-                                                                    Log.info("rooms_number:" + rooms_number);
+                                                                    //Log.info("rooms_number:" + rooms_number);
 
                                                                     var roomCapacityNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-capacity");
                                                                     rooms_seats = roomCapacityNode[0].value.replace(/^\s+|\s+$/g, "");
-                                                                    Log.info("rooms_seats:" + rooms_seats);
+                                                                    //Log.info("rooms_seats:" + rooms_seats);
 
                                                                     var roomsFurnitureNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-furniture");
                                                                     rooms_furniture = roomsFurnitureNode[0].value.replace(/^\s+|\s+$/g, "");
-                                                                    Log.info("rooms_furniture:" + rooms_furniture);
+                                                                    //Log.info("rooms_furniture:" + rooms_furniture);
 
                                                                     var roomsTypeNode = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-field-room-type");
                                                                     rooms_type = roomsTypeNode[0].value.replace(/^\s+|\s+$/g, "");
-                                                                    Log.info("rooms_type:" + rooms_type);
+                                                                    //Log.info("rooms_type:" + rooms_type);
 
                                                                     var roomsHrefInitial = that.scanRowForInfoWithoutChildNodes(rowHtml, "views-field-nothing");
                                                                     var roomHrefNode = that.getInnerAttrInsteadOfChildNode(roomsHrefInitial, "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/");
                                                                     //hardcode here:
                                                                     rooms_href = roomHrefNode[0].value.replace(/^\s+|\s+$/g, "");
-                                                                    Log.info("rooms_href:" + rooms_href);
+                                                                    //Log.info("rooms_href:" + rooms_href);
                                                                     //var legitRoomNumber = that.setZoomToClassOrId(roomNumInitial, 'Room Details');
                                                                     //tableRowCounter++;
                                                                     //Log.info(String(tableRowCounter));
@@ -355,7 +358,8 @@ export default class InsightFacade implements IInsightFacade {
                                                             }
                                                         }
                                                     } catch (e) {
-                                                        Log.info(e);
+                                                        e
+                                                       // Log.info(e);
                                                     }
 
                                                 }
@@ -519,23 +523,26 @@ export default class InsightFacade implements IInsightFacade {
                                 let lon = parsedData.lon;
                                 latlonString = latlonString + lat;
                                 latlonString = latlonString + lon;
+                                /*TODO: Uncomment these:
                                 console.log(parsedData);
                                 console.log(lat);
                                 console.log(lon);
-                                Log.info("lat is:" + lat);
-                                Log.info("lon is:" + lon);
+                                */
+                                //Log.info("lat is:" + lat);
+                               // Log.info("lon is:" + lon);
                                 fulfill(latlonString);
                             } catch (e) {
                                 console.log(`problem with request: ${e.message}`);
                             }
                         });
                     } catch (e) {
-                        Log.info("err is:" + e);
+                       // Log.info("err is:" + e);
                     }
 
                 }).on('error', (e: Error) => {
                     //console.log(`Got error: ${e.message}`);
-                    Log.info("got error:" + e.message);
+                    console.log(`Got error: ${e.message}`);
+                    //Log.info("got error:" + e.message);
 
                 });
 
