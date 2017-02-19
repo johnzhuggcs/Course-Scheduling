@@ -72,9 +72,9 @@ describe("QueryTestSpec", function () {
             }
         }
         var keyTest = Object.keys(queryTest);
-
+        var result = {"true":["courses"]}
         sanityCheck(queryTest);
-        expect(insightFacade.isValid(queryTest)).to.equal(true);
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 
 
     });
@@ -86,7 +86,7 @@ describe("QueryTestSpec", function () {
         var keyTest = Object.keys(queryTest);
 
         
-        expect(insightFacade.mergeDeDuplicate(queryTest, queryTest2)).to.equal(queryTest);
+        expect(insightFacade.mergeDeDuplicate(queryTest, queryTest2)).to.deep.equal(queryTest);
 
 
     });
@@ -128,8 +128,8 @@ describe("QueryTestSpec", function () {
             }
         }
         sanityCheck(queryTest);
-        var result = ["course"];
-        expect(insightFacade.isValid(queryTest)).to.equal(true);
+        var result = {"true":["courses"]};
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 
 
     });
@@ -170,7 +170,7 @@ describe("QueryTestSpec", function () {
             }
         }
         sanityCheck(queryTest);
-        var result = ["course"];
+        var result = {"false":["course"]};
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 
 
@@ -245,7 +245,8 @@ describe("QueryTestSpec", function () {
 
         }
 
-        expect(insightFacade.hasFilter(queryTest, testInvalidKeys)).to.equal(false);
+        var isOneDataSet ={"true":["courses"]}
+        expect(insightFacade.hasFilter(queryTest, testInvalidKeys, isOneDataSet)).to.equal(false);
 
 
     });
@@ -352,7 +353,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(424);
             expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(424);
             expect(err.body).to.deep.equal({"missing":["fake", "sham"]})
         })
@@ -411,7 +412,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(424);
             expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -471,7 +472,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(400);
             expect(value.body).to.deep.equal({"error":"invalid query"})
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -555,7 +556,7 @@ describe("QueryTestSpec", function () {
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
             Log.test('Error: ' + err);
-            //return JSON.parse(err);
+
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
 
@@ -947,7 +948,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1073,6 +1074,9 @@ describe("QueryTestSpec", function () {
 
     });
 
+
+
+
     it("200 testing out * IS", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
@@ -1123,7 +1127,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1184,7 +1188,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1232,7 +1236,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1286,7 +1290,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1340,7 +1344,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1424,13 +1428,17 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
 
 
     });
+
+
+
+
 
     it("200 testing out partial name return all prof", function () {
         var queryTest:QueryRequest = {
@@ -1508,7 +1516,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1635,7 +1643,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1762,7 +1770,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1799,7 +1807,77 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out Firetruck", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND":[
+                    {
+                        "IS":{
+                            "courses_dept":"*i*"
+                        }
+                    },
+                    {
+                        "IS":{
+                            "courses_id":"69*"
+                        }
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                ],
+                "FORM":"TABLE"
+            }
+        }
+
+
+        var emptyArray:any[] = [];
+        var result = { render: 'TABLE',
+            result:[{"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"hist", "courses_id":"699"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"},
+                    {"courses_dept":"mine",	"courses_id":"698"}]
+
+        }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1841,7 +1919,49 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
+    it("200 testing out Firefly Chem", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND": [{
+                    "IS": {
+                        "courses_instructor": "*ee*"
+                    }
+                },
+                    {
+                        "IS":{"courses_dept":"chem"}
+                    }
+                ]
+
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_instructor"
+                ],
+                "ORDER":"courses_instructor",
+                "FORM":"TABLE"
+            }
+        }
+
+
+        var emptyArray:any[] = [];
+        var result = { render: 'TABLE',
+            result:[{"courses_instructor":"wheeler, michael"},
+                {"courses_instructor":"wheeler, michael"}]
+        }
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -1974,7 +2094,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -2034,7 +2154,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -2093,7 +2213,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"no data matches query"})
         })
@@ -2158,7 +2278,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -2212,7 +2332,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
@@ -2266,7 +2386,7 @@ describe("QueryTestSpec", function () {
             expect(value.code).to.equal(200);
             expect(value.body).to.deep.equal(result);
         }).catch(function (err) {
-            //Log.test('Error: ' + err);
+            Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"invalid query"})
         })
