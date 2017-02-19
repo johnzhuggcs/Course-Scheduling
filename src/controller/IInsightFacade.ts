@@ -108,6 +108,19 @@ export interface IInsightFacade {
      * was not previously added.
      *
      */
+
+    setZoomToTagName(dataToZoom: any, destination: string): any;
+
+    setZoomToClassOrId(dataToZoom: any, destination:string): any;
+
+    scanRowForInfoWithoutChildNodes(row:any,valueToGet:string):any;
+
+    getInnerAttrInsteadOfChildNode(row:any,valueToGet:string):any;
+
+    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[]): any;
+
+    getLatLon(rooms_address:string):Promise<any>;
+
     removeDataset(id: string): Promise<InsightResponse>;
 
     /**
