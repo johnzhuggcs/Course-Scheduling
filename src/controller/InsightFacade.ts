@@ -24,7 +24,7 @@ export default class InsightFacade implements IInsightFacade {
     addDataset(id: string, content: string): Promise<InsightResponse> {
         let that = this;
         return new Promise(function (fulfill, reject) {
-
+            //var listOfParsedJson = "".split("\n");
 
             var JSZip = require('jszip');
             var fs = require('fs');
@@ -44,6 +44,15 @@ export default class InsightFacade implements IInsightFacade {
 
             //returns data if it's empty
             //setTimeout(function() {
+
+            // for parsing latlon *hardest part*
+
+
+            var arrayOfAddr : string[] = [];
+            var arrayOfParsedJson: string[] = [];
+            //var newParsedJ = "";
+            var isHTML = false;
+
 
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
@@ -111,6 +120,7 @@ export default class InsightFacade implements IInsightFacade {
                                 //},100000);
                             } else {
 
+                                isHTML = true;
                                 var listOfValidShortNames: string[] = [];
                                 var listOfValidFullNames: string[] = [];
                                 var listOfValidAddresses: string[] = [];
@@ -163,7 +173,7 @@ export default class InsightFacade implements IInsightFacade {
                                         }
                                          }
                                 } catch (e) {
-                                    e
+                                    e;
                                     //Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
                                 } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
 
@@ -175,118 +185,9 @@ export default class InsightFacade implements IInsightFacade {
                                         htmlDataForAddress = that.setZoomToClassOrId(htmlDataForAddress, 'field-content');
                                         rooms_address = htmlDataForAddress.childNodes[0].value;
                                         //Log.info(rooms_address);
-
-                                        //start to grab latlon from here:
-                                        /*var request = require('request');
-                                        var requestedString = request.get('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address,function(data:any) {
-                                            return data;
-                                        });
-                                        Log.info("requestedString" + JSON.stringify(requestedString));*/
+                                        arrayOfAddr.push(rooms_address);
 
 
-
-                                       //requestedString;
-
-                                        var aList:any[] = [];
-                                        var beet = "";
-                                        var newString = that.getLatLon(rooms_address).then(function(result) {
-                                            /*TODO: uncomment this
-                                            console.log(result);
-                                             */
-                                        });
-                                        Promise.all(aList).then(function(final) {
-                                            for (let i in final) {
-                                                var newbeet= final[i];
-                                            }
-                                            beet = JSON.stringify(newbeet);
-                                        });
-
-
-                                        //Log.info('rooms_latlon:' + newString);
-                                        //Log.info('rooms_latlon2:' + beet);
-
-                                       //Log.info('rooms_lat:' + String(rooms_lat));
-                                        //Log.info('rooms_lon:' + String(rooms_lon));
-
-
-
-                                        //Log.info("requested:" + JSON.stringify(requestedString));
-
-                                        /*var cache:any[] = [];
-                                        var hi = JSON.stringify(requestedString, function(key, value) {
-                                            if (typeof value === 'object' && value !== null) {
-                                                if (cache.indexOf(value) !== -1) {
-                                                    // Circular reference found, discard key
-                                                    return;
-                                                }
-                                                // Store value in our collection
-                                                cache.push(value);
-                                            }
-                                            return value;
-                                        });
-                                        cache = null; // Enable garbage collection
-
-                                        Log.info("requestedString2" + hi);
-                                        try {
-                                            Log.info("requestedString" + JSON.stringify(requestedString));
-                                        } catch (e) {
-                                            Log.info("problem is:" + e)
-                                        }*/
-
-                                        /*var rp = require('request-promise-native');
-
-                                        try {
-                                            var arrayOfAddr: any[] = [];
-                                            var arrayOfHtml: any[] = [];
-                                            var p = new Promise((fulfill, reject) => {
-
-                                                var htmlStr = "gg";
-                                                Log.info("does this even run?");
-                                                var html = 'http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address;
-                                                var options = {
-                                                    uri: html,
-                                                    json: true // Automatically parses the JSON string in the response
-                                                };
-
-
-                                                rp(html)
-                                                    .then(function (htmlString: any) {
-                                                        Log.info("does this even run2?");
-                                                        Log.info("requestedString" + JSON.stringify(htmlString));
-                                                        htmlStr = JSON.stringify(htmlString);
-
-                                                    })
-                                                    .catch(function (err: Error) {
-                                                    Log.info("any error?" + err);
-                                                    reject(err);
-                                                });
-                                                fulfill(htmlStr);
-                                            });
-                                        } catch (e) {
-                                            Log.info("wtf" + e);
-                                        }
-
-                                        arrayOfAddr.push(p);
-
-                                        Promise.all(arrayOfAddr).then(value => {
-                                            for (let i in value) {
-                                                Log.info("requestedString1" + value[i]);
-                                            }
-                                        });*/
-
-                                        /*var latLonData = parse5.parse('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address);
-                                        Log.info ("data is: " + JSON.stringify(latLonData));*/
-
-
-
-
-
-                                        /*try {
-                                            Log.info("list3:" + listOfValidAddresses.toString());
-                                        } catch (e) {
-                                            Log.info("initial:" + e);
-                                        }
-*/
                                         if (listOfValidAddresses.includes(rooms_address)) {
 
                                             rooms_shortname = listOfValidShortNames[listOfValidFullNames.indexOf(rooms_fullname)].replace(/^\s+|\s+$/g, "");
@@ -300,7 +201,6 @@ export default class InsightFacade implements IInsightFacade {
                                                 htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-content');
                                                 htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'views-table');
                                                 htmlDataFromTable = that.setZoomToTagName(htmlDataFromTable, 'tbody');
-                                                //Log.info(htmlDataFromTable);
 
                                                 for (let i in htmlDataFromTable.childNodes) {
                                                     //Log.info("a");
@@ -336,9 +236,6 @@ export default class InsightFacade implements IInsightFacade {
                                                                     //hardcode here:
                                                                     rooms_href = roomHrefNode[0].value.replace(/^\s+|\s+$/g, "");
                                                                     //Log.info("rooms_href:" + rooms_href);
-                                                                    //var legitRoomNumber = that.setZoomToClassOrId(roomNumInitial, 'Room Details');
-                                                                    //tableRowCounter++;
-                                                                    //Log.info(String(tableRowCounter));
                                                                     rooms_name = rooms_shortname + "_" + rooms_number;
 
                                                                     parsedJSON += '{\"result\":[' +
@@ -368,6 +265,8 @@ export default class InsightFacade implements IInsightFacade {
 
                                                 rooms_name = rooms_shortname;
 
+                                                //arrayOfAddr.push(rooms_address);
+
                                                 parsedJSON += '{\"result\":[' +
                                                     '{\"rooms_fullname\":\"' + rooms_fullname + '\",' +
                                                     '\"rooms_shortname\":\"' + rooms_shortname + '\",' +
@@ -387,6 +286,8 @@ export default class InsightFacade implements IInsightFacade {
                             //Log.info(parsedJSON);
                        }
                         //Log.info(parsedJSON);
+
+                        arrayOfParsedJson = parsedJSON.split("\r\n");
                         return parsedJSON;
                     }).then(function(parsed) {
                         if (noOfFiles == 0) {
@@ -402,29 +303,159 @@ export default class InsightFacade implements IInsightFacade {
                     }).then(function(parsedJ) {
 
                         if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
-                            try {
-                                fs.writeFileSync(id, parsedJ);
-                            } catch (e) {
-                                var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
-                                reject(ir2);
-                            }
+                            if (isHTML == true) {
 
-                            var ir4: InsightResponse = {code: 204, body: {}};
-                            fulfill(ir4);
+                                var listOfLatLon: string[] = [];
+
+                                var aList: any[] = [];
+
+                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr);
+
+                                Promise.all(aList).then(function (finallatlon) {
+
+                                    //newParsedJ = insertLatLonToParsedJson(parsedJ);
+
+                                    var newParsedJ = "";
+
+
+                                    //that.insertLatLonToParsedJson(finallatlon, arrayOfAddr, arrayOfParsedJson, newParsedJ);
+
+                                    for (let f in finallatlon) { //at first, convert those finallatlon to json object
+                                        var json = JSON.parse(finallatlon[f]);
+                                        finallatlon[f] = json;
+                                    }
+
+                                    for (let i in finallatlon) {
+                                        for (let j in arrayOfParsedJson) {
+                                            for (let k in arrayOfAddr) {
+                                                if (arrayOfParsedJson[j].includes(arrayOfAddr[k])
+                                                    && (finallatlon[i]).addr == arrayOfAddr[k]) {
+                                                    var startingNum = arrayOfParsedJson[j].indexOf("\"rooms_lat\":") + "\"rooms_lat\":".length;
+                                                    var middleBeginNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":");
+                                                    var middleEndNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":") + "\"rooms_lon\":".length + 1;
+                                                    var endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_seats\":");
+                                                    var startingString = arrayOfParsedJson[j].substring(0, startingNum);
+                                                    var middleString = arrayOfParsedJson[j].substring(middleBeginNum, middleEndNum);
+
+                                                    var lat = finallatlon[i].lat;
+                                                    var lon = finallatlon[i].lon;
+
+                                                    if (!arrayOfParsedJson[j].includes("\,\"rooms_seats\":")) {
+                                                        endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_href\":");
+                                                    }
+                                                    var endingString = arrayOfParsedJson[j].substring(endingNum, arrayOfParsedJson[j].length);
+                                                    var newString = startingString + lat + middleString + lon + endingString;
+
+                                                    newParsedJ = newParsedJ + newString + "\r\n";
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    try {
+                                        fs.writeFileSync(id, newParsedJ);
+                                    } catch (e) {
+                                        var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                        reject(ir2);
+                                    }
+
+                                    var ir4: InsightResponse = {code: 204, body: {}};
+                                    fulfill(ir4);
+                                });
+                            } else {
+                                try {
+                                    fs.writeFileSync(id, parsedJ);
+                                } catch (e) {
+                                    var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                    reject(ir2);
+                                }
+
+                                var ir4: InsightResponse = {code: 204, body: {}};
+                                fulfill(ir4);
+                            }
 
                         }
                         return parsedJ
                     }).then(function(parsedJ){
                         if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
-                            try {
-                                fs.writeFileSync(id, parsedJ);
-                            } catch (e) {
-                                var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
-                                reject(ir2);
-                            }
 
-                            var ir4: InsightResponse = {code: 201, body: {}};
-                            fulfill(ir4);
+                            //if unparsefiledata.includes(Addr), extract the latlon
+                            // for each latlon, store them into a list of latlon (to be created)
+                            //for each line, return the latlon
+
+                            //pushParsedJPromisesToArray(aList)
+                            //newParsedJ = insertLatLonToParsedJson(parsedJ);
+
+                            if (isHTML == true) {
+
+                                var listOfLatLon: string[] = [];
+
+                                var aList: any[] = [];
+
+                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr);
+
+                                Promise.all(aList).then(function (finallatlon) {
+
+                                    //newParsedJ = insertLatLonToParsedJson(parsedJ);
+
+                                    var newParsedJ = "";
+
+
+                                    //that.insertLatLonToParsedJson(finallatlon, arrayOfAddr, arrayOfParsedJson, newParsedJ);
+
+                                    for (let f in finallatlon) { //at first, convert those finallatlon to json object
+                                        var json = JSON.parse(finallatlon[f]);
+                                        finallatlon[f] = json;
+                                    }
+
+                                    for (let i in finallatlon) {
+                                        for (let j in arrayOfParsedJson) {
+                                            for (let k in arrayOfAddr) {
+                                                if (arrayOfParsedJson[j].includes(arrayOfAddr[k])
+                                                    && (finallatlon[i]).addr == arrayOfAddr[k]) {
+                                                    var startingNum = arrayOfParsedJson[j].indexOf("\"rooms_lat\":") + "\"rooms_lat\":".length;
+                                                    var middleBeginNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":");
+                                                    var middleEndNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":") + "\"rooms_lon\":".length + 1;
+                                                    var endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_seats\":");
+                                                    var startingString = arrayOfParsedJson[j].substring(0, startingNum);
+                                                    var middleString = arrayOfParsedJson[j].substring(middleBeginNum, middleEndNum);
+
+                                                    var lat = finallatlon[i].lat;
+                                                    var lon = finallatlon[i].lon;
+
+                                                    if (!arrayOfParsedJson[j].includes("\,\"rooms_seats\":")) {
+                                                        endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_href\":");
+                                                    }
+                                                    var endingString = arrayOfParsedJson[j].substring(endingNum, arrayOfParsedJson[j].length);
+                                                    var newString = startingString + lat + middleString + lon + endingString;
+
+                                                    newParsedJ = newParsedJ + newString + "\r\n";
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    try {
+                                        fs.writeFileSync(id, newParsedJ);
+                                    } catch (e) {
+                                        var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                        reject(ir2);
+                                    }
+
+                                    var ir4: InsightResponse = {code: 201, body: {}};
+                                    fulfill(ir4);
+                                });
+                            } else {
+                                try {
+                                    fs.writeFileSync(id, parsedJ);
+                                } catch (e) {
+                                    var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
+                                    reject(ir2);
+                                }
+
+                                var ir4: InsightResponse = {code: 201, body: {}};
+                                fulfill(ir4);
+                            }
                         }
 
                     });
@@ -488,56 +519,54 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise(function(fulfill,reject) {
             var latlonString = "";
             var http = require('http');
+            var url = 'http://skaha.cs.ubc.ca:11316/api/v1/team45/' + (rooms_address.replace(/\s/g,"%20"));
+            var jaj = "";
             try {
-                var parse1 = http.get('http://skaha.cs.ubc.ca:11316/api/v1/team45/' + rooms_address, (res: any) => {
-                    const statusCode = res.statusCode;
-                    const contentType = res.headers['content-type'];
+                var cheese = http.get(url, (res: any) => { //when the connection is established
+                    /*const statusCode = res.statusCode;
+                     const contentType = res.headers['content-type'];
 
-                    let error;
-                    if (statusCode !== 200) {
-                        error = new Error(`Request Failed.\n` +
-                            `Status Code: ${statusCode}`);
-                    } else if (!/^application\/json/.test(contentType)) {
-                        error = new Error(`Invalid content-type.\n` +
-                            `Expected application/json but received ${contentType}`);
-                    }
-                    if (error) {
-                        console.log(error.message);
-                        // consume response data to free up memory
-                        res.resume();
-                        return;
-                    }
+                     let error;
+                     if (statusCode !== 200) {
+                     error = new Error(`Request Failed.\n` +
+                     `Status Code: ${statusCode}`);
+                     } else if (!/^application\/json/.test(contentType)) {
+                     error = new Error(`Invalid content-type.\n` +
+                     `Expected application/json but received ${contentType}`);
+                     }
+                     if (error) {
+                     console.log(error.message);
+                     // consume response data to free up memory
+                     res.resume();
+                     return;
+                     }*/
+
 
                     res.setEncoding('utf8');
-                    try {
-                        let rawData = '';
+                    let rawData = '';
+                    res.on('data', (chunk: any) => rawData += chunk); //when there's a chunk of data
+
+                    res.on('end', () => { //when the connection closes
                         try {
-                            res.on('data', (chunk: any) => rawData += chunk);
+                            let parsedData = JSON.parse(rawData);
+                            let lat = parsedData.lat;
+                            let lon = parsedData.lon;
+                            latlonString = '{"addr":"' + rooms_address + '","lat":' + lat;
+                            latlonString = latlonString + ',"lon":' + lon + '}';
+
+                            //console.log(`latlonString: ${latlonString}`);
+
+                            //console.log(parsedData);
+                            //console.log(lat);
+                            //console.log(lon);
+
+                            //Log.info("lat is:" + lat);
+                            // Log.info("lon is:" + lon);
+                            fulfill(latlonString);
                         } catch (e) {
-                            "Error is?" + e;
+                            console.log(e.message);
                         }
-                        res.on('end', () => {
-                            try {
-                                let parsedData = JSON.parse(rawData);
-                                let lat = parsedData.lat;
-                                let lon = parsedData.lon;
-                                latlonString = latlonString + lat;
-                                latlonString = latlonString + lon;
-                                /*TODO: Uncomment these:
-                                console.log(parsedData);
-                                console.log(lat);
-                                console.log(lon);
-                                */
-                                //Log.info("lat is:" + lat);
-                               // Log.info("lon is:" + lon);
-                                fulfill(latlonString);
-                            } catch (e) {
-                                console.log(`problem with request: ${e.message}`);
-                            }
-                        });
-                    } catch (e) {
-                       // Log.info("err is:" + e);
-                    }
+                    });
 
                 }).on('error', (e: Error) => {
                     //console.log(`Got error: ${e.message}`);
@@ -546,15 +575,62 @@ export default class InsightFacade implements IInsightFacade {
 
                 });
 
+                //console.log(latlonString);
+                //fulfill(latlonString);
+                //cheese;
+
                 //var js = JSON.stringify(parse1);
-
-
-
-
-            } catch (err) {
-                Log.info("error is:" + err);
+            } catch (e){
+                Log.info(e);
             }
         });
+    }
+
+    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[]):any {
+        for (let i in arrayOfAddr) {
+            var p = new Promise((fulfilltiny, rejecttiny) => {
+                var newString = isthis.getLatLon(arrayOfAddr[i]).then(function (latlon:any) {
+                    fulfilltiny(latlon); //<-- obviously you fulfill the result instead of new string...
+                });
+            });
+
+            arrayOfPromises.push(p);
+        }
+    }
+
+    insertLatLonToParsedJson(finallatlon:any, arrayOfAddr: string[], arrayOfParsedJson: any[], newParsedJ:string):any {
+
+        for (let f in finallatlon) { //at first, convert those finallatlon to json object
+            var json = JSON.parse(finallatlon[f]);
+            finallatlon[f] = json;
+        }
+
+        for (let i in finallatlon) {
+            for (let j in arrayOfParsedJson) {
+                for (let k in arrayOfAddr) {
+                    if (arrayOfParsedJson[j].includes(arrayOfAddr[k])
+                        && (finallatlon[i]).addr == arrayOfAddr[k]) {
+                        var startingNum = arrayOfParsedJson[j].indexOf("\"rooms_lat\":") + "\"rooms_lat\":".length;
+                        var middleBeginNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":");
+                        var middleEndNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":")  + "\"rooms_lon\":".length + 1;
+                        var endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_seats\":");
+                        var startingString = arrayOfParsedJson[j].substring(0,startingNum);
+                        var middleString = arrayOfParsedJson[j].substring(middleBeginNum,middleEndNum);
+
+                        var lat = finallatlon[i].lat;
+                        var lon = finallatlon[i].lon;
+
+                        if (!arrayOfParsedJson[j].includes("\,\"rooms_seats\":")) {
+                            endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_href\":");
+                        }
+                        var endingString = arrayOfParsedJson[j].substring(endingNum,arrayOfParsedJson[j].length);
+                        var newString = startingString + lat + middleString + lon + endingString;
+
+                        newParsedJ = newParsedJ + newString + "\r\n";
+                    }
+                }
+            }
+        }
     }
 
 

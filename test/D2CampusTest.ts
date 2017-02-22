@@ -27,7 +27,7 @@ describe("InsightFacadeTest", function () {
     }
 
     const fs = require('fs');
-    it.only("204: addDataset should add a dataset to UBCInsight (D2)", function () {
+    it("204: addDataset should add a dataset to UBCInsight (D2)", function () {
 
         return insight.addDataset('D2testInsight',fs.readFileSync('rooms.zip').toString('base64')).then(function (value: InsightResponse) {
             //var ir: InsightResponse;
@@ -42,7 +42,7 @@ describe("InsightFacadeTest", function () {
 
     });
 
-    it.only("204: initialize for us (D2)", function () {
+    it("204: initialize for us (D2)", function () {
 
         return insight.addDataset('D2courses',fs.readFileSync('rooms.zip').toString('base64')).then(function (value: InsightResponse) {
 
@@ -59,7 +59,7 @@ describe("InsightFacadeTest", function () {
     });
     //my thing flipped (204 and 201 flipped)
 
-    it.only("201: addDataset should add a dataset to UBCInsight (D2)", function () {
+    it("201: addDataset should add a dataset to UBCInsight (D2)", function () {
 
 
         fs.writeFile('D2VirtualInsight', '{}', (err: Error) => {

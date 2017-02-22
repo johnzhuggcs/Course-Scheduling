@@ -121,7 +121,12 @@ export interface IInsightFacade {
 
     getLatLon(rooms_address:string):Promise<any>;
 
+    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[]):any;
+
+    insertLatLonToParsedJson(finallatlon:any[], arrayOfAddr: string[], arrayOfParsedJson: any[], parsedJ:string, newParsedJ:string):any;
+
     removeDataset(id: string): Promise<InsightResponse>;
+
 
     /**
      * Perform a query on UBCInsight.
