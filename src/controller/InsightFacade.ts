@@ -54,6 +54,9 @@ export default class InsightFacade implements IInsightFacade {
             var isHTML = false;
 
 
+            //for error 400:
+            var invalidRoomCounter = 0;
+
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
                     zipasync.forEach(function (relativePath: any, file: any) {
@@ -143,15 +146,18 @@ export default class InsightFacade implements IInsightFacade {
 
                                         var readyToBeZoomedInHtmlData;
 
-                                        readyToBeZoomedInHtmlData = htmlData;
-
-                                        readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'html');
-                                        readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'body');
-                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'full-width-container');
-                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'main');
-                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'content');
-                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'block-system-main');
-                                        readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-buildings-and-classrooms');
+                                        try {
+                                            readyToBeZoomedInHtmlData = htmlData;
+                                            readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'html');
+                                            readyToBeZoomedInHtmlData = that.setZoomToTagName(readyToBeZoomedInHtmlData, 'body');
+                                            readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'full-width-container');
+                                            readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'main');
+                                            readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'content');
+                                            readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'block-system-main');
+                                            readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-buildings-and-classrooms');
+                                        } catch (e) {
+                                            invalidRoomCounter++;
+                                        }
 
                                 try {
                                         var htmlDataFromTable = readyToBeZoomedInHtmlData;
@@ -174,6 +180,8 @@ export default class InsightFacade implements IInsightFacade {
                                          }
                                 } catch (e) {
                                     e;
+                                    invalidRoomCounter++;
+
                                     //Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
                                 } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
 
@@ -255,6 +263,7 @@ export default class InsightFacade implements IInsightFacade {
                                                             }
                                                         }
                                                     } catch (e) {
+                                                       invalidRoomCounter++;
                                                         e
                                                        // Log.info(e);
                                                     }
@@ -265,9 +274,13 @@ export default class InsightFacade implements IInsightFacade {
 
                                                 rooms_name = rooms_shortname;
 
+                                                invalidRoomCounter++;
+
                                                 //arrayOfAddr.push(rooms_address);
 
-                                                parsedJSON += '{\"result\":[' +
+
+                                                //they said "buildings with no rooms shouldn't be considered
+                                                /*parsedJSON += '{\"result\":[' +
                                                     '{\"rooms_fullname\":\"' + rooms_fullname + '\",' +
                                                     '\"rooms_shortname\":\"' + rooms_shortname + '\",' +
                                                     '\"rooms_name\":\"' + rooms_name + '\",' +
@@ -275,7 +288,7 @@ export default class InsightFacade implements IInsightFacade {
                                                     '\"rooms_lat\":' + rooms_lat + ',' +
                                                     '\"rooms_lon\":' + rooms_lon + ',' +
                                                     '\"rooms_href\":\"' + rooms_href + '\"}' +
-                                                    '],\"rank\":0}' + '\r\n';
+                                                    '],\"rank\":0}' + '\r\n';*/
                                             }
 
                                         }
@@ -295,21 +308,21 @@ export default class InsightFacade implements IInsightFacade {
                             reject(ir2);
                         }
 
-                        if (filesNotJsonOrArrayOrHTMLCounter == noOfFiles) {
+                        if (filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter == noOfFiles) {
                             var ir2: InsightResponse = {code: 400, body: {'error': 'cannot set a valid zip that does not contain any real data.'}};
                             reject(ir2);
                         }
                         return parsed;
                     }).then(function(parsedJ) {
 
-                        if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
+                        if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter < noOfFiles) {
                             if (isHTML == true) {
 
                                 var listOfLatLon: string[] = [];
 
                                 var aList: any[] = [];
 
-                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr);
+                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr, invalidRoomCounter);
 
                                 Promise.all(aList).then(function (finallatlon) {
 
@@ -358,6 +371,8 @@ export default class InsightFacade implements IInsightFacade {
                                         var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
                                         reject(ir2);
                                     }
+
+                                    //console.log(`invalidRoomCounter:${invalidRoomCounter}`);
 
                                     var ir4: InsightResponse = {code: 204, body: {}};
                                     fulfill(ir4);
@@ -377,7 +392,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         return parsedJ
                     }).then(function(parsedJ){
-                        if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter < noOfFiles) {
+                        if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter < noOfFiles) {
 
                             //if unparsefiledata.includes(Addr), extract the latlon
                             // for each latlon, store them into a list of latlon (to be created)
@@ -392,7 +407,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                 var aList: any[] = [];
 
-                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr);
+                                that.pushParsedJPromisesToArray(that, aList, arrayOfAddr, invalidRoomCounter);
 
                                 Promise.all(aList).then(function (finallatlon) {
 
@@ -441,6 +456,10 @@ export default class InsightFacade implements IInsightFacade {
                                         var ir2: InsightResponse = {code: 400, body: {'error': 'cannot writefile'}};
                                         reject(ir2);
                                     }
+
+
+                                    //for testing purpose
+                                    //console.log(`invalidRoomCounter:${invalidRoomCounter}`);
 
                                     var ir4: InsightResponse = {code: 201, body: {}};
                                     fulfill(ir4);
@@ -515,7 +534,7 @@ export default class InsightFacade implements IInsightFacade {
         }
     }
 
-    getLatLon(rooms_address:string):Promise<any> {
+    getLatLon(rooms_address:string, invalidRoomCounter:number):Promise<any> {
         return new Promise(function(fulfill,reject) {
             var latlonString = "";
             var http = require('http');
@@ -523,7 +542,7 @@ export default class InsightFacade implements IInsightFacade {
             var jaj = "";
             try {
                 var cheese = http.get(url, (res: any) => { //when the connection is established
-                    /*const statusCode = res.statusCode;
+                    const statusCode = res.statusCode;
                      const contentType = res.headers['content-type'];
 
                      let error;
@@ -537,9 +556,10 @@ export default class InsightFacade implements IInsightFacade {
                      if (error) {
                      console.log(error.message);
                      // consume response data to free up memory
+                         invalidRoomCounter++;
                      res.resume();
                      return;
-                     }*/
+                     }
 
 
                     res.setEncoding('utf8');
@@ -564,14 +584,16 @@ export default class InsightFacade implements IInsightFacade {
                             // Log.info("lon is:" + lon);
                             fulfill(latlonString);
                         } catch (e) {
-                            console.log(e.message);
+                           // console.log(e.message);
+                            invalidRoomCounter++;
                         }
                     });
 
                 }).on('error', (e: Error) => {
                     //console.log(`Got error: ${e.message}`);
-                    console.log(`Got error: ${e.message}`);
+                    //console.log(`Got error: ${e.message}`);
                     //Log.info("got error:" + e.message);
+                    invalidRoomCounter++;
 
                 });
 
@@ -582,14 +604,15 @@ export default class InsightFacade implements IInsightFacade {
                 //var js = JSON.stringify(parse1);
             } catch (e){
                 Log.info(e);
+                invalidRoomCounter++;
             }
         });
     }
 
-    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[]):any {
+    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[],invalidRoomCounter:number):any {
         for (let i in arrayOfAddr) {
             var p = new Promise((fulfilltiny, rejecttiny) => {
-                var newString = isthis.getLatLon(arrayOfAddr[i]).then(function (latlon:any) {
+                var newString = isthis.getLatLon(arrayOfAddr[i],invalidRoomCounter).then(function (latlon:any) {
                     fulfilltiny(latlon); //<-- obviously you fulfill the result instead of new string...
                 });
             });
@@ -725,158 +748,6 @@ export default class InsightFacade implements IInsightFacade {
 
         });
     }
-    //Old Code from February 3rd
-
-
-    /*addDataset(id: string, content: string): Promise<InsightResponse> {
-
-        return new Promise(function (fulfill, reject) {
-
-            var request = require('request');
-            var JSZip = require('jszip');
-            var fs = require('fs');
-            var zip = new JSZip();
-            var arrayOfId: string[] = [];
-            var arrayOfUnparsedFileData: any = [];
-
-            var filesNotJsonCounter = 0;
-            var noOfFiles = 0;
-
-            zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
-
-
-                zipasync.forEach(function (relativePath: any, file: any) {
-                        if (!(/(.*)\/$/.test(file.name))) { //multi_courses/ VS multi_courses.zip  /(.\*)\//
-                            var filecompressednoasync = file._data.compressedContent;
-                            arrayOfUnparsedFileData.push(file.async("string"));
-                        }
-                    }
-                );
-                Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
-                    var arrayCounter = 0;
-                    var parsedJSON = '';
-                    var data = '';
-                    var isTry = true;
-                    for (let i in arrayofUnparsedFileDataAll) {
-                        try {
-                            isTry = true;
-                            var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
-                            JSON.parse(x);//JSON.parse
-                        }
-                        catch (err) {
-                            filesNotJsonCounter++;
-                            isTry = false;
-                            err;
-                        }
-                        noOfFiles++;
-
-                        if (isTry) {
-                            parsedJSON += String(arrayofUnparsedFileDataAll[i]) + "\r\n";//JSON.parse
-
-                        }
-
-                    }
-
-
-
-                    if (noOfFiles == 0) {
-                        var ir2: InsightResponse = {code: 400, body: {'Error': 'No datafile is found'}};
-                        reject(ir2);
-                    }
-
-                    if (filesNotJsonCounter == noOfFiles) {
-                        var ir2: InsightResponse = {code: 400, body: {'Error': 'Could not parse JSON'}};
-                        reject(ir2);
-                    }
-
-                    if (noOfFiles != 0 && filesNotJsonCounter != noOfFiles) {
-                        if (!fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                            fs.writeFile(id, parsedJSON, (err: Error) => {
-                                if (err) throw err;
-                            });//write data file
-                            fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
-                                if (err) throw err;
-                            }); //for new storage
-                            var ir4: InsightResponse = {code: 204, body: {}};
-                            fulfill(ir4);
-                        }
-                        else if (fs.existsSync('existingIds_Don\'tMakeAnotherIdOfThisFileName')) {
-                            data = fs.readFileSync('existingIds_Don\'tMakeAnotherIdOfThisFileName').toString('utf8');
-                            arrayOfId = data.split("\r\n");
-                            if (!arrayOfId.includes(id)) {
-                                {
-                                    fs.writeFile(id, parsedJSON, (err: Error) => {
-                                        if (err) throw err;
-                                    });
-                                    fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', id + "\r\n", (err: Error) => {
-                                        if (err) throw err;
-                                    });
-                                    var ir4: InsightResponse = {code: 204, body: {}};
-                                    fulfill(ir4);
-                                }
-                            }
-                            else {
-                                var count = 0;
-                                for (let i in arrayOfId) {
-                                    if (arrayOfId.includes(id)||fs.existsSync(id)) {
-                                        //if id exists in arrayOfId
-                                        // or id exists in the project folder
-                                        count++;
-                                        id = id + "(" + count + ")";
-                                    }
-                                }
-
-                                fs.writeFile(id, parsedJSON, (err: Error) => {
-                                    if (err) throw err;
-                                });//datafile is written
-                                data += id + "\r\n";
-                                fs.writeFile('existingIds_Don\'tMakeAnotherIdOfThisFileName', data, (err: Error) => {
-                                    if (err) throw err;
-                                });
-                                arrayOfId = [];
-                                var ir4: InsightResponse = {code: 201, body: {}};
-                                fulfill(ir4);
-                            }
-                        }
-                    }
-                });
-            }).catch(function (e: any) {
-                var ir2: InsightResponse = {code: 400, body: {e}};
-                reject(ir2);
-            });
-        });
-    }*/
-
-    /*removeDataset(id: string): Promise<InsightResponse>
-        //by providing the id, remove the dataset
-        //delete the zip file by id
-
-        return new Promise(function (fulfill,reject) {
-            var request = require('request');
-            var JSZip = require('jszip');
-            var fs = require('fs');
-            var zip = new JSZip();
-
-            if (fs.existsSync(id)) {
-                //zip.remove(id);
-//DON'T use js zip, just use it for my own data structure and the ones I've created
-                //correct the counter so that it conserves all the ids
-
-                fs.unlinkSync(id);
-
-                var ir4: InsightResponse = {code: 204, body: {}};
-                fulfill(ir4);
-
-
-
-            } else {
-                var ir4: InsightResponse = {code: 400, body: {'Error': 'Delete was a resource that was not previously added'}};
-                reject(ir4);
-            }
-
-        });
-    }*/
-
 
     //TODO: if (<key> not found in UBCInsight) {return promise 400 body: {invalid <key>}}
     /*TODO: return a promise --> search in UBCInsight (this is hell lot easier man...)

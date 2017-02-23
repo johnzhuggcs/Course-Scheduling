@@ -119,9 +119,9 @@ export interface IInsightFacade {
 
     validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[]): any;
 
-    getLatLon(rooms_address:string):Promise<any>;
+    getLatLon(rooms_address:string,invalidRoomCounter:number):Promise<any>;
 
-    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[]):any;
+    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[],invalidRoomCounter:number):any;
 
     insertLatLonToParsedJson(finallatlon:any[], arrayOfAddr: string[], arrayOfParsedJson: any[], parsedJ:string, newParsedJ:string):any;
 
