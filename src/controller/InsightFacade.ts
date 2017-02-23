@@ -8,6 +8,7 @@ import {isString} from "util";
 import {isNumber} from "util";
 import {isUndefined} from "util";
 import {read} from "fs";
+import {isNullOrUndefined} from "util";
 
 //import {objectify} from "tslint/lib/utils";
 
@@ -900,7 +901,7 @@ export default class InsightFacade implements IInsightFacade {
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        /**if(Number(x) >= 935){
+                        /**if(Number(x) >= 129){
                             Log.info("start debug")
                         }*/
                         //Log.info(x)
@@ -930,11 +931,11 @@ export default class InsightFacade implements IInsightFacade {
                                             Log.info("continue debug")
                                         }*/
                                         for(var sectionValidKey in singleSection) {
-                                            if(!singleSection.hasOwnProperty(sectionValidKey)){
-                                                continue;
-                                            }
+                                            if(validKey[0] == "courses"){
+                                                translatedKey = newThis.vocabDataBase(sectionValidKey)
+                                            }else {translatedKey = sectionValidKey}
 
-                                            translatedKey = newThis.vocabDataBase(sectionValidKey)
+
                                             if(translatedKey == false){
                                                 translatedKey = translatedKey
                                             }   else if(translatedKey == true) {
@@ -944,36 +945,38 @@ export default class InsightFacade implements IInsightFacade {
                                                     var uuid = singleSection[sectionValidKey];
                                                     var stringUuid = uuid.toString();
 
-                                                    if (isUndefined(uuid)) {
+                                                    /**if (isUndefined(uuid)) {
                                                         var code400InvalidQuery: InsightResponse = {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
                                                         return reject(code400InvalidQuery);
-                                                    } else {
+                                                    } else {*/
                                                         atomicReturnInfo = {[translatedKey]:stringUuid}
 
                                                         returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                         //Log.info(returnInfo);
 
                                                         //should look like {"courses_avg":95, "courses_instructor":"bleh"}
-                                                    }
+                                                    //}
                                                 }else {
                                                     atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
-                                                    if (isUndefined(singleSection[sectionValidKey])) {
+                                                    /**if (isUndefined(singleSection[sectionValidKey])) {
                                                         var code400InvalidQuery: InsightResponse = {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
                                                         return reject(code400InvalidQuery);
-                                                    } else {
+                                                    } else {*/
 
 
                                                         returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        sectionValidKey = null;
+                                                        atomicReturnInfo = null;
                                                         //Log.info(returnInfo);
 
                                                         //should look like {"courses_avg":95, "courses_instructor":"bleh"}
-                                                    }
+                                                    //}
                                                 }
                                             }
                                         }returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
@@ -995,23 +998,30 @@ export default class InsightFacade implements IInsightFacade {
                                                     continue;
                                                 }else{*/
 
-                                                    if(returnInfo.hasOwnProperty(singleColumnKey)){
+                                                    if(isNullOrUndefined(returnInfo)){
+                                                       cachedReturnInfo = cachedReturnInfo;
+                                                    }else if(returnInfo.hasOwnProperty(singleColumnKey)){
                                                         /**if(Number(x) == 0){
                                                             returnInfo = {};
                                                         }*/
 
 
                                                         cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+
                                                     } else
-                                                    if (isUndefined(returnInfo[singleColumnKey])) {
+                                                    /**if (isUndefined(returnInfo[singleColumnKey])) {
                                                         var code400InvalidQuery: InsightResponse = {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
                                                         };
                                                         return reject(code400InvalidQuery);
-                                                    } else {
+                                                    } else */{
 
-                                                        returnInfo = returnInfo
+                                                        //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                                        cachedReturnInfo = null;
+                                                        returnInfo = null;
+
+                                                        //returnInfo = returnInfo
                                                         //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                         //Log.info(returnInfo);
 
@@ -1021,8 +1031,12 @@ export default class InsightFacade implements IInsightFacade {
                                                 /**if(result instanceof Array && result.length == 0){
                                                 result = result[0]
                                             }*/
+                                            }returnInfo = null;
+                                            if(isNullOrUndefined(cachedReturnInfo)){
+                                                continue;
+                                            }else {
+                                                finalReturn.push(cachedReturnInfo);
                                             }
-                                            finalReturn.push(cachedReturnInfo);
                                         }
 
 
@@ -1055,13 +1069,17 @@ export default class InsightFacade implements IInsightFacade {
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
                         if (columns.includes(order)) {
-                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")) {
+                            /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
+                             validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
+                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
+                            || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     return a[order] - b[order];
                                 });
 
-                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor")) {
+                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
+                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address")) {
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                     var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1585,7 +1603,7 @@ export default class InsightFacade implements IInsightFacade {
                                     || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
                                     || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
                                     || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture") { //checks for valid key
-                                    if(yesOrNo == "true" && (dataSet[0] == "roomss" || dataSet.length == 0)) {
+                                    if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
                                         Table = optionsValue[columnsEtcKey[2]];
                                         if (Table == "TABLE") { //if value of FORM is TABLE
                                             isOneDataset = {"true":["rooms"]}

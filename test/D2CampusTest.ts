@@ -8,7 +8,7 @@ import Log from "../src/Util";
 import {InsightResponse, IInsightFacade} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 
-describe("InsightFacadeTest", function () {
+describe("D2CampusTest", function () {
 
     var insight: InsightFacade= null;
 
