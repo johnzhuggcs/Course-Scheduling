@@ -63,6 +63,8 @@ export default class InsightFacade implements IInsightFacade {
             var listOfValidAddresses: string[] = [];
             var listOfValidUrls: string[] = [];
 
+            //for irongate
+            var isInvalidId = false;
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
                     zipasync.forEach(function (relativePath: any, file: any) {
@@ -97,6 +99,7 @@ export default class InsightFacade implements IInsightFacade {
                                 that.validStringListOfBuildings(that, listOfValidShortNames, listOfValidFullNames, listOfValidAddresses, listOfValidUrls,String(arrayofUnparsedFileDataAll[initial]));
                                 //delete arrayofUnparsedFileDataAll[initial];
                                 delete (arrayofUnparsedFileDataAll[initial]);
+                                //no need to minus noofFiles since it's not calculated yet
                             }
                         }
 
@@ -109,6 +112,12 @@ export default class InsightFacade implements IInsightFacade {
                             //should reject {"result":[],"rank":0} here as well (because it hasn't contain any courses info)
                             //if not result for first key and rank for second key
                             if (!String(arrayofUnparsedFileDataAll[i]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")) {
+                                if (id == 'rooms'){
+                                    var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
+                                    isInvalidId = true;
+                                    reject(ir2);
+                                    return;
+                                }
                                 try {
                                     isTry = true;
                                     var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
@@ -148,6 +157,14 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                                 //},100000);
                             } else {
+
+                                //for irongate
+                                if (id == 'courses'){
+                                    var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
+                                    isInvalidId = true;
+                                    reject(ir2);
+                                    return;
+                                }
 
                                 isHTML = true;/*
                                 var listOfValidShortNames: string[] = [];
@@ -200,7 +217,6 @@ export default class InsightFacade implements IInsightFacade {
                                         var htmlDataForFullname = readyToBeZoomedInHtmlData;
                                         htmlDataForFullname = that.setZoomToTagName(htmlDataForFullname, 'h2');
                                         htmlDataForFullname = that.setZoomToClassOrId(htmlDataForFullname, 'field-content');
-
                                         //rooms_fullname = htmlDataForFullname.childNodes[0].value;
                                     if (!isUndefined(htmlDataForFullname.childNodes)) {
                                         if (listOfValidFullNames.includes(htmlDataForFullname.childNodes[0].value)) {
@@ -217,7 +233,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
                                 } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
 
-                                    if (listOfValidFullNames.includes(rooms_fullname)) {
+                                    if (listOfValidFullNames.includes(rooms_fullname)) {//invalid room full name --> invalid building --> invalidBuildingCounter++
                                         //Log.info(rooms_fullname);
 
                                         var htmlDataForAddress = readyToBeZoomedInHtmlData;
@@ -237,6 +253,7 @@ export default class InsightFacade implements IInsightFacade {
                                             htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-footer');
                                             htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-buildings-and-classrooms');
 //TODO: Uncomment this
+                                            //console.log(!isUndefined(that.setZoomToClassOrId(htmlDataFromTable, 'view-content')));
                                             if (!isUndefined(that.setZoomToClassOrId(htmlDataFromTable, 'view-content'))) {
                                                 htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'view-content');
                                                 htmlDataFromTable = that.setZoomToClassOrId(htmlDataFromTable, 'views-table');
@@ -304,7 +321,7 @@ export default class InsightFacade implements IInsightFacade {
                                                 }
 
                                             } else {
-
+                                                //console.log(`passed through here`);
                                                 rooms_name = rooms_shortname;
 
                                                 invalidRoomCounter++;
@@ -325,6 +342,8 @@ export default class InsightFacade implements IInsightFacade {
                                             }
 
                                         }
+                                    } else {
+                                        invalidRoomCounter++;
                                     }
                                 }
 
@@ -341,12 +360,18 @@ export default class InsightFacade implements IInsightFacade {
                             reject(ir2);
                         }
 
+                        //console.log(`invalidRoomCounter: ${invalidRoomCounter}`);
+                        //console.log(`noOfFiles: ${noOfFiles}`);
+
                         if (filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter == noOfFiles) {
                             var ir2: InsightResponse = {code: 400, body: {'error': 'cannot set a valid zip that does not contain any real data.'}};
                             reject(ir2);
                         }
                         return parsed;
                     }).then(function(parsedJ) {
+                        if (isInvalidId) {
+                            return;
+                        }
 
                         if (!fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter < noOfFiles) {
                             if (isHTML == true) {
@@ -425,6 +450,10 @@ export default class InsightFacade implements IInsightFacade {
                         }
                         return parsedJ
                     }).then(function(parsedJ){
+                        if (isInvalidId) {
+                            return;
+                        }
+
                         if (fs.existsSync(id) && noOfFiles >  0 && filesNotJsonOrArrayOrHTMLCounter + invalidRoomCounter < noOfFiles) {
 
                             //if unparsefiledata.includes(Addr), extract the latlon
@@ -573,7 +602,6 @@ export default class InsightFacade implements IInsightFacade {
             var http = require('http');
             var url = 'http://skaha.cs.ubc.ca:11316/api/v1/team45/' + (rooms_address.replace(/\s/g,"%20"));
             var jaj = "";
-            try {
                 var cheese = http.get(url, (res: any) => { //when the connection is established
                     const statusCode = res.statusCode;
                      const contentType = res.headers['content-type'];
@@ -587,7 +615,7 @@ export default class InsightFacade implements IInsightFacade {
                      `Expected application/json but received ${contentType}`);
                      }
                      if (error) {
-                     console.log(error.message);
+                     //console.log(error.message);
                      // consume response data to free up memory
                          invalidRoomCounter++;
                      res.resume();
@@ -635,10 +663,6 @@ export default class InsightFacade implements IInsightFacade {
                 //cheese;
 
                 //var js = JSON.stringify(parse1);
-            } catch (e){
-                Log.info(e);
-                invalidRoomCounter++;
-            }
         });
     }
 
@@ -651,41 +675,6 @@ export default class InsightFacade implements IInsightFacade {
             });
 
             arrayOfPromises.push(p);
-        }
-    }
-
-    insertLatLonToParsedJson(finallatlon:any, arrayOfAddr: string[], arrayOfParsedJson: any[], newParsedJ:string):any {
-
-        for (let f in finallatlon) { //at first, convert those finallatlon to json object
-            var json = JSON.parse(finallatlon[f]);
-            finallatlon[f] = json;
-        }
-
-        for (let i in finallatlon) {
-            for (let j in arrayOfParsedJson) {
-                for (let k in arrayOfAddr) {
-                    if (arrayOfParsedJson[j].includes(arrayOfAddr[k])
-                        && (finallatlon[i]).addr == arrayOfAddr[k]) {
-                        var startingNum = arrayOfParsedJson[j].indexOf("\"rooms_lat\":") + "\"rooms_lat\":".length;
-                        var middleBeginNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":");
-                        var middleEndNum = arrayOfParsedJson[j].indexOf("\,\"rooms_lon\":")  + "\"rooms_lon\":".length + 1;
-                        var endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_seats\":");
-                        var startingString = arrayOfParsedJson[j].substring(0,startingNum);
-                        var middleString = arrayOfParsedJson[j].substring(middleBeginNum,middleEndNum);
-
-                        var lat = finallatlon[i].lat;
-                        var lon = finallatlon[i].lon;
-
-                        if (!arrayOfParsedJson[j].includes("\,\"rooms_seats\":")) {
-                            endingNum = arrayOfParsedJson[j].indexOf("\,\"rooms_href\":");
-                        }
-                        var endingString = arrayOfParsedJson[j].substring(endingNum,arrayOfParsedJson[j].length);
-                        var newString = startingString + lat + middleString + lon + endingString;
-
-                        newParsedJ = newParsedJ + newString + "\r\n";
-                    }
-                }
-            }
         }
     }
 

@@ -82,7 +82,7 @@ describe("D2CampusTest", function () {
 
     });
 
-    /*it.only("400: addDataset should reject dataset with no table", function () {
+    it("400: addDataset should reject dataset with no table", function () {
         return insight.addDataset('D2supposetounparse',fs.readFileSync('noTableCampus.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
@@ -94,7 +94,7 @@ describe("D2CampusTest", function () {
         })
 
     });
-    it.only("400: addDataset should reject dataset excluded from index", function () {
+    it("400: addDataset should reject dataset excluded from index", function () {
         return insight.addDataset('D2supposetounparse',fs.readFileSync('notInIndex.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
@@ -106,7 +106,31 @@ describe("D2CampusTest", function () {
         })
 
     });
-    */
+    it("Irongate: Adding a dataset with the wrong id should give 400 (rooms)", function () {
+        return insight.addDataset('rooms',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'error': 'illegal attempt to add dataset with the wrong id.'});
+        })
+
+    });
+    it("Irongate: Adding a dataset with the wrong id should give 400 (courses)", function () {
+        return insight.addDataset('courses',fs.readFileSync('rooms.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'error': 'illegal attempt to add dataset with the wrong id.'});
+        })
+
+    });
+
 /*
     it("400: addDataset should detect non-real data files (e.g., Array, invalid JSON, etc.)", function () {
         return insight.addDataset('D1supposetounparse',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
