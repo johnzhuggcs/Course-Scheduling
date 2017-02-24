@@ -117,7 +117,7 @@ export interface IInsightFacade {
 
     getInnerAttrInsteadOfChildNode(row:any,valueToGet:string):any;
 
-    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[]): any;
+    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[],indexString:string): any;
 
     getLatLon(rooms_address:string,invalidRoomCounter:number):Promise<any>;
 

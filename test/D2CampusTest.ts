@@ -82,6 +82,31 @@ describe("D2CampusTest", function () {
 
     });
 
+    /*it.only("400: addDataset should reject dataset with no table", function () {
+        return insight.addDataset('D2supposetounparse',fs.readFileSync('noTableCampus.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'error': 'cannot set a valid zip that does not contain any real data.'});
+        })
+
+    });
+    it.only("400: addDataset should reject dataset excluded from index", function () {
+        return insight.addDataset('D2supposetounparse',fs.readFileSync('notInIndex.zip').toString('base64')).then(function (value: InsightResponse) {
+            expect.fail();
+        }).catch(function (value: InsightResponse) {
+            var ir: InsightResponse;
+            sanityCheck(value);
+            //Log.test(JSON.stringify(value));
+            expect(value.code).to.equal(400);
+            expect(value.body).to.deep.equal({'error': 'cannot set a valid zip that does not contain any real data.'});
+        })
+
+    });
+    */
 /*
     it("400: addDataset should detect non-real data files (e.g., Array, invalid JSON, etc.)", function () {
         return insight.addDataset('D1supposetounparse',fs.readFileSync('unparsable_json.zip').toString('base64')).then(function (value: InsightResponse) {
@@ -95,6 +120,7 @@ describe("D2CampusTest", function () {
         })
 
     });
+
     it("400/Bender: addDataset should detect empty zip", function () {
         return insight.addDataset('D1supposetoempty',fs.readFileSync('empty_zip.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();

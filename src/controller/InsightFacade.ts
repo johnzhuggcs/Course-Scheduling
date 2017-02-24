@@ -58,6 +58,11 @@ export default class InsightFacade implements IInsightFacade {
             //for error 400:
             var invalidRoomCounter = 0;
 
+            var listOfValidShortNames: string[] = [];
+            var listOfValidFullNames: string[] = [];
+            var listOfValidAddresses: string[] = [];
+            var listOfValidUrls: string[] = [];
+
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
                     zipasync.forEach(function (relativePath: any, file: any) {
@@ -74,6 +79,26 @@ export default class InsightFacade implements IInsightFacade {
                     Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
                         var parsedJSON = '';
                         var isTry = true;
+
+
+                        for (let initial in arrayofUnparsedFileDataAll) {
+                            if ((String(arrayofUnparsedFileDataAll[initial])
+                                    .includes('Select a room below for more information about its amenities. Where available, photos taken from the instructor and student viewpoints are also shown.'))
+                                    &&
+                                        (String(arrayofUnparsedFileDataAll[initial])
+                                    .includes('ACU'))
+                                && (String(arrayofUnparsedFileDataAll[initial])
+                                    .includes('ALRD'))
+                                && (String(arrayofUnparsedFileDataAll[initial])
+                                    .includes('ANSO'))
+
+                        ) {
+                                //console.log(arrayofUnparsedFileDataAll[initial]);
+                                that.validStringListOfBuildings(that, listOfValidShortNames, listOfValidFullNames, listOfValidAddresses, listOfValidUrls,String(arrayofUnparsedFileDataAll[initial]));
+                                //delete arrayofUnparsedFileDataAll[initial];
+                                delete (arrayofUnparsedFileDataAll[initial]);
+                            }
+                        }
 
                         for (let i in arrayofUnparsedFileDataAll) {
                             //Log.info(String(arrayofUnparsedFileDataAll[i]));
@@ -124,13 +149,14 @@ export default class InsightFacade implements IInsightFacade {
                                 //},100000);
                             } else {
 
-                                isHTML = true;
+                                isHTML = true;/*
                                 var listOfValidShortNames: string[] = [];
                                 var listOfValidFullNames: string[] = [];
                                 var listOfValidAddresses: string[] = [];
-                                var listOfValidUrls: string[] = [];
+                                var listOfValidUrls: string[] = [];*/
 
-                                    that.validStringListOfBuildings(that, listOfValidShortNames, listOfValidFullNames, listOfValidAddresses, listOfValidUrls);
+
+                                    //find index.htm within the zip, or else it would throw a runtime error
 
                                         var htmlData = parse5.parse(String(arrayofUnparsedFileDataAll[i]));
                                         var rooms_fullname = "";
@@ -158,6 +184,8 @@ export default class InsightFacade implements IInsightFacade {
                                             readyToBeZoomedInHtmlData = that.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'view-buildings-and-classrooms');
                                         } catch (e) {
                                             invalidRoomCounter++;
+                                            console.log(`++1`);
+                                            e;
                                         }
 
                                 try {
@@ -178,10 +206,13 @@ export default class InsightFacade implements IInsightFacade {
                                         if (listOfValidFullNames.includes(htmlDataForFullname.childNodes[0].value)) {
                                             rooms_fullname = htmlDataForFullname.childNodes[0].value;
                                         }
-                                         }
+                                    } else {
+                                        invalidRoomCounter++;
+                                    }
                                 } catch (e) {
-                                    e;
                                     invalidRoomCounter++;
+                                    console.log(`++`);
+                                    e;
 
                                     //Log.info("err is:" + e + "and room name includes: " + rooms_fullname);
                                 } //try catch just to catch the weirdest error caused by Main Mall Theatre (aka. MAUD)
@@ -265,7 +296,8 @@ export default class InsightFacade implements IInsightFacade {
                                                         }
                                                     } catch (e) {
                                                        invalidRoomCounter++;
-                                                        e
+                                                        console.log(`+++`);
+                                                        e;
                                                        // Log.info(e);
                                                     }
 
@@ -373,7 +405,7 @@ export default class InsightFacade implements IInsightFacade {
                                         reject(ir2);
                                     }
 
-                                    //console.log(`invalidRoomCounter:${invalidRoomCounter}`);
+                                   // console.log(`invalidRoomCounter:${invalidRoomCounter}`);
 
                                     var ir4: InsightResponse = {code: 204, body: {}};
                                     fulfill(ir4);
@@ -658,14 +690,16 @@ export default class InsightFacade implements IInsightFacade {
     }
 
 
-    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[]): any {
+    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[],indexString:string): any {
        // Log.info("it runs?");
         var fs = require('fs');
         var parse5 = require('parse5');
-        var htmlData = parse5.parse(fs.readFileSync('index.htm',{encoding: 'utf8'}));
+       //var htmlData = parse5.parse(fs.readFileSync('index.htm',{encoding: 'utf8'}));
+        var htmlData = parse5.parse(indexString);
         var readyToBeZoomedInHtmlData;
 
         readyToBeZoomedInHtmlData = htmlData;
+
         readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'html');
         readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'body');
         readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'full-width-container');
@@ -677,15 +711,15 @@ export default class InsightFacade implements IInsightFacade {
         readyToBeZoomedInHtmlData = isthis.setZoomToClassOrId(readyToBeZoomedInHtmlData, 'views-table');
         readyToBeZoomedInHtmlData = isthis.setZoomToTagName(readyToBeZoomedInHtmlData, 'tbody');
 
-        //Log.info("it runs2?");
         for (let i in readyToBeZoomedInHtmlData.childNodes) {
 
                     for (let a in readyToBeZoomedInHtmlData.childNodes[i].attrs) {
                         if (readyToBeZoomedInHtmlData.childNodes[i].attrs[a].value.includes("odd")
                             || readyToBeZoomedInHtmlData.childNodes[i].attrs[a].value.includes("even")) {
+
+
                             var rowHtml = readyToBeZoomedInHtmlData.childNodes[i].childNodes;
 
-                        //    Log.info("it runs3?");
                             var shortNameNode = isthis.scanRowForInfoWithoutChildNodes(rowHtml,"views-field-field-building-code");
                             var shortName = shortNameNode[0].value;
                             //try {shortName} catch(e) {Log.info("sth happened" + e);}
