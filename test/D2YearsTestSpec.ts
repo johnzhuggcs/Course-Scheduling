@@ -8,7 +8,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("QueryTestSpec", function () {
+describe("D2YearsTestSpec", function () {
 
     var insightFacade: InsightFacade = null;
     var insight: InsightFacade = null;
@@ -55,7 +55,7 @@ describe("QueryTestSpec", function () {
     });
 
 
-    it.only("200 testing out simple query YEARS", function () {
+    it("200 testing out simple query YEARS", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "AND": [{

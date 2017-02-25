@@ -53,7 +53,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it("200 testing out simple query self", function () {
+    it.skip("200 testing out simple query self", function () {
 
         var queryTest: any = {
             "WHERE": {
@@ -88,7 +88,7 @@ describe("D2QueryTestSpec", function () {
     });
 
 
-    it("200 testing out NO ORDER simple query self", function () {
+    it.skip("200 testing out NO ORDER simple query self", function () {
 
         var queryTest: any = {
             "WHERE": {
@@ -121,7 +121,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it("200 testing out complex query provided in deliverable", function () {
+    it.skip("200 testing out complex query provided in deliverable", function () {
 
         var queryTest: any = {
             "WHERE": {
@@ -152,7 +152,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it.only("200 testing out simple query YEARS", function () {
+    it.skip("200 testing out simple query YEARS", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "AND": [{

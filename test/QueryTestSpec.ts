@@ -28,7 +28,7 @@ describe("QueryTestSpec", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        //return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
         //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
 
 
@@ -46,7 +46,7 @@ describe("QueryTestSpec", function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         //insightFacade = null
         //return insight.removeDataset("rooms");
-        //return insight.removeDataset('courses');
+        return insight.removeDataset('courses');
     });
 
     afterEach(function () {
@@ -405,25 +405,25 @@ describe("QueryTestSpec", function () {
                     "fake_id",
                     "courses_avg"
                 ],
-                "ORDER":"sham_avg",
+                "ORDER":"fake_dept",
                 "FORM":"TABLE"
             }
         }
         sanityCheck(queryTest);
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(424);
-            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
+            expect(value.body).to.deep.equal({"missing":["fake"]})
         }).catch(function (err) {
             Log.test('Error: ' + err);
-            expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"invalid query"})
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["fake"]})
         })
 
 
 
     });
 
-    it("424 unloaded fake id in options", function () {
+    it("424 unloaded fake id in options rooms", function () {
         var queryTest:any =     {
             "WHERE":{
                 "OR":[
@@ -474,8 +474,8 @@ describe("QueryTestSpec", function () {
             expect(value.body).to.deep.equal({"missing":["rooms"]})
         }).catch(function (err) {
             Log.test('Error: ' + err);
-            expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"invalid query"})
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["rooms"]})
         })
 
 
