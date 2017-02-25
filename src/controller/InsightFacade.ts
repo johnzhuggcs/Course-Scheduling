@@ -935,7 +935,7 @@ export default class InsightFacade implements IInsightFacade {
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        /**if(Number(x) >= 129){
+                        /**if(Number(x) >= 1638){
                             Log.info("start debug")
                         }*/
                         //Log.info(x)
@@ -961,16 +961,26 @@ export default class InsightFacade implements IInsightFacade {
                                     //console.time("one course")
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        /**if(Number(x) == 6){
+                                        /**if(Number(x) == 21){
                                             Log.info("continue debug")
                                         }*/
+                                        var overallSection:boolean = false;
                                         for(var sectionValidKey in singleSection) {
+
                                             if(validKey[0] == "courses"){
                                                 translatedKey = newThis.vocabDataBase(sectionValidKey)
                                             }else {translatedKey = sectionValidKey}
 
-
-                                            if(translatedKey == false){
+                                            if(sectionValidKey == "Section" && singleSection[sectionValidKey] == "overall"){
+                                                overallSection = true;
+                                                atomicReturnInfo = {courses_year:1900}
+                                                returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                sectionValidKey = null;
+                                                atomicReturnInfo = null;
+                                            }else if((translatedKey == "courses_year" && overallSection == true) ||
+                                                (sectionValidKey == "Section" && singleSection[sectionValidKey] != "overall")){
+                                                overallSection = false;
+                                            }else if(translatedKey == false){
                                                 translatedKey = translatedKey
                                             }   else if(translatedKey == true) {
                                                 translatedKey = translatedKey
@@ -993,7 +1003,20 @@ export default class InsightFacade implements IInsightFacade {
 
                                                         //should look like {"courses_avg":95, "courses_instructor":"bleh"}
                                                     //}
-                                                }else {
+                                                }else
+                                                if(translatedKey == "courses_year" && typeof singleSection[sectionValidKey] == "string"){
+                                                    var year = singleSection[sectionValidKey];
+                                                    var numberYear = Number(year);
+
+                                                    atomicReturnInfo = {[translatedKey]:numberYear}
+
+                                                    returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                    //Log.info(returnInfo);
+
+                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"}
+                                                    //}
+                                                }
+                                                else{
                                                     atomicReturnInfo = {[translatedKey]: singleSection[sectionValidKey]}
                                                     /**if (isUndefined(singleSection[sectionValidKey])) {
                                                         var code400InvalidQuery: InsightResponse = {
@@ -1174,8 +1197,30 @@ export default class InsightFacade implements IInsightFacade {
 
 
             } else if(yesOrNo == "false"){
-                var code424InvalidQuery:InsightResponse = {code:424, body:{'missing':dataSetId}};
-                return reject(code424InvalidQuery);
+                var unloadedDatasets = [];
+                for(let x in dataSetId){
+                    try {
+                        var oneDataset = dataSetId[x]
+                        //console.time("testing read file filters general")
+                        contentDatasetResult = fs.readFileSync(oneDataset, "utf8")
+                        //console.timeEnd("testing read file filters general")
+
+                    }
+                    catch(err){
+                        if (err.code === 'ENOENT') {
+                            unloadedDatasets.push(oneDataset);
+                        } else {
+                            throw err;
+                        }
+                    }
+                }
+                if(unloadedDatasets.length > 0) {
+                    var code424InvalidQuery: InsightResponse = {code: 424, body: {'missing': unloadedDatasets}};
+                    return reject(code424InvalidQuery);
+                } else{
+                    var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"invalid query"}};
+                    return reject(code400InvalidQuery);
+                }
 
             }
                 else{
@@ -1766,7 +1811,16 @@ export default class InsightFacade implements IInsightFacade {
                             //TODO VALENTINES
                         } else return false;
                     } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
+                        var invalidIdLists = validProjectKey[0].split("_");
+
+                        if(invalidIdArray.includes(invalidIdLists[0])){
+                            invalidIdLists = [];
+                        } else {
+                            invalidIdArray.push(invalidIdLists[0]);
+                        }
+                        isOneDataset = {"false":invalidIdArray}
                         return isOneDataset;
+
                     } else return isOneDataset
                 }
                 else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) && (this.occurrences(validProjectKey[0], "_", true)) == 1 &&

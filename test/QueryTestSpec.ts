@@ -28,7 +28,8 @@ describe("QueryTestSpec", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+        //return insight.addDataset('courses',fs.readFileSync('courses.zip').toString('base64'))
+        //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
 
 
     });
@@ -44,7 +45,8 @@ describe("QueryTestSpec", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         //insightFacade = null
-        return insight.removeDataset('courses');
+        //return insight.removeDataset("rooms");
+        //return insight.removeDataset('courses');
     });
 
     afterEach(function () {
@@ -421,6 +423,64 @@ describe("QueryTestSpec", function () {
 
     });
 
+    it("424 unloaded fake id in options", function () {
+        var queryTest:any =     {
+            "WHERE":{
+                "OR":[
+                    {
+                        "AND":[
+                            {
+                                "AND":[
+                                    {
+                                        "GT":{
+                                            "courses_avg":90
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "NOT":{
+                                    "AND":[
+                                        {
+                                            "GT":{
+                                                "rooms_seats":90
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "EQ":{
+                            "courses_avg":95
+                        }
+                    }
+                ]
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_id",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+        sanityCheck(queryTest);
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(424);
+            expect(value.body).to.deep.equal({"missing":["rooms"]})
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+
+    });
     it("400 testing out complex query with further nested array errors", function () {
         var queryTest:any =     {
             "WHERE":{
@@ -607,14 +667,13 @@ describe("QueryTestSpec", function () {
 
     it("400 invalid order", function () {
         var queryTest:QueryRequest = {
-            "WHERE"://{
-            //"NOT":{"NOT":{"NOT":{"NOT":
+            "WHERE":
                 {"NOT":{"NOT":{"NOT":
                     {
                         "LT":{
                             "courses_avg":99
-                            //}
-                        }}}}//}}}
+
+                        }}}}
 
                 },
             "OPTIONS":{
@@ -622,7 +681,7 @@ describe("QueryTestSpec", function () {
                     "courses_dept",
                     "courses_avg"
                 ],
-                "ORDER":"courses_av",
+                "ORDER":"rooms_avg",
                 "FORM":"TABLE"
             }
         }

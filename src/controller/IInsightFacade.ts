@@ -34,6 +34,7 @@ export interface MCompare{
     courses_pass?: number;       //The number of students that passed the course offering.
     courses_fail?: number;       //The number of students that failed the course offering.
     courses_audit?: number;      //The number of students that audited the course offering.
+    courses_year?: number;       //The year in which the section is offered
 
 }
 

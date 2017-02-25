@@ -7,7 +7,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("QueryTestSpec", function () {
+describe("D2QueryTestSpec", function () {
 
     var insightFacade: InsightFacade = null;
     var insight: InsightFacade = null;
@@ -27,6 +27,7 @@ describe("QueryTestSpec", function () {
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
         return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
+        //return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -52,7 +53,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it.skip("200 testing out simple query self", function () {
+    it("200 testing out simple query self", function () {
 
         var queryTest: any = {
             "WHERE": {
@@ -86,7 +87,41 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it.skip("200 testing out complex query provided in deliverable", function () {
+
+    it("200 testing out NO ORDER simple query self", function () {
+
+        var queryTest: any = {
+            "WHERE": {
+                "GT": {
+                    "rooms_seats": 180
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_seats",
+                    "rooms_address"
+                ],
+
+                "FORM": "TABLE"
+            }
+        }
+
+        var result = {"render":"TABLE","result":[{"rooms_seats":181,"rooms_address":"2194 Health Sciences Mall"},{"rooms_seats":503,"rooms_address":"2194 Health Sciences Mall"},{"rooms_seats":190,"rooms_address":"2175 West Mall V6T 1Z4"},{"rooms_seats":187,"rooms_address":"2175 West Mall V6T 1Z4"},{"rooms_seats":190,"rooms_address":"2175 West Mall V6T 1Z4"},{"rooms_seats":188,"rooms_address":"2175 West Mall V6T 1Z4"},{"rooms_seats":325,"rooms_address":"6174 University Boulevard"},{"rooms_seats":299,"rooms_address":"6000 Student Union Blvd"},{"rooms_seats":299,"rooms_address":"6000 Student Union Blvd"},{"rooms_seats":299,"rooms_address":"6000 Student Union Blvd"},{"rooms_seats":442,"rooms_address":"6108 Thunderbird Boulevard"},{"rooms_seats":236,"rooms_address":"2405 Wesbrook Mall"},{"rooms_seats":280,"rooms_address":"2125 Main Mall"},{"rooms_seats":224,"rooms_address":"1984 Mathematics Road"},{"rooms_seats":200,"rooms_address":"2357 Main Mall"},{"rooms_seats":350,"rooms_address":"2350 Health Sciences Mall"},{"rooms_seats":350,"rooms_address":"2350 Health Sciences Mall"},{"rooms_seats":205,"rooms_address":"6356 Agricultural Road"},{"rooms_seats":183,"rooms_address":"6356 Agricultural Road"},{"rooms_seats":260,"rooms_address":"2053 Main Mall"},{"rooms_seats":257,"rooms_address":"6224 Agricultural Road"},{"rooms_seats":375,"rooms_address":"2045 East Mall"},{"rooms_seats":225,"rooms_address":"1984 West Mall"},{"rooms_seats":250,"rooms_address":"2424 Main Mall"},{"rooms_seats":350,"rooms_address":"2207 Main Mall"},{"rooms_seats":265,"rooms_address":"2036 Main Mall"},{"rooms_seats":240,"rooms_address":"2036 Main Mall"},{"rooms_seats":200,"rooms_address":"2360 East Mall V6T 1Z3"},{"rooms_seats":426,"rooms_address":"2260 West Mall, V6T 1Z4"},{"rooms_seats":181,"rooms_address":"1866 Main Mall"},{"rooms_seats":275,"rooms_address":"1866 Main Mall"},{"rooms_seats":228,"rooms_address":"6270 University Boulevard"}]}
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse) {
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
+
+
+    });
+
+    it("200 testing out complex query provided in deliverable", function () {
 
         var queryTest: any = {
             "WHERE": {
@@ -111,6 +146,50 @@ describe("QueryTestSpec", function () {
 
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
+
+
+    });
+
+    it.only("200 testing out simple query YEARS", function () {
+        var queryTest:QueryRequest = {
+            "WHERE":{
+                "AND": [{
+                    "GT": {
+                        "courses_year": 2015
+                    }
+                },
+                    {
+                        "EQ":{
+                            "courses_avg":97
+                        }
+                    }
+                ]
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_year",
+                    "courses_avg"
+                ],
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        var result = {"render":"TABLE",
+            "result":
+                [{"courses_dept":"math","courses_year":2016,"courses_avg":97.25}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
 
         })
 
