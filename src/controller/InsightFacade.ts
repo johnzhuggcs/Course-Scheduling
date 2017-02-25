@@ -65,9 +65,8 @@ export default class InsightFacade implements IInsightFacade {
 
             //for irongate
             var isInvalidId = false;
-            var burden1 = false;
-            var burden2 = false;
-            var bigBurden = false;
+            var coursesCounter = 0;
+            var roomsCounter = 0;
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
                     zipasync.forEach(function (relativePath: any, file: any) {
@@ -85,20 +84,26 @@ export default class InsightFacade implements IInsightFacade {
                         var parsedJSON = '';
                         var isTry = true;
 
-                       /* if (id == 'courses'
-                        && arrayofUnparsedFileDataAll){
-                            var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
+                        for (let veryinitial in arrayofUnparsedFileDataAll) {
+                            if (String(arrayofUnparsedFileDataAll[veryinitial]).includes('{"result":')
+                                && String(arrayofUnparsedFileDataAll[veryinitial]).includes(',"rank":')) {
+                                coursesCounter++;
+                            }
+                            if (String(arrayofUnparsedFileDataAll[veryinitial]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")) {
+                                roomsCounter++;
+                            }
+                        }
+                        if ((coursesCounter > 0 && roomsCounter == 0 && id == "rooms")
+                            || (coursesCounter == 0 && roomsCounter > 0 && id == "courses")) {
+                            var ir2: InsightResponse = {
+                                code: 400,
+                                body: {'error': 'illegal attempt to add dataset with the wrong id.'}
+                            };
                             isInvalidId = true;
                             reject(ir2);
                             return;
                         }
-                        if (id == 'rooms'){
-                            var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
-                            isInvalidId = true;
-                            burden2 = true;
-                            reject(ir2);
-                            return;
-                        }*/
+
 
 
                         for (let initial in arrayofUnparsedFileDataAll) {
