@@ -106,7 +106,7 @@ describe("D2CampusTest", function () {
         })
 
     });
-    it("Irongate: Adding a dataset with the wrong id should give 400 (rooms)", function () {
+    /*it("Irongate: Adding a dataset with the wrong id should give 400 (rooms)", function () {
         return insight.addDataset('rooms',fs.readFileSync('courses.zip').toString('base64')).then(function (value: InsightResponse) {
             expect.fail();
         }).catch(function (value: InsightResponse) {
@@ -129,7 +129,7 @@ describe("D2CampusTest", function () {
             expect(value.body).to.deep.equal({'error': 'illegal attempt to add dataset with the wrong id.'});
         })
 
-    });
+    });*/
 
 /*
     it("400: addDataset should detect non-real data files (e.g., Array, invalid JSON, etc.)", function () {

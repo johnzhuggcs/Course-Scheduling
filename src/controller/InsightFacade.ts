@@ -65,6 +65,9 @@ export default class InsightFacade implements IInsightFacade {
 
             //for irongate
             var isInvalidId = false;
+            var burden1 = false;
+            var burden2 = false;
+            var bigBurden = false;
             zip.loadAsync(content, {'base64': true}).then(function (zipasync: any) { //converts the content string to a JSZip object and loadasync makes everything become a promise
 
                     zipasync.forEach(function (relativePath: any, file: any) {
@@ -81,6 +84,21 @@ export default class InsightFacade implements IInsightFacade {
                     Promise.all(arrayOfUnparsedFileData).then(arrayofUnparsedFileDataAll => {
                         var parsedJSON = '';
                         var isTry = true;
+
+                       /* if (id == 'courses'
+                        && arrayofUnparsedFileDataAll){
+                            var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
+                            isInvalidId = true;
+                            reject(ir2);
+                            return;
+                        }
+                        if (id == 'rooms'){
+                            var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
+                            isInvalidId = true;
+                            burden2 = true;
+                            reject(ir2);
+                            return;
+                        }*/
 
 
                         for (let initial in arrayofUnparsedFileDataAll) {
@@ -101,6 +119,7 @@ export default class InsightFacade implements IInsightFacade {
                                 delete (arrayofUnparsedFileDataAll[initial]);
                                 //no need to minus noofFiles since it's not calculated yet
                             }
+
                         }
 
                         for (let i in arrayofUnparsedFileDataAll) {
@@ -112,12 +131,6 @@ export default class InsightFacade implements IInsightFacade {
                             //should reject {"result":[],"rank":0} here as well (because it hasn't contain any courses info)
                             //if not result for first key and rank for second key
                             if (!String(arrayofUnparsedFileDataAll[i]).includes("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML+RDFa 1.1//EN\">")) {
-                                if (id == 'rooms'){
-                                    var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
-                                    isInvalidId = true;
-                                    reject(ir2);
-                                    return;
-                                }
                                 try {
                                     isTry = true;
                                     var x = String(arrayofUnparsedFileDataAll[i]);//JSON.stringify doesn't work
@@ -159,13 +172,6 @@ export default class InsightFacade implements IInsightFacade {
                             } else {
 
                                 //for irongate
-                                if (id == 'courses'){
-                                    var ir2: InsightResponse = {code: 400, body: {'error': 'illegal attempt to add dataset with the wrong id.'}};
-                                    isInvalidId = true;
-                                    reject(ir2);
-                                    return;
-                                }
-
                                 isHTML = true;/*
                                 var listOfValidShortNames: string[] = [];
                                 var listOfValidFullNames: string[] = [];
