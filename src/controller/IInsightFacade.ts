@@ -124,8 +124,6 @@ export interface IInsightFacade {
 
     pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[],invalidRoomCounter:number):any;
 
-    insertLatLonToParsedJson(finallatlon:any[], arrayOfAddr: string[], arrayOfParsedJson: any[], parsedJ:string, newParsedJ:string):any;
-
     removeDataset(id: string): Promise<InsightResponse>;
 
 
