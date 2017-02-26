@@ -155,7 +155,7 @@ describe("ComplexQuerySpec", function () {
 
     });
 
-    it("200 testing out Excalibur", function () {
+    it.only("200 testing out Excalibur", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
 

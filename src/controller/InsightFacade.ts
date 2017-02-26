@@ -1574,8 +1574,7 @@ export default class InsightFacade implements IInsightFacade {
                 filter = query[Where]; //returns content of FILTER
 
                 isOneDataset = this.hasFilter(filter, invalidIdArray, isOneDataset);
-                var yesOrNo = Object.keys(isOneDataset)[0];
-                var dataSet = isOneDataset[yesOrNo];
+
                 if(isOneDataset != false) { //check if FILTER is valid, needed as FILTER is recursively nested && invalidIdArray.length == 0
                     optionsValue = query[Options]; //gets all values from OPTIONS
                     columnsEtcKey = Object.keys(optionsValue); //gets all the "key" within the value from OPTIONS, such as COLUMNS and etc...
@@ -1583,6 +1582,8 @@ export default class InsightFacade implements IInsightFacade {
                         (columnsEtcKey.length == 2 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "FORM")){
                         columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
                         for(let x in columnsValidKeyArray){
+                            var yesOrNo = Object.keys(isOneDataset)[0];
+                            var dataSet = isOneDataset[yesOrNo];
                             if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
                                 || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                                 || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"

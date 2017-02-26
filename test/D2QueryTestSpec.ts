@@ -682,5 +682,82 @@ describe("D2QueryTestSpec", function () {
 
     });
 
+    it("424 testing out one AND", function () {
+
+        var queryTest: QueryRequest =  {
+            "WHERE": {
+                "AND": [{
+                    "OR":[{
+                        "IS":{
+                            "rooms_type":"Tiered Large Group"
+                        }
+                    }]},
+                    {
+                        "GT": {
+                            "rooms_lat": 49.2612
+                        }
+                    },
+                    {
+                        "LT": {
+                            "rooms_lat": 49.26129
+                        }
+                    },
+                    {
+                        "LT": {
+                            "rooms_lon": -123.2480
+                        }
+                    },
+                    {
+                        "GT": {
+                            "rooms_lon": -123.24809
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "crap_fullname",
+                    "rooms_shortname",
+                    "damn_number",
+                    "rooms_name",
+                    "rooms_address",
+                    "rooms_type",
+                    "rooms_furniture",
+                    "rooms_href",
+                    "rooms_lat",
+                    "rooms_lon",
+                    "rooms_seats"
+                ],
+
+                "FORM": "TABLE"
+            }
+        }
+
+        var result = {"render":"TABLE","result":[{"rooms_fullname":"Hugh Dempster Pavilion","rooms_shortname":"DMP","rooms_number":"310","rooms_name":"DMP_310","rooms_address":"6245 Agronomy Road V6T 1Z4","rooms_type":"Tiered Large Group","rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-310","rooms_lat":49.26125,"rooms_lon":-123.24807,"rooms_seats":160},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_shortname":"DMP","rooms_number":"301","rooms_name":"DMP_301","rooms_address":"6245 Agronomy Road V6T 1Z4","rooms_type":"Tiered Large Group","rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-301","rooms_lat":49.26125,"rooms_lon":-123.24807,"rooms_seats":80},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_shortname":"DMP","rooms_number":"110","rooms_name":"DMP_110","rooms_address":"6245 Agronomy Road V6T 1Z4","rooms_type":"Tiered Large Group","rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-110","rooms_lat":49.26125,"rooms_lon":-123.24807,"rooms_seats":120}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: any) {
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"]
+            var expectedResult:any = result["result"];
+            expect(value.body).to.deep.equal(result);
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).includes(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing": ["crap", "damn"]})
+
+        })
+
+
+    });
+
 
 });
