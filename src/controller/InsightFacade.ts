@@ -973,7 +973,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                             if(sectionValidKey == "Section" && singleSection[sectionValidKey] == "overall"){
                                                 overallSection = true;
-                                                atomicReturnInfo = {courses_year:1900}
+                                                atomicReturnInfo = {"courses_year":1900}
                                                 returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
                                                 sectionValidKey = null;
                                                 atomicReturnInfo = null;
@@ -1136,7 +1136,7 @@ export default class InsightFacade implements IInsightFacade {
                                 });
 
                             } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
-                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address")) {
+                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type")) {
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                     var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1891,19 +1891,13 @@ export default class InsightFacade implements IInsightFacade {
 
                     } else return isOneDataset
                 }else if(validProjectKey.length == 1  && (this.occurrences(validProjectKey[0], "_", true)) == 1 && (validProjectKey[0] == "rooms_fullname" || validProjectKey[0] == "rooms_shortname"|| validProjectKey[0] == "rooms_number"||validProjectKey[0] == "rooms_address" || validProjectKey[0] == "rooms_type"
-                    || validProjectKey[0] == "rooms_furniture" || validProjectKey[0] == "rooms_href")){
+                    || validProjectKey[0] == "rooms_furniture" || validProjectKey[0] == "rooms_href" || validProjectKey[0] == "rooms_name")){
                     if(yesOrNo == "true" && (dataSet == "rooms" || dataSet.length == 0)) {
                         if (isString(sComparisonString) || (sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                             isString(sComparisonString))) {
-                            if(validProjectKey[0] == "rooms_name"){
-                                if(sComparisonString == comparisonValue["rooms_shortname"]+"_"+comparisonValue["rooms_number"]){
-                                    isOneDataset = {"true": ["rooms"]};
-                                    return isOneDataset;
-                                }else return false
-                            }else {
-                                isOneDataset = {"true": "rooms"};
+
+                                isOneDataset = {"true": ["rooms"]};
                                 return isOneDataset;
-                            }
 
                         } else return false;
                     } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
@@ -1917,7 +1911,7 @@ export default class InsightFacade implements IInsightFacade {
                         isOneDataset = {"false":invalidIdArray}
                         return isOneDataset;
 
-                    } else isOneDataset
+                    } else return isOneDataset
                 } else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) &&
                     (validProjectKey[0].endsWith("_dept") || validProjectKey[0].endsWith("_id") ||
                     validProjectKey[0].endsWith("_instructor") || validProjectKey[0].endsWith("_title")|| validProjectKey[0].endsWith("_uuid"))){
