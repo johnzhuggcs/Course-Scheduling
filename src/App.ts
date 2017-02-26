@@ -6,7 +6,7 @@ import Log from './Util';
 
 /**
  * Starts the server; doesn't listen to whether the start was successful.
- */
+ *//**
 export class App {
     public initServer(port: number) {
         Log.info('App::initServer( ' + port + ' ) - start');
@@ -23,4 +23,4 @@ export class App {
 // This ends up starting the whole system and listens on a hardcoded port (4321)
 Log.info('App - starting');
 let app = new App();
-app.initServer(4321);
+app.initServer(4321); */

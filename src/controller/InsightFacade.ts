@@ -935,7 +935,7 @@ export default class InsightFacade implements IInsightFacade {
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
                     for (let x in datasetResultArray) { //iterates through the array of results, now just a result
-                        /**if(Number(x) >= 1638){
+                        /**if(Number(x) == 123){
                             Log.info("start debug")
                         }*/
                         //Log.info(x)
@@ -961,7 +961,7 @@ export default class InsightFacade implements IInsightFacade {
                                     //console.time("one course")
                                     for (let x in sectionArray) {
                                         singleSection = sectionArray[x]
-                                        /**if(Number(x) == 21){
+                                        /**if(Number(x) == 4){
                                             Log.info("continue debug")
                                         }*/
                                         var overallSection:boolean = false;
@@ -1401,8 +1401,13 @@ export default class InsightFacade implements IInsightFacade {
             tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
             tempReturnInfo2 = returnInfo;
 
-
-            if(tempSortKey[0] == "GT" || tempSortKey[0] == "LT" || tempSortKey[0] == "EQ" || tempSortKey[0] == "IS"){
+            if(resultKeyArray[0] == "AND" || resultKeyArray[0] == "OR"){
+                for(let x in newResult) {
+                    sortKey = this.getFilterArray(newResult[x])
+                    returnInfo = this.isNOT(returnInfo, tempReturnInfo, sortKey, resultKeyArray);
+                }
+            }
+            else if(tempSortKey[0] == "GT" || tempSortKey[0] == "LT" || tempSortKey[0] == "EQ" || tempSortKey[0] == "IS"){
                 sortKey = sortKey[tempSortKey[0]]
             } else if(tempSortKey[0] == "NOT"){
                 sortKey = this.getFilterArray(resultOfWhere);
