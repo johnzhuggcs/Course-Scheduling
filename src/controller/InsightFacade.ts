@@ -1332,10 +1332,17 @@ export default class InsightFacade implements IInsightFacade {
             var newResult;
             var tempReturnInfo
             for(let x in resultOfWhere){
+                /**if(resultOfWhere.length == 1){
+                    newFilter = resultOfWhere[x];
+                    newKeys = Object.keys(newFilter);
+                    newResult = newFilter[newKeys[0]];
+                    returnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+                }*/
                 if(Number(x) == 0){
                     newFilter = resultOfWhere[x];
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
+                    returnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
 
                 }else {
                     returnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
@@ -1366,6 +1373,9 @@ export default class InsightFacade implements IInsightFacade {
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
+                    if(resultOfWhere.length == 1){
+                        returnInfo = tempReturnInfo
+                    }else{tempReturnInfo = tempReturnInfo}
                 }else {
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
                     newFilter = resultOfWhere[x];
