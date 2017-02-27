@@ -18,8 +18,8 @@ export interface QueryRequest {
 }
 
 export interface FilterQuery{
-    OR?:[FilterQuery, FilterQuery];
-    AND?:[FilterQuery, FilterQuery];
+    OR?:[FilterQuery];
+    AND?:[FilterQuery];
     LT?:MCompare;
     GT?:MCompare;
     EQ?:MCompare;
@@ -35,6 +35,9 @@ export interface MCompare{
     courses_fail?: number;       //The number of students that failed the course offering.
     courses_audit?: number;      //The number of students that audited the course offering.
     courses_year?: number;       //The year in which the section is offered
+    rooms_lat?: number;
+    rooms_lon?: number;
+    rooms_seats?: number;
 
 }
 
@@ -45,6 +48,11 @@ export interface SCompare{
     courses_instructor?: string; //The instructor teaching the course offering.
     courses_title?: string;      //The name of the course.
     courses_uuid?:string;        //The unique id of a course offering.
+    rooms_fullname?:string;
+    rooms_shorname?:string;
+    rooms_name?:string;
+    rooms_type?:string;
+    courses_year?:number;
    }
 
 export interface ColumnsQuery{

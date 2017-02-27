@@ -2221,7 +2221,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it("400 testing out complex partial prof name", function () {
+    it("200 testing out complex partial prof name", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "AND":[

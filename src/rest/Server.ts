@@ -44,6 +44,7 @@ export default class Server {
      *
      * @returns {Promise<boolean>}
      */
+    /**
     public start(): Promise<boolean> {
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -81,11 +82,12 @@ export default class Server {
             }
         });
     }
+     */
 
     // The next two methods handle the echo service.
     // These are almost certainly not the best place to put these, but are here for your reference.
     // By updating the Server.echo function pointer above, these methods can be easily moved.
-
+/**
     public static echo(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('Server::echo(..) - params: ' + JSON.stringify(req.params));
         try {
@@ -97,7 +99,7 @@ export default class Server {
             res.json(400, {error: err.message});
         }
         return next();
-    }
+    }*/
 
     public static performEcho(msg: string): InsightResponse {
         if (typeof msg !== 'undefined' && msg !== null) {
