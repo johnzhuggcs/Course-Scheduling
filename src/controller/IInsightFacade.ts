@@ -52,6 +52,7 @@ export interface SCompare{
     rooms_shorname?:string;
     rooms_name?:string;
     rooms_type?:string;
+    courses_year?:number;
    }
 
 export interface ColumnsQuery{

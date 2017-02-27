@@ -803,6 +803,7 @@ export default class InsightFacade implements IInsightFacade {
         var dataSetId = queryCheck[yesOrNo];
 
         return new Promise(function (resolve, reject) {
+
             if(yesOrNo == "true"){
                 var filter = query.WHERE
                 var columns = query.OPTIONS.COLUMNS;
@@ -1653,7 +1654,7 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }isOneDataset = {"false":invalidIdArray}
 
-                            }else if(typeof columnsValidKeyArray[x] == "string" && (!(columnsValidKeyArray[x].startsWith("courses") && !(columnsValidKeyArray[x].startsWith("rooms"))) && columnsValidKeyArray[x].includes("_"))){
+                            }else if(typeof columnsValidKeyArray[x] == "string" && (!(columnsValidKeyArray[x].startsWith("courses")) || !(columnsValidKeyArray[x].startsWith("rooms"))) && columnsValidKeyArray[x].includes("_")){
 
                                 invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -1667,13 +1668,15 @@ export default class InsightFacade implements IInsightFacade {
                             }else
                                 return false
                         } if(columnsEtcKey[1] == "ORDER") {
+                            yesOrNo = Object.keys(isOneDataset)[0];
+                            dataSet = isOneDataset[yesOrNo];
                             orderValidKey = optionsValue[columnsEtcKey[1]];//gets ORDER key
                             if (columnsValidKeyArray.includes(orderValidKey)) {
-                                if (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+                                if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
                                     || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
                                     || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
                                     || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                    || orderValidKey == "courses_uuid" || orderValidKey == "courses_year") { //checks for valid key
+                                    || orderValidKey == "courses_uuid" || orderValidKey == "courses_year")) { //checks for valid key
                                     if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
                                         Table = optionsValue[columnsEtcKey[2]];
                                         if (Table == "TABLE") { //if value of FORM is TABLE
@@ -1682,7 +1685,7 @@ export default class InsightFacade implements IInsightFacade {
                                         } else return false;
 
                                     } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
-                                        var invalidIdLists = orderValidKey.split("_");
+                                        var invalidIdLists:any = orderValidKey.split("_");
 
                                         if(invalidIdArray.includes(invalidIdLists[0])){
                                             invalidIdLists = [];
@@ -1693,11 +1696,11 @@ export default class InsightFacade implements IInsightFacade {
                                         return isOneDataset;
 
                                     } return isOneDataset;
-                                } else if (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
+                                } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
                                     || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
                                     || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
                                     || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
-                                    || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture") { //checks for valid key
+                                    || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture")) { //checks for valid key
                                     if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
                                         Table = optionsValue[columnsEtcKey[2]];
                                         if (Table == "TABLE") { //if value of FORM is TABLE
@@ -1706,7 +1709,7 @@ export default class InsightFacade implements IInsightFacade {
                                         } else return false;
 
                                     } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
-                                        var invalidIdLists = orderValidKey.split("_");
+                                        var invalidIdLists:any = orderValidKey.split("_");
 
                                         if(invalidIdArray.includes(invalidIdLists[0])){
                                             invalidIdLists = [];
@@ -1747,7 +1750,7 @@ export default class InsightFacade implements IInsightFacade {
                                     }
                                     isOneDataset = {"false":invalidIdArray}
                                     return isOneDataset;
-                                } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses") && !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_"))) {
+                                } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
 
                                     invalidIdLists = orderValidKey.split("_");
 
@@ -1760,7 +1763,8 @@ export default class InsightFacade implements IInsightFacade {
                                     return isOneDataset;
                                 } else return false
                             } else return false
-                        } else { Table = optionsValue[columnsEtcKey[1]];
+                        } else {
+                            Table = optionsValue[columnsEtcKey[1]];
                             if (Table == "TABLE") { //if value of FORM is TABLE
                                 return isOneDataset;
                             } else return false;
@@ -1796,7 +1800,7 @@ export default class InsightFacade implements IInsightFacade {
                 mComparisonNumber = comparisonValue[validProjectKey[0]];
                 var yesOrNo = Object.keys(isOneDataset)[0];
                 var dataSet = isOneDataset[yesOrNo];
-                if( validProjectKey.length == 1 && (validProjectKey[0] == "courses_avg" || validProjectKey[0] == "courses_pass" ||
+                if( validProjectKey.length == 1 && typeof validProjectKey[0] == "string" && (validProjectKey[0] == "courses_avg" || validProjectKey[0] == "courses_pass" ||
                     validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit" || validProjectKey[0] == "courses_year")){ //make sure only a valid key exists
                     if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
@@ -1804,7 +1808,7 @@ export default class InsightFacade implements IInsightFacade {
                             return isOneDataset;
                             //TODO VALENTINES
                         } else return false;
-                    } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
+                    } else if(yesOrNo == "true" && (dataSet[0] != "courses") && typeof validProjectKey[0] == "string"){
                         var invalidIdLists = validProjectKey[0].split("_");
 
                         if(invalidIdArray.includes(invalidIdLists[0])){
@@ -1817,7 +1821,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     } else return isOneDataset
                  }
-                else if(validProjectKey.length == 1 && (validProjectKey[0] == "rooms_lat" || validProjectKey[0] == "rooms_lon" ||
+                else if(validProjectKey.length == 1 && typeof validProjectKey[0] == "string" && (validProjectKey[0] == "rooms_lat" || validProjectKey[0] == "rooms_lon" ||
                     validProjectKey[0] == "rooms_seats")){ //make sure only a valid key exists
 
                     if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
@@ -1826,7 +1830,7 @@ export default class InsightFacade implements IInsightFacade {
                             return isOneDataset;
                             //TODO VALENTINES
                         } else return false;
-                    } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
+                    } else if(yesOrNo == "true" && (dataSet[0] != "rooms") && typeof validProjectKey[0] == "string"){
                         var invalidIdLists = validProjectKey[0].split("_");
 
                         if(invalidIdArray.includes(invalidIdLists[0])){
@@ -1865,7 +1869,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
-                } else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses") || !(validProjectKey[0].startsWith("rooms")) && validProjectKey[0].includes("_"))){
+                } else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1877,7 +1881,19 @@ export default class InsightFacade implements IInsightFacade {
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
 
-                } else return false;
+                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    isOneDataset = {"false":invalidIdArray}
+                    return isOneDataset;
+
+                }else return false;
 
 
             } else if (comparisonKey[0] == "IS"){ //SComparator
@@ -1886,7 +1902,7 @@ export default class InsightFacade implements IInsightFacade {
                 sComparisonString = comparisonValue[validProjectKey[0]];
                 var yesOrNo = Object.keys(isOneDataset)[0];
                 var dataSet = isOneDataset[yesOrNo];
-                if(validProjectKey.length == 1  && (this.occurrences(validProjectKey[0], "_", true)) == 1 && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
+                if(validProjectKey.length == 1  && typeof validProjectKey[0] == "string" && (this.occurrences(validProjectKey[0], "_", true)) == 1 && (validProjectKey[0] == "courses_dept" || validProjectKey[0] == "courses_id"|| validProjectKey[0] == "courses_instructor"||validProjectKey[0] == "courses_title" || validProjectKey[0] == "courses_uuid")){
                     if(yesOrNo == "true" && (dataSet == "courses" || dataSet.length == 0)) {
                         if (isString(sComparisonString) || (sComparisonString.toString().charAt(0) && sComparisonString.toString().charAt(sComparisonString.toString().length - 1) &&
                             isString(sComparisonString))) {
@@ -1894,7 +1910,7 @@ export default class InsightFacade implements IInsightFacade {
                             return isOneDataset;
 
                         } else return false;
-                    } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
+                    } else if(yesOrNo == "true" && typeof validProjectKey[0] == "string" && (dataSet[0] != "courses")){
                         var invalidIdLists = validProjectKey[0].split("_");
 
                         if(invalidIdArray.includes(invalidIdLists[0])){
@@ -1955,7 +1971,7 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
-                }else if(typeof  validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses") || !(validProjectKey[0].startsWith("rooms")) && validProjectKey[0].includes("_"))){
+                }else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1966,7 +1982,21 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
-                }else return false;
+                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if(invalidIdArray.includes(invalidIdLists[0])){
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    isOneDataset = {"false":invalidIdArray}
+                    return isOneDataset;
+
+                }else {
+                    return false;
+                }
 
             } else if (comparisonKey[0] == "NOT"){ //NEGATION
                 isOneDataset = this.hasFilter(comparisonValue, invalidIdArray, isOneDataset)
