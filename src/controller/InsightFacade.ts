@@ -1,7 +1,7 @@
 /**
  * This is the main programmatic entry point for the project.
  */
-import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery, TypeScriptSucks} from "./IInsightFacade";
+import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery} from "./IInsightFacade";
 
 import Log from "../Util";
 import {isString} from "util";
@@ -923,7 +923,7 @@ export default class InsightFacade implements IInsightFacade {
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
                 //console.timeEnd("parse through extracted content")
-                // TODO: sort result Info
+
 
 
                 // example empty result {"result":[],"rank":0}
@@ -1117,12 +1117,11 @@ export default class InsightFacade implements IInsightFacade {
                                     return reject(code400InvalidQuery)
                                 }
 
-                                // TODO: then get the WHERE to decide which ones to keep
+
 
                             }
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
-                    // TODO: sort using order last
 
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
@@ -1137,7 +1136,7 @@ export default class InsightFacade implements IInsightFacade {
                                 });
 
                             } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
-                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type")) {
+                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")) {
                                 finalReturn = finalReturn.sort(function (a, b) {
                                     var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                     var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1461,9 +1460,9 @@ export default class InsightFacade implements IInsightFacade {
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
-                returnInfo = [] //TODO: Possible error HERE!!!
+                returnInfo = []
             } else{
-                returnInfo = returnInfo //TODO: Possible error HERE!!!
+                returnInfo = returnInfo
             }
         }return returnInfo;
     }
@@ -1480,7 +1479,7 @@ export default class InsightFacade implements IInsightFacade {
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
-                returnInfo = [] //TODO: Possible error HERE!!!
+                returnInfo = []
             } else{returnInfo = returnInfo}
         }return returnInfo;
     }
@@ -1496,9 +1495,9 @@ export default class InsightFacade implements IInsightFacade {
             if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal && sortKey == tempAtomicKey) {
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
-                returnInfo = [] //TODO: Possible error HERE!!!
+                returnInfo = []
             } else {
-                returnInfo = returnInfo //TODO: Possible error HERE!!!
+                returnInfo = returnInfo
             }
         }
         return returnInfo;//resultKeyArray[0] is basically "courses_avg"
@@ -1522,7 +1521,7 @@ export default class InsightFacade implements IInsightFacade {
             } else if(isString(sortVal) && tempAtomicValue == sortVal && sortKey == tempAtomicKey){
                 tempAtomicValue = tempAtomicValue
             } else if(isString(sortVal) && sortKey == tempAtomicKey){
-                returnInfo = [] //TODO: Possible error HERE!!!
+                returnInfo = []
             } else{
                 returnInfo = returnInfo
             }
@@ -1806,7 +1805,7 @@ export default class InsightFacade implements IInsightFacade {
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
                             isOneDataset = {"true": ["courses"]};
                             return isOneDataset;
-                            //TODO VALENTINES
+
                         } else return false;
                     } else if(yesOrNo == "true" && (dataSet[0] != "courses") && typeof validProjectKey[0] == "string"){
                         var invalidIdLists = validProjectKey[0].split("_");
@@ -1828,7 +1827,7 @@ export default class InsightFacade implements IInsightFacade {
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
                             isOneDataset = {"true": ["rooms"]};
                             return isOneDataset;
-                            //TODO VALENTINES
+
                         } else return false;
                     } else if(yesOrNo == "true" && (dataSet[0] != "rooms") && typeof validProjectKey[0] == "string"){
                         var invalidIdLists = validProjectKey[0].split("_");

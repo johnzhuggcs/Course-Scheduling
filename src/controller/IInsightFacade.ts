@@ -14,8 +14,26 @@ export interface QueryRequest {
 
     WHERE:FilterQuery;
     OPTIONS:ColumnsQuery;
+    TRANSFORMATIONS?:TransformationQuery
     [propName: string]: any;
 }
+
+export interface TransformationQuery{
+    GROUP:[string];
+    APPLY:[{string:Token}]
+}
+
+
+export interface Token{
+    MAX?:string;
+    MIN?:string;
+    AVG?:string;
+    COUNT?:string;
+    SUM?:string;
+    [propName:string]:any
+}
+
+
 
 export interface FilterQuery{
     OR?:[FilterQuery];
@@ -57,12 +75,13 @@ export interface SCompare{
 
 export interface ColumnsQuery{
     COLUMNS:[string];
-    ORDER?:string;
-    FORM:"TABLE";
+    ORDER?:{dir:Direction, keys?:[string]}|string;
+    FORM:"TABLE"
 }
 
-export interface TypeScriptSucks{
-
+export interface Direction{
+    UP?:string
+    DOWN?:string
 }
 
 export interface IInsightFacade {

@@ -759,5 +759,68 @@ describe("D2QueryTestSpec", function () {
 
     });
 
+    it("200 testing out href", function () {
+
+        var queryTest: any = {
+            "WHERE": {
+
+                    "AND": [
+                        {
+                            "GT": {
+                                "rooms_seats": 20
+                            }
+                        },
+                        {
+                            "LT": {
+                                "rooms_lon": -123.2480
+                            }
+                        },
+                        {
+                            "GT": {
+                                "rooms_lon": -123.24809
+                            }
+                        }
+                    ]
+
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_fullname",
+                    "rooms_href",
+                    "rooms_seats"
+                ],
+                "ORDER": "rooms_href",
+                "FORM": "TABLE"
+            }
+        }
+
+        var result:any = {"render":"TABLE","result":[{"rooms_fullname":"Hugh Dempster Pavilion","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-101","rooms_seats":40},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-110","rooms_seats":120},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201","rooms_seats":40},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-301","rooms_seats":80},{"rooms_fullname":"Hugh Dempster Pavilion","rooms_href":"http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-310","rooms_seats":160}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: any) {
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"]
+            var expectedResult:any = result["result"];
+            //expect(value.body).to.deep.equal(result);
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).include(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+
+            Log.test("passed here")
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
+
+
+    });
+
 
 });
