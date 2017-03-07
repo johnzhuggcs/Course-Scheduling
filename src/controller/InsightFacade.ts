@@ -1125,6 +1125,7 @@ export default class InsightFacade implements IInsightFacade {
 
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
+                        //TODO: check for new ORDER
                         if (columns.includes(order)) {
                             /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
                              validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
@@ -1554,10 +1555,13 @@ export default class InsightFacade implements IInsightFacade {
 
     //Help Functions For querychecking
     isValid(query:QueryRequest):any{
+        //TODO: check for new ORDER and TRANSFORMATION
         //checks for query provided is of valid syntax
         var keyArray = Object.keys(query); //an array of the keys, should only be WHERE and OPTIONS now
         var Where    //returns WHERE
         var Options; //returns OPTIONS
+        var Transformations; //returns TRANSFORMATIONS
+        var noFilter:boolean;
         var filter;  //returns value of FILTER
         var optionsValue; //returns value of OPTIONS
         var columnsEtcKey; //returns values including and after COLUMNS
@@ -1567,13 +1571,20 @@ export default class InsightFacade implements IInsightFacade {
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
-        if(keyArray[0] == "WHERE" && keyArray[1] == "OPTIONS"){ //checks if outermost keys are WHERE and OPTIONS
+        if(keyArray[0] == "WHERE" && keyArray[1] == "OPTIONS" && (keyArray[2] == "TRANSFORMATIONS" || isUndefined(keyArray[2]))){ //checks if outermost keys are WHERE and OPTIONS
 
                 Where = keyArray[0]; //gets "WHERE"
                 Options = keyArray[1]; //gets"OPTIONS"
-                filter = query[Where]; //returns content of FILTER
+                if(!isUndefined(keyArray[2])){
+                    Transformations = keyArray[2] //gets "TRANSFORMATIONS" if they exist
+                }
 
-                isOneDataset = this.hasFilter(filter, invalidIdArray, isOneDataset);
+                filter = query[Where]; //returns content of FILTER
+                if(filter.length == 0){
+                    noFilter = true;
+                } else {
+                    isOneDataset = this.hasFilter(filter, invalidIdArray, isOneDataset);
+                }
 
                 if(isOneDataset != false) { //check if FILTER is valid, needed as FILTER is recursively nested && invalidIdArray.length == 0
                     optionsValue = query[Options]; //gets all values from OPTIONS
