@@ -1891,7 +1891,7 @@ export default class InsightFacade implements IInsightFacade {
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
 
-                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+                /**} else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1901,7 +1901,7 @@ export default class InsightFacade implements IInsightFacade {
                         invalidIdArray.push(invalidIdLists[0]);
                     }
                     isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
+                    return isOneDataset;*/
 
                 }else return false;
 
@@ -1981,7 +1981,18 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
-                }else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+                }else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")) {
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    isOneDataset = {"false": invalidIdArray}
+                    return isOneDataset;
+                    /**} else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1991,18 +2002,7 @@ export default class InsightFacade implements IInsightFacade {
                         invalidIdArray.push(invalidIdLists[0]);
                     }
                     isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
-                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
-
-                    var invalidIdLists = validProjectKey[0].split("_");
-
-                    if(invalidIdArray.includes(invalidIdLists[0])){
-                        invalidIdLists = [];
-                    } else {
-                        invalidIdArray.push(invalidIdLists[0]);
-                    }
-                    isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
+                    return isOneDataset;*/
 
                 }else {
                     return false;
