@@ -1128,7 +1128,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
 
-                    //console.time("sort through result")
+                   // console.time("sort through result")
                     if(!(isUndefined(order))) {
                         //TODO: check for new ORDER
                         if (typeof order == "string") {
@@ -1186,6 +1186,7 @@ export default class InsightFacade implements IInsightFacade {
                             }
                             //console.timeEnd("sort through result")
                         } else {
+                            //console.time("sort through new order")
                             var orderKeys = Object.keys(order);
                             var dir:any = order[orderKeys[0]];
                             var keysArray:any = order[orderKeys[1]];
@@ -1271,7 +1272,7 @@ export default class InsightFacade implements IInsightFacade {
                                         reject(code400InvalidQuery);
                                     }
 
-
+                            //console.timeEnd("sort through new order")
                         }
                     }
 
