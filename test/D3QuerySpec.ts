@@ -177,7 +177,7 @@ describe("D3QueryTestSpec", function () {
 
 
     });
-    it("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it.skip("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: QueryRequest =  {
             "WHERE": {

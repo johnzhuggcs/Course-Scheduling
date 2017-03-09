@@ -52,7 +52,7 @@ describe("ComplexQuerySpec", function () {
 
     });
 
-    it("200 testing out Firetruck", function () {
+    it.skip("200 testing out Firetruck", function () {
         var queryTest:any = {
             "WHERE":{
                 "AND":[
@@ -192,7 +192,7 @@ describe("ComplexQuerySpec", function () {
 
     });
 
-    it("200 testing out Excalibur NO ORDER", function () {
+    it.skip("200 testing out Excalibur NO ORDER", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
 
