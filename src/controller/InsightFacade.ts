@@ -821,7 +821,7 @@ export default class InsightFacade implements IInsightFacade {
                 //var nonExistIdArray = [];
 
 
-                /**
+
                 if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
                     var nonLogicFilter;
                     //console.time("testing get filter");
@@ -901,9 +901,9 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
 
-                }*/
+                }
 
-                var grabbingIDColumnKey = columns[0];
+                /**var grabbingIDColumnKey = columns[0];
                 validKey = grabbingIDColumnKey.split("_");
                 var testingResult = validKey[0]
                 try {
@@ -920,7 +920,7 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         throw err;
                     }
-                }
+                }*/
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
                 //console.timeEnd("parse through extracted content")
