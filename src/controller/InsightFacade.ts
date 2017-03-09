@@ -797,9 +797,9 @@ export default class InsightFacade implements IInsightFacade {
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
         var fs = require("fs");
-        //console.time("start query check")
+        console.time("start query check")
         var queryCheck = this.isValid(query);
-        //console.timeEnd("start query check")
+        console.timeEnd("start query check")
         var newThis = this;
         var yesOrNo = Object.keys(queryCheck)[0];
         var dataSetId = queryCheck[yesOrNo];
@@ -870,7 +870,7 @@ export default class InsightFacade implements IInsightFacade {
                         catch(err){
                             if (err.code === 'ENOENT') {
                                 var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                return (code424InvalidQuery);
+                                return reject(code424InvalidQuery);
 
                             } else {
                                 throw err;
@@ -1754,6 +1754,7 @@ export default class InsightFacade implements IInsightFacade {
     isValid(query:QueryRequest):any{
         //TODO: check for new ORDER and TRANSFORMATION
         //checks for query provided is of valid syntax
+
         var keyArray = Object.keys(query); //an array of the keys, should only be WHERE and OPTIONS now
         var Where    //returns WHERE
         var Options; //returns OPTIONS
@@ -2074,6 +2075,7 @@ export default class InsightFacade implements IInsightFacade {
                                                     var applyDatasetArray = applyTokenWithKey[applyToken].split("_")
                                                     var applyDataset = applyDatasetArray[0]
                                                     isOneDataset = {"false":[applyDataset]}
+
                                                     return isOneDataset
                                                 }
                                             }else return false;
@@ -2092,7 +2094,8 @@ export default class InsightFacade implements IInsightFacade {
 
 
         }else return false;
-    }
+
+        }
 
     hasFilter(filter:FilterQuery, invalidIdArray:any, isOneDataset:any):any{ //
         var comparisonKey = Object.keys(filter); //gets first comparator from FILTER

@@ -1,13 +1,14 @@
 /**
- * Created by johnz on 2017-03-08.
+ * Created by johnz on 2017-03-09.
  */
+
 import {expect} from 'chai';
 import Log from "../src/Util";
 import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("D3QueryTestSpec", function () {
+describe("D3TimeAnalysis", function () {
 
     var insightFacade: InsightFacade = null;
     var insight: InsightFacade = null;
@@ -26,8 +27,8 @@ describe("D3QueryTestSpec", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
-        return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
+        return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
+        //return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -43,8 +44,8 @@ describe("D3QueryTestSpec", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         insightFacade = null
-        //return insight.removeDataset('rooms');
-        return insight.removeDataset('courses');
+        return insight.removeDataset('rooms');
+        //return insight.removeDataset('courses');
 
     });
 
@@ -55,24 +56,6 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("checking out NO FILTER complex query provided in deliverable", function () {
-        var queryTest: any = {
-            "WHERE": {
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "courses_dept",
-                    "courses_id",
-                    "courses_avg"
-                ],
-                "ORDER": "courses_avg",
-                "FORM": "TABLE"
-            }
-        }
-        //sanityCheck(queryTest);
-        var result = {"true": ["courses"]};
-        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
-    });
 
     it("checking out weird query provided in deliverable", function () {
         var queryTest: any = {
@@ -94,90 +77,6 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it("checking out complex query provided in deliverable", function () {
-        var queryTest: any = {
-            "WHERE": {
-                "AND": [{
-                    "IS": {
-                        "rooms_furniture": "*Tables*"
-                    }
-                }, {
-                    "GT": {
-                        "rooms_seats": 300
-                    }
-                }]
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "rooms_shortname",
-                    "maxSeats"
-                ],
-                "ORDER": {
-                    "dir": "DOWN",
-                    "keys": ["maxSeats"]
-                },
-                "FORM": "TABLE"
-            },
-            "TRANSFORMATIONS": {
-                "GROUP": ["rooms_shortname"],
-                "APPLY": [{
-                    "maxSeats": {
-                        "MAX": "rooms_seats"
-                    }
-                }]
-            }
-        }
-        sanityCheck(queryTest);
-        var result = {"true": ["rooms"]};
-        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
-    });
-
-    it("400 transform", function () {
-        var queryTest:any =    {
-            "WHERE": {
-                "AND": [{
-                    "IS": {
-                        "rooms_furniture": "*Tables*"
-                    }
-                }, {
-                    "GT": {
-                        "rooms_seats": 300
-                    }
-                }]
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "rooms_shortname",
-                    "anything"
-                ],
-                "ORDER": {
-                    "dir": "DOWN",
-                    "keys": ["anything"]
-                },
-                "FORM": "TABLE"
-            },
-            "TRANSFORMATIONS": {
-                "GROUP": ["rooms_shortname"],
-                "APPLY": [{
-                    "anything": {
-                        "MAX": "rooms_seats"
-                    }
-                }]
-            }
-        }
-        sanityCheck(queryTest);
-        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
-            expect(value.code).to.equal(424);
-            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
-        }).catch(function (err) {
-            Log.test('Error: ' + err);
-            expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"invalid query"})
-        })
-
-
-
-    });
     it("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: QueryRequest =  {
@@ -250,12 +149,55 @@ describe("D3QueryTestSpec", function () {
         }).catch(function (err) {
             Log.test('Error: ' + err);
 
-            expect(err.code).to.equal(424);
-            expect(err.body).to.deep.equal({"missing": ["rooms"]})
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
 
         })
 
+    });
 
+    it("200 testing out complex query provided in deliverable", function () {
+
+        var queryTest: any = {
+            "WHERE": {
+                "AND":[{
+                    "IS": {
+                        "rooms_address": "*Agrono*"
+                    }
+                },
+                    {
+                        "GT":{
+                            "rooms_seats":100
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_address", "rooms_name"
+                ],
+                "FORM": "TABLE"
+            }
+        }
+
+        var result:any = {"render":"TABLE","result":[{"rooms_address":"6245 Agronomy Road V6T 1Z4","rooms_name":"DMP_310"},{"rooms_address":"6245 Agronomy Road V6T 1Z4","rooms_name":"DMP_110"}]}
+        return insightFacade.performQuery(queryTest).then(function (value: any) {
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"]
+            var expectedResult:any = result["result"];
+            /**for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }*/
+            //expect(expectedResult).includes(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+            //expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
 
 
     });
