@@ -576,6 +576,7 @@ describe("D2QueryTestSpec", function () {
                     "rooms_seats"
                 ],
 
+
                 "FORM": "TABLE"
             }
         }

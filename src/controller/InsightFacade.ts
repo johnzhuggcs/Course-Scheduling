@@ -821,7 +821,7 @@ export default class InsightFacade implements IInsightFacade {
                 //var nonExistIdArray = [];
 
 
-
+                /**
                 if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
                     var nonLogicFilter;
                     //console.time("testing get filter");
@@ -839,25 +839,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
                         // for future projects
-                        /**for(let x in cachedIdArray){
-                            if(validKey == cachedIdArray[x]){
-                                contentDatasetResult = fs.readFileSync(validKey);
-                            } else nonExistIdArray.push(validKey);
-                        }*/
 
-                        /**try {
-                        contentDatasetResult = fs.readFileSync(validKey);
-                    } catch (err) {
-                        if (err.code === 'ENOENT') {
-                            var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":queryCheck}};
-                            reject(code424InvalidQuery);
-
-                        } else {
-                            throw err;
-                        }
-                        // Here you get the error when the file was not found,
-                        // but you also get any other error
-                    } */
                         //console.time("testing read file AND OR")
                         try {
                             contentDatasetResult = fs.readFileSync(testingResult, "utf8")
@@ -896,9 +878,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
 
                         //console.timeEnd("testing read file NOT")
-                }} /**else if(keys[0] == "NOT"){
-
-                }*/
+                }}
                 else {
 
                     //var nonLogicFilterVals = result[0];
@@ -921,6 +901,25 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
 
+                }*/
+
+                var grabbingIDColumnKey = columns[0];
+                validKey = grabbingIDColumnKey.split("_");
+                var testingResult = validKey[0]
+                try {
+                    //console.time("testing read file filters general")
+                    contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                    //console.timeEnd("testing read file filters general")
+
+                }
+                catch(err){
+                    if (err.code === 'ENOENT') {
+                        var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
+                        return reject(code424InvalidQuery);
+
+                    } else {
+                        throw err;
+                    }
                 }
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
@@ -1040,7 +1039,7 @@ export default class InsightFacade implements IInsightFacade {
                                                 }
                                             }
                                         }
-                                        if(result != {}) {
+                                        if(!isUndefined(result)) {
                                             returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
                                         }
                                         //Log.info(returnInfo);
@@ -1128,7 +1127,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
 
-                   // console.time("sort through result")
+                   console.time("sort through result")
                     if(!(isUndefined(order))) {
                         //TODO: check for new ORDER
                         if (typeof order == "string") {
@@ -1184,9 +1183,9 @@ export default class InsightFacade implements IInsightFacade {
                                 };
                                 return reject(code400InvalidQuery);
                             }
-                            //console.timeEnd("sort through result")
+                            console.timeEnd("sort through result")
                         } else {
-                            //console.time("sort through new order")
+                            console.time("sort through new order")
                             var orderKeys = Object.keys(order);
                             var dir:any = order[orderKeys[0]];
                             var keysArray:any = order[orderKeys[1]];
@@ -1210,42 +1209,58 @@ export default class InsightFacade implements IInsightFacade {
                                 if(dir == "DOWN") {
                                     tempSortResult = b[keysArray[0]] - a[keysArray[0]];
                                     if(tempSortResult == 0){
-                                        return newThis.breakingTies(b, a, keysArray.shift())
+                                        tempKeysArray = keysArray.shift()
+                                        return newThis.breakingTies(b, a, tempKeysArray, dir)
                                     }else return tempSortResult
                                 }else if(dir == "UP"){
                                     tempSortResult = a[keysArray[0]] - b[keysArray[0]];
                                     if(tempSortResult == 0){
-                                        return newThis.breakingTies(a, b, keysArray.shift())
+                                        tempKeysArray = keysArray.shift()
+                                        return newThis.breakingTies(a, b, tempKeysArray, dir)
                                     }else return tempSortResult;
                                 }
                             });
 
                             } else if (keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
                                    || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")) {
-                                   finalReturn = finalReturn.sort(function (a, b) {
-                                       if(dir == "DOWN"){
-                                           var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                           var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                           if (nameB < nameA) {
-                                               return -1;
-                                           } else if (nameB > nameA) {
-                                               return 1;
-                                           } else
-                                               return newThis.breakingTies(b, a, keysArray.shift());
-                                       }else if(dir == "UP") {
-                                           var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                           var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                           if (nameA < nameB) {
-                                               return -1;
-                                           } else if (nameA > nameB) {
-                                               return 1;
-                                           } else
-                                               return newThis.breakingTies(a, b, keysArray.shift());;
+                                  // var x = 0;
+                                   var tempKeysArray = keysArray.slice();
+                                    finalReturn = finalReturn.sort(function (a, b) {
+
+                                        if (dir == "DOWN") {
+
+                                            //Log.info(JSON.stringify(a));
+                                            //Log.info(JSON.stringify(keysArray[0]))
+
+                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            if (nameB < nameA) {
+                                                return -1;
+                                            } else if (nameB > nameA) {
+                                                return 1;
+                                            } else {
+                                                tempKeysArray.shift()
+                                                return newThis.breakingTies(b, a, tempKeysArray, dir);
+                                            }
+                                        } else if (dir == "UP") {
+                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            if (nameA < nameB) {
+                                                return -1;
+                                            } else if (nameA > nameB) {
+                                                return 1;
+                                            } else {
+                                                tempKeysArray.shift()
+                                                return newThis.breakingTies(a, b, tempKeysArray, dir);
+                                            }
+
+
                                        }
                                    });
 
 
                             } else if (keysArray[0].endsWith("_uuid")) {
+                                var tempKeysArray = keysArray.slice();
                                         finalReturn = finalReturn.sort(function (a, b) {
                                             var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
                                             var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
@@ -1253,12 +1268,14 @@ export default class InsightFacade implements IInsightFacade {
                                             if(dir == "DOWN") {
                                                 tempSortResult = numB - numA;
                                                 if(tempSortResult == 0){
-                                                    return newThis.breakingTies(b, a, keysArray.shift())
+                                                    tempKeysArray.shift()
+                                                    return newThis.breakingTies(b, a, tempKeysArray, dir)
                                                 }else return tempSortResult
                                             }else if(dir == "UP"){
                                                 tempSortResult = numA - numB;
                                                 if(tempSortResult == 0){
-                                                    return newThis.breakingTies(a, b, keysArray.shift())
+                                                    tempKeysArray.shift()
+                                                    return newThis.breakingTies(a, b, tempKeysArray, dir);
                                                 }else return tempSortResult;
                                             }
                                         });
@@ -1272,7 +1289,7 @@ export default class InsightFacade implements IInsightFacade {
                                         reject(code400InvalidQuery);
                                     }
 
-                            //console.timeEnd("sort through new order")
+                            console.timeEnd("sort through new order")
                         }
                     }
 
@@ -1338,39 +1355,76 @@ export default class InsightFacade implements IInsightFacade {
 
     }
 
-    breakingTies(a:any, b:any, sortArray:any):any{
+    breakingTies(a:any, b:any, sortArray:any, direction:string):any{
         var tempSortResult;
 
         for(let x in sortArray){
+            var tempsortArray;
             if (sortArray[x].endsWith("_avg") || sortArray[x].endsWith("_pass") || sortArray[x].endsWith("_fail") || sortArray[x].endsWith("_audit") || sortArray[x].endsWith("_year")
                || sortArray[x].endsWith("_lat") || sortArray[x].endsWith("_lon") || sortArray[x].endsWith("_seats")) {
-                tempSortResult = a[sortArray[x]] - b[sortArray[x]];
-                    if(tempSortResult == 0){
-                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], sortArray.shift())
-                    }else return tempSortResult
+                if (direction == "UP") {
+                    tempSortResult = a[sortArray[x]] - b[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
+                else if (direction == "DOWN") {
+                    tempSortResult = b[sortArray[x]] - a[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
             }
             else if (sortArray[x].endsWith("_dept") || sortArray[x].endsWith("_id") || sortArray[x].endsWith("_instructor") || sortArray[x].endsWith("_fullname")
                     || sortArray[x].endsWith("_shortname") || sortArray[x].endsWith("_number") || sortArray[x].endsWith("_name") || sortArray[x].endsWith("_address")
                     || sortArray[x].endsWith("_type") || sortArray[x].endsWith("_href")) {
-
-                        var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
-                        var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
-                        if (nameA < nameB) {
-                            return -1;
-                        } else if (nameA > nameB) {
-                            return 1;
-                        } else
-                            return this.breakingTies(a[sortArray[x]], b[sortArray[x]], sortArray.shift());
+                        if(direction == "UP") {
+                            var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                            var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                            if (nameA < nameB) {
+                                return -1;
+                            } else if (nameA > nameB) {
+                                return 1;
+                            } else {
+                                tempsortArray = sortArray.shift()
+                                return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction);
+                            }
+                        }else if(direction == "DOWN"){
+                            var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                            var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                            if (nameA > nameB) {
+                                return -1;
+                            } else if (nameA < nameB) {
+                                return 1;
+                            } else {
+                                tempsortArray = sortArray.shift()
+                                return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction);
+                            }
+                        }
 
 
 
                 } else if (sortArray[x].endsWith("_uuid")) {
+                        if(direction == "UP") {
+                            var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                            var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                            tempSortResult = numA - numB;
 
-                        var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
-                        var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
-                        tempSortResult = numA - numB
-                        if(tempSortResult == 0){
-                            return this.breakingTies(a, b, sortArray.shift())
+                            if (tempSortResult == 0) {
+                                tempsortArray = sortArray.shift()
+                                return this.breakingTies(a, b, tempsortArray, direction)
+                            } else return tempSortResult;
+                        }else if(direction == "DOWN"){
+                            var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                            var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                            tempSortResult = numB - numA;
+
+                            if (tempSortResult == 0) {
+                                tempsortArray = sortArray.shift()
+                                return this.breakingTies(b, a, tempsortArray, direction)
+                            } else return tempSortResult;
                         }
 
 

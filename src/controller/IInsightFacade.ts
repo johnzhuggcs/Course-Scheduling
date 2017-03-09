@@ -309,5 +309,5 @@ export interface IInsightFacade {
      * @param b
      * @param sortArray
      */
-    breakingTies(a: any, b: any, sortArray: any): any
+    breakingTies(a: any, b: any, sortArray: any, direction:string): any
 }

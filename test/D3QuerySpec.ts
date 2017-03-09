@@ -54,7 +54,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only("checking out NO FILTER complex query provided in deliverable", function () {
+    it("checking out NO FILTER complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
             },
@@ -253,6 +253,8 @@ describe("D3QueryTestSpec", function () {
             expect(err.body).to.deep.equal({"error": "invalid query"})
 
         })
+
+
 
 
     });
