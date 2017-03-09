@@ -43,7 +43,7 @@ describe("ServerTestSpec", function () {
         Log.test('AfterTest: ' + (<any>this).currentTest.title);
     });
 
-    /**it("Should be able to start", function () {
+    it("Should be able to start", function () {
 
         return server.start().then(function (value: boolean) {
 
@@ -55,7 +55,7 @@ describe("ServerTestSpec", function () {
             expect(err).to.equal(false);//should check the same name within the respairatory
         })
 
-    });*/
+    });
 
     it("Should be able to stop", function () {
 
@@ -71,7 +71,7 @@ describe("ServerTestSpec", function () {
 
     });
 
-    /**it("Should be able to echo", function () {
+    it("Should be able to echo", function () {
 
         return server.start().then(function (value: boolean) {
 
@@ -83,6 +83,6 @@ describe("ServerTestSpec", function () {
             expect(err).to.equal(false);//should check the same name within the respairatory
         })
 
-    }); */
+    });
 
 });
