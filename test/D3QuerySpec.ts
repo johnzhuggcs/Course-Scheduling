@@ -131,6 +131,52 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
+    it.skip("400 transform", function () {
+        var queryTest:any =    {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "anything"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["anything"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname"],
+                "APPLY": [{
+                    "anything": {
+                        "MAX": "rooms_seats"
+                    }
+                }]
+            }
+        }
+        sanityCheck(queryTest);
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(424);
+            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+
+    });
     it("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: QueryRequest =  {

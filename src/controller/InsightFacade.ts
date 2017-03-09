@@ -1244,10 +1244,10 @@ export default class InsightFacade implements IInsightFacade {
                                    });
 
 
-                                    } else if (order.endsWith("_uuid")) {
+                            } else if (keysArray[0].endsWith("_uuid")) {
                                         finalReturn = finalReturn.sort(function (a, b) {
-                                            var numA = Number(a[order]); // ignore upper and lowercase
-                                            var numB = Number(b[order]); // ignore upper and lowercase
+                                            var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
+                                            var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
 
                                             if(dir == "DOWN") {
                                                 tempSortResult = numB - numA;
@@ -1720,7 +1720,7 @@ export default class InsightFacade implements IInsightFacade {
 
                 Where = keyArray[0];//gets "WHERE"
                 Options = keyArray[1]; //gets"OPTIONS"
-                if(!isUndefined(keyArray[2])){
+                if(keyArray[2] == "TRANSFORMATIONS"){
                     transformationsValue = query[keyArray[2]] //gets "TRANSFORMATIONS" if they exist
                     transformationExists = true
                 }
@@ -1905,7 +1905,7 @@ export default class InsightFacade implements IInsightFacade {
                                         } else {
                                             invalidIdArray.push(invalidIdLists[0]);
                                         }
-                                        isOneDataset = {"false": invalidIdArray}
+                                        isOneDataset = {"false":invalidIdArray}
                                         return isOneDataset;
                                     } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
                                         (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
@@ -1920,7 +1920,7 @@ export default class InsightFacade implements IInsightFacade {
                                         } else {
                                             invalidIdArray.push(invalidIdLists[0]);
                                         }
-                                        isOneDataset = {"false": invalidIdArray}
+                                        isOneDataset = {"false":invalidIdArray}
                                         return isOneDataset;
                                     } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
 
@@ -1931,7 +1931,7 @@ export default class InsightFacade implements IInsightFacade {
                                         } else {
                                             invalidIdArray.push(invalidIdLists[0]);
                                         }
-                                        isOneDataset = {"false": invalidIdArray}
+                                        isOneDataset = {"false":invalidIdArray}
                                         return isOneDataset;
                                     } else if (transformationExists == true && typeof orderValidKey == "string"){
                                         if(columnsValidKeyArray.length > 0 && columnsValidKeyArray.includes(orderValidKey)){
