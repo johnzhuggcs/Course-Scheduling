@@ -79,16 +79,16 @@ export default class Server {
 
                 //that.rest.put('/', Server.echo);
 
-                Log.info("this runs");
+                //Log.info("this runs");
                 that.rest.put('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     //InsightResponse.addDataset(req.params.id,fs.readFileSync('rooms.zip').toString('base64'));
                     //res.send('hello ' + req.params.name);
                     let dataStr = new Buffer(req.params.body).toString('base64');
-                    Log.info ("it is:" + dataStr);
+                    //Log.info ("it is:" + dataStr);
                     that.insightFac.addDataset(req.params.id, dataStr).then(function (insightResponsePromise: any) {
                         //Log.info("type:" + typeof insightResponsePromise);
                         var listOfInsights: string[] = [];
-                        Log.info("insightCodeIs:" + insightResponsePromise.code);
+                        //Log.info("insightCodeIs:" + insightResponsePromise.code);
                         if (insightResponsePromise.code == 201) {
                             res.send(201);
                             return next();
@@ -114,7 +114,7 @@ export default class Server {
 
                         });*/
                     }).catch(function(err){
-                        Log.info("did not");
+                        //Log.info("did not");
                         res.send(400);
                         return next();
                     });

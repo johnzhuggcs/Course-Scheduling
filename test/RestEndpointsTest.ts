@@ -46,12 +46,12 @@ describe("RestEndpointsTest.ts", function () {
 
 
 
-    it.only("PUT description", function () {
+    it("PUT description", function () {
         return chai.request("http://localhost:4321")
             .put('/dataset/courses')
             .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
             .then(function (res: any) {
-                Log.trace('then:');
+               // Log.trace('then:');
                 //sanityCheck(res);
                 //Log.test(JSON.stringify(value));
                // expect(res.code).to.equal(204);
@@ -61,7 +61,7 @@ describe("RestEndpointsTest.ts", function () {
                 // some assertions
             })
             .catch(function (err: any) {
-                Log.trace('catch:' + err);
+                //Log.trace('catch:' + err);
                 // some assertions
                 expect.fail();
             });
