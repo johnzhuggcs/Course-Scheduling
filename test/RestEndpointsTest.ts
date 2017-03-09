@@ -2,7 +2,8 @@
  * Created by paull on 6/3/2017.
  */
 
-import Server from "../src/rest/Server";
+import
+    Server from "../src/rest/Server";
 import {expect} from 'chai';
 import Log from "../src/Util";
 import {InsightResponse, IInsightFacade} from "../src/controller/IInsightFacade";
