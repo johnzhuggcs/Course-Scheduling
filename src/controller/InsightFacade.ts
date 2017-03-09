@@ -1130,7 +1130,7 @@ export default class InsightFacade implements IInsightFacade {
                    console.time("sort through result")
                     if(!(isUndefined(order))) {
                         //TODO: check for new ORDER
-                        if (typeof order == "string") {
+                        //if (typeof order == "string") {
                             if (columns.includes(order)) {
                                 /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
                                  validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
@@ -1184,7 +1184,7 @@ export default class InsightFacade implements IInsightFacade {
                                 return reject(code400InvalidQuery);
                             }
                             console.timeEnd("sort through result")
-                        } else {
+                        /**} else {
                             console.time("sort through new order")
                             var orderKeys = Object.keys(order);
                             var dir:any = order[orderKeys[0]];
@@ -1290,7 +1290,7 @@ export default class InsightFacade implements IInsightFacade {
                                     }
 
                             console.timeEnd("sort through new order")
-                        }
+                        }*/
                     }
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
