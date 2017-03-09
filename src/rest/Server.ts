@@ -7,6 +7,8 @@ import restify = require('restify');
 
 import Log from "../Util";
 import {InsightResponse} from "../controller/IInsightFacade";
+import InsightFacade from "../controller/InsightFacade";
+//import {Insight} from "../controller/InsightFacade"
 
 /**
  * This configures the REST endpoints for the server.
@@ -16,9 +18,14 @@ export default class Server {
     private port: number;
     private rest: restify.Server;
 
+    //var insight:InsightResponse;
+
+    private insightFac: InsightFacade;
+
     constructor(port: number) {
         Log.info("Server::<init>( " + port + " )");
         this.port = port;
+        this.insightFac = new InsightFacade();
     }
 
     /**
@@ -44,9 +51,10 @@ export default class Server {
      *
      * @returns {Promise<boolean>}
      */
-    /**
+
     public start(): Promise<boolean> {
         let that = this;
+        var fs = require('fs');
         return new Promise(function (fulfill, reject) {
             try {
                 Log.info('Server::start() - start');
@@ -55,14 +63,66 @@ export default class Server {
                     name: 'insightUBC'
                 });
 
+                that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));//added as Holmes said
+
                 that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     res.send(200);
+                    //res.send('hello ' + req.params.name);
                     return next();
                 });
 
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
                 that.rest.get('/echo/:msg', Server.echo);
+
+                //TODO: D3
+
+                //that.rest.put('/', Server.echo);
+
+                Log.info("this runs");
+                that.rest.put('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    //InsightResponse.addDataset(req.params.id,fs.readFileSync('rooms.zip').toString('base64'));
+                    //res.send('hello ' + req.params.name);
+                    let dataStr = new Buffer(req.params.body).toString('base64');
+                    Log.info ("it is:" + dataStr);
+                    that.insightFac.addDataset(req.params.id, dataStr).then(function (insightResponsePromise: any) {
+                        //Log.info("type:" + typeof insightResponsePromise);
+                        var listOfInsights: string[] = [];
+                        Log.info("insightCodeIs:" + insightResponsePromise.code);
+                        if (insightResponsePromise.code == 201) {
+                            res.send(201);
+                            return next();
+                        }
+                        if (insightResponsePromise.code == 204) {
+                            res.send(204);
+                            return next();
+                        }
+                        if (insightResponsePromise.code == 400) {
+                            res.send(400);
+                            return next();
+                        }
+                        /*listOfInsights.push(insightResponsePromise);
+                        Promise.all(listOfInsights).then(function(insightResses){
+                            //Log.info("insightP:" + insightRes);
+                            for (let i in insightResses) {
+                                //Log.info("insightP:" + insightResses[i].);
+                                if (insightResses[i].code == 200) {
+                                    res.send(200);
+                                }
+                            }
+                            res.json(200,"fs");
+
+                        });*/
+                    }).catch(function(err){
+                        Log.info("did not");
+                        res.send(400);
+                        return next();
+                    });
+
+                    //res.send(200);
+                    //res.send('hello ' + req.params.name);
+                    //return next();
+                });
 
                 // Other endpoints will go here
 
@@ -82,12 +142,12 @@ export default class Server {
             }
         });
     }
-     */
+
 
     // The next two methods handle the echo service.
     // These are almost certainly not the best place to put these, but are here for your reference.
     // By updating the Server.echo function pointer above, these methods can be easily moved.
-/**
+
     public static echo(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('Server::echo(..) - params: ' + JSON.stringify(req.params));
         try {
@@ -99,7 +159,7 @@ export default class Server {
             res.json(400, {error: err.message});
         }
         return next();
-    }*/
+    }
 
     public static performEcho(msg: string): InsightResponse {
         if (typeof msg !== 'undefined' && msg !== null) {
