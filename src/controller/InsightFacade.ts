@@ -822,7 +822,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
 
-                if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
+                /**if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
                     var nonLogicFilter;
                     //console.time("testing get filter");
                     nonLogicFilter = newThis.getFilterArray(result);
@@ -901,9 +901,9 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
 
-                }
+                }*/
 
-                /**var grabbingIDColumnKey = columns[0];
+                var grabbingIDColumnKey = columns[0];
                 validKey = grabbingIDColumnKey.split("_");
                 var testingResult = validKey[0]
                 try {
@@ -920,7 +920,7 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         throw err;
                     }
-                }*/
+                }
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
                 //console.timeEnd("parse through extracted content")
@@ -1127,10 +1127,10 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
 
-                   console.time("sort through result")
+                   //console.time("sort through result")
                     if(!(isUndefined(order))) {
                         //TODO: check for new ORDER
-                        //if (typeof order == "string") {
+                        if (typeof order == "string") {
                             if (columns.includes(order)) {
                                 /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
                                  validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
@@ -1183,8 +1183,8 @@ export default class InsightFacade implements IInsightFacade {
                                 };
                                 reject(code400InvalidQuery);
                             }
-                            console.timeEnd("sort through result")
-                        /**} else {
+                            //console.timeEnd("sort through result")
+                        } else {
                             console.time("sort through new order")
                             var orderKeys = Object.keys(order);
                             var dir:any = order[orderKeys[0]];
@@ -1290,7 +1290,7 @@ export default class InsightFacade implements IInsightFacade {
                                     }
 
                             console.timeEnd("sort through new order")
-                        }*/
+                        }
                     }
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
