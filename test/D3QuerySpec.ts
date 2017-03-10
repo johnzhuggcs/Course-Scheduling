@@ -94,7 +94,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it("checking out complex query provided in deliverable", function () {
+    it.only("checking out complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
                 "AND": [{
