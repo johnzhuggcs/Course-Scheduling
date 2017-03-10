@@ -45,87 +45,185 @@ describe("RestEndpointsTest.ts", function () {
     //import {Response} from "restify";
     //import Response = chaiHttp.Response;
 
-
-
-    it("PUT description", function () {
+    it.only("PUT description (204)", function () {
         return chai.request("http://localhost:4321")
             .put('/dataset/courses')
             .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
             .then(function (res: any) {
-                Log.info("res.code is:" + typeof res);
-                Log.info("res.code is:" + typeof res.status);
-                Log.info("res.code is:" + res.status);
-                Log.info("res.code is:" + res.body);
-               // Log.trace('then:');
-                //sanityCheck(res);
-                //Log.test(JSON.stringify(value));
                 expect(res.status).to.equal(204);
-                //Log.info(res.code);
-                //expect(res.body).to.deep.equal({});
-
-                // some assertions
             })
             .catch(function (err: any) {
-                //Log.trace('catch:' + err);
-                // some assertions
                 expect.fail();
             });
     });
-
-    it("DELETE description", function () {
+    it.only("PUT description (201)", function () {
         return chai.request("http://localhost:4321")
-            .del('/dataset/courses')
+            .put('/dataset/courses')
+            .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
             .then(function (res: any) {
-                // Log.trace('then:');
-                //sanityCheck(res);
-                //Log.test(JSON.stringify(value));
-                // expect(res.code).to.equal(204);
-                //Log.info(res.code);
-                expect(res.status).to.equal(204);
-                //expect(res.body).to.deep.equal({});
-
-                // some assertions
+                expect(res.status).to.equal(201);
             })
             .catch(function (err: any) {
-                //Log.trace('catch:' + err);
-                // some assertions
                 expect.fail();
             });
     });
-    /**it.only("POST description", function () {
+    it.only("PUT description (400)", function () {
+        return chai.request("http://localhost:4321")
+            .put('/dataset/failedFile')
+            .attach("body", fs.readFileSync("./empty_zip.zip"), "empty_zip.zip")
+            .then(function (res: any) {
+                expect.fail();
+            })
+            .catch(function (err: any) {
+                expect(err.status).to.equal(400);
+            });
+    });
 
-        var queryJSONObject: any = {
-            "WHERE": {
-                "GT": {
-                    "rooms_seats": 180
+    it.only("POST description (200)", function () {
+        var queryJSONObject:QueryRequest = {
+            "WHERE":{
+                "GT":{
+                    'courses_avg':97
                 }
             },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "rooms_seats",
-                    "rooms_address"
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
                 ],
-                "ORDER": "rooms_address",
-                "FORM": "TABLE"
+                "ORDER":"courses_avg",
+                "FORM":"TABLE"
             }
-        }
-        Log.info ("queryjsonbefore" + queryJSONObject)
+        };
 
         return chai.request("http://localhost:4321")
             .post('/query')
             .send(queryJSONObject)
             .then(function (res: any) {
                 Log.trace('then:');
-                // some assertions
                 expect(res.status).to.equal(200);
-                //Log.info(res.code);
-                //expect(res.body).to.deep.equal({});
             })
             .catch(function (err:any) {
                 Log.info(err);
                 Log.trace('catch:');
-                // some assertions
                 expect.fail();
             });
-    });*/
+    });
+
+    it.only("POST description (400)", function () {
+        var queryJSONObject:QueryRequest = {
+            "WHERE":
+                {"NOT":{"NOT":{"NOT":
+                    {
+                        "LT":{
+                            "courses_avg":99
+
+                        }}}}
+
+                },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "courses_dept",
+                    "courses_avg"
+                ],
+                "ORDER":"rooms_avg",
+                "FORM":"TABLE"
+            }
+        }
+
+        return chai.request("http://localhost:4321")
+            .post('/query')
+            .send(queryJSONObject)
+            .then(function (res: any) {
+                Log.trace('then:');
+                expect(res.status).to.equal(400);
+            })
+            .catch(function (err:any) {
+                Log.info(err);
+                Log.trace('catch:');
+                expect(err.status).to.equal(400);
+            });
+    });
+
+    it.only("POST description (424)", function () {
+        var queryJSONObject:any =     {
+            "WHERE":{
+                "OR":[
+                    {
+                        "AND":[
+                            {
+                                "AND":[
+                                    {
+                                        "GT":{
+                                            "fake_avg":90
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "NOT":{
+                                    "AND":[
+                                        {
+                                            "GT":{
+                                                "sham_avg":"90"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "EQ":{
+                            "fake_avg":95
+                        }
+                    }
+                ]
+            },
+            "OPTIONS":{
+                "COLUMNS":[
+                    "fake_dept",
+                    "fake_id",
+                    "fake_avg"
+                ],
+                "ORDER":"fake_avg",
+                "FORM":"TABLE"
+            }
+        };
+
+        return chai.request("http://localhost:4321")
+            .post('/query')
+            .send(queryJSONObject)
+            .then(function (res: any) {
+                Log.trace('then:');
+                expect(res.status).to.equal(424);
+            })
+            .catch(function (err:any) {
+                Log.info(err);
+                Log.trace('catch:');
+                expect(err.status).to.equal(424);
+            });
+    });
+
+    it.only("DELETE description (204)", function () {
+        return chai.request("http://localhost:4321")
+            .del('/dataset/courses')
+            .then(function (res: any) {
+                expect(res.status).to.equal(204);
+            })
+            .catch(function (err: any) {
+                expect.fail();
+            });
+    });
+    it.only("DELETE description (404)", function () {
+        return chai.request("http://localhost:4321")
+            .del('/dataset/courses')
+            .then(function (res: any) {
+                expect.fail();
+            })
+            .catch(function (err: any) {
+                expect(err.status).to.equal(404);
+            });
+    });
+
 });
