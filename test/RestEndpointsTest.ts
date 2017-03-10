@@ -6,7 +6,7 @@ import
     Server from "../src/rest/Server";
 import {expect} from 'chai';
 import Log from "../src/Util";
-import {InsightResponse, IInsightFacade} from "../src/controller/IInsightFacade";
+import {InsightResponse, IInsightFacade, QueryRequest} from "../src/controller/IInsightFacade";
 import InsightFacade from "../src/controller/InsightFacade";
 
 describe("RestEndpointsTest.ts", function () {
@@ -52,12 +52,16 @@ describe("RestEndpointsTest.ts", function () {
             .put('/dataset/courses')
             .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
             .then(function (res: any) {
+                Log.info("res.code is:" + typeof res);
+                Log.info("res.code is:" + typeof res.status);
+                Log.info("res.code is:" + res.status);
+                Log.info("res.code is:" + res.body);
                // Log.trace('then:');
                 //sanityCheck(res);
                 //Log.test(JSON.stringify(value));
-               // expect(res.code).to.equal(204);
+                expect(res.status).to.equal(204);
                 //Log.info(res.code);
-                expect(res.body).to.deep.equal({});
+                //expect(res.body).to.deep.equal({});
 
                 // some assertions
             })
@@ -68,19 +72,60 @@ describe("RestEndpointsTest.ts", function () {
             });
     });
 
-   /* it("POST description", function () {
-        return chai.request(URL)
-            .post('/dataset/rooms')
-            .send(queryJSONObject)
+    it("DELETE description", function () {
+        return chai.request("http://localhost:4321")
+            .del('/dataset/courses')
             .then(function (res: any) {
-                Log.trace('then:');
+                // Log.trace('then:');
+                //sanityCheck(res);
+                //Log.test(JSON.stringify(value));
+                // expect(res.code).to.equal(204);
+                //Log.info(res.code);
+                expect(res.status).to.equal(204);
+                //expect(res.body).to.deep.equal({});
+
                 // some assertions
             })
-            .catch(function (err) {
-                Log.trace('catch:');
+            .catch(function (err: any) {
+                //Log.trace('catch:' + err);
                 // some assertions
                 expect.fail();
             });
     });
-*/
+    /**it.only("POST description", function () {
+
+        var queryJSONObject: any = {
+            "WHERE": {
+                "GT": {
+                    "rooms_seats": 180
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_seats",
+                    "rooms_address"
+                ],
+                "ORDER": "rooms_address",
+                "FORM": "TABLE"
+            }
+        }
+        Log.info ("queryjsonbefore" + queryJSONObject)
+
+        return chai.request("http://localhost:4321")
+            .post('/query')
+            .send(queryJSONObject)
+            .then(function (res: any) {
+                Log.trace('then:');
+                // some assertions
+                expect(res.status).to.equal(200);
+                //Log.info(res.code);
+                //expect(res.body).to.deep.equal({});
+            })
+            .catch(function (err:any) {
+                Log.info(err);
+                Log.trace('catch:');
+                // some assertions
+                expect.fail();
+            });
+    });*/
 });

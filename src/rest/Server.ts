@@ -77,18 +77,10 @@ export default class Server {
 
                 //TODO: D3
 
-                //that.rest.put('/', Server.echo);
-
-                //Log.info("this runs");
                 that.rest.put('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    //InsightResponse.addDataset(req.params.id,fs.readFileSync('rooms.zip').toString('base64'));
-                    //res.send('hello ' + req.params.name);
                     let dataStr = new Buffer(req.params.body).toString('base64');
-                    //Log.info ("it is:" + dataStr);
                     that.insightFac.addDataset(req.params.id, dataStr).then(function (insightResponsePromise: any) {
-                        //Log.info("type:" + typeof insightResponsePromise);
                         var listOfInsights: string[] = [];
-                        //Log.info("insightCodeIs:" + insightResponsePromise.code);
                         if (insightResponsePromise.code == 201) {
                             res.send(201);
                             return next();
@@ -101,27 +93,53 @@ export default class Server {
                             res.send(400);
                             return next();
                         }
-                        /*listOfInsights.push(insightResponsePromise);
-                        Promise.all(listOfInsights).then(function(insightResses){
-                            //Log.info("insightP:" + insightRes);
-                            for (let i in insightResses) {
-                                //Log.info("insightP:" + insightResses[i].);
-                                if (insightResses[i].code == 200) {
-                                    res.send(200);
-                                }
-                            }
-                            res.json(200,"fs");
-
-                        });*/
                     }).catch(function(err){
-                        //Log.info("did not");
                         res.send(400);
                         return next();
                     });
+                });
 
-                    //res.send(200);
-                    //res.send('hello ' + req.params.name);
-                    //return next();
+                that.rest.del('/dataset/:id', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    that.insightFac.removeDataset(req.params.id).then(function (insightResponsePromise: any) {
+                        var listOfInsights: string[] = [];
+                        if (insightResponsePromise.code == 204) {
+                            res.send(204);
+                            return next();
+                        }
+                        if (insightResponsePromise.code == 404) {
+                            res.send(404);
+                            return next();
+                        }
+                    }).catch(function(err){
+                        res.send(404);
+                        return next();
+                    });
+                });
+
+                that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                    try {
+                        that.insightFac.performQuery(req.body).then(function (insightResponsePromise: any) {
+                            Log.info("here");
+                            var listOfInsights: string[] = [];
+                            if (insightResponsePromise.code == 200) {
+                                res.send(200);
+                                return next();
+                            }
+                            if (insightResponsePromise.code == 204) {
+                                res.send(204);
+                                return next();
+                            }
+                            if (insightResponsePromise.code == 404) {
+                                res.send(404);
+                                return next();
+                            }
+                        }).catch(function (err) {
+                            res.send(404);
+                            return next();
+                        });
+                    }catch (e) {
+                        Log.info("err is:" + e);
+                    }
                 });
 
                 // Other endpoints will go here
