@@ -53,7 +53,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it.only("200 testing out simple query self", function () {
+    it("200 testing out simple query self", function () {
 
         var queryTest: any = {
             "WHERE": {
