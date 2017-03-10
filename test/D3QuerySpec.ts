@@ -81,7 +81,7 @@ describe("D3QueryTestSpec", function () {
                 "COLUMNS": [
                     "rooms_furniture"
                 ],
-                "ORDER": "rooms_furniture",
+                "ORDER": {},
                 "FORM": "TABLE"
             },
             "TRANSFORMATIONS": {

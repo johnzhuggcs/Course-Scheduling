@@ -2443,7 +2443,9 @@ describe("QueryTestSpec", function () {
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
+            //console.time("deep equal time")
             expect(value.body).to.deep.equal(result);
+            //console.timeEnd("deep equal time")
         }).catch(function (err) {
             Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
