@@ -797,9 +797,9 @@ export default class InsightFacade implements IInsightFacade {
     performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
         var fs = require("fs");
-        console.time("start query check")
+        //console.time("start query check")
         var queryCheck = this.isValid(query);
-        console.timeEnd("start query check")
+        //console.timeEnd("start query check")
         var newThis = this;
         var yesOrNo = Object.keys(queryCheck)[0];
         var dataSetId = queryCheck[yesOrNo];
@@ -1799,10 +1799,52 @@ export default class InsightFacade implements IInsightFacade {
                             if (transformationExists == true) {
 
                                 for (let x in columnsValidKeyArray) {
+                                    yesOrNo = Object.keys(isOneDataset)[0];
+                                    dataSet = isOneDataset[yesOrNo];
                                     if (typeof columnsValidKeyArray[x] == "string") {
-                                        yesOrNo = Object.keys(isOneDataset)[0];
-                                        dataSet = isOneDataset[yesOrNo];
-                                        continue;
+                                        if (typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
+                                            || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
+                                            || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
+                                            || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
+                                            || columnsValidKeyArray[x] == "courses_uuid" || columnsValidKeyArray[x] == "courses_year")) { //checks for valid keys
+                                            if (yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
+                                                isOneDataset = {"true": ["courses"]} //dummy line of code so further check would be done outside of for-loop
+                                            } else if (yesOrNo == "true" && (dataSet[0] != "courses")) {
+                                                var invalidIdLists = columnsValidKeyArray[x].split("_");
+
+                                                if (invalidIdArray.includes(invalidIdLists[0])) {
+                                                    invalidIdLists = [];
+                                                } else {
+                                                    invalidIdArray.push(invalidIdLists[0]);
+                                                }
+                                                isOneDataset = {"false": invalidIdArray}
+                                                //return isOneDataset;
+
+                                            } else continue;
+                                        } else if (typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "rooms_fullname" || columnsValidKeyArray[x] == "rooms_shortname"
+                                            || columnsValidKeyArray[x] == "rooms_shortname" || columnsValidKeyArray[x] == "rooms_number"
+                                            || columnsValidKeyArray[x] == "rooms_name" || columnsValidKeyArray[x] == "rooms_address"
+                                            || columnsValidKeyArray[x] == "rooms_lat" || columnsValidKeyArray[x] == "rooms_lon"
+                                            || columnsValidKeyArray[x] == "rooms_seats" || columnsValidKeyArray[x] == "rooms_type" || columnsValidKeyArray[x] == "rooms_furniture"
+                                            || columnsValidKeyArray[x] == "rooms_href")) { //checks for valid keys
+                                            if (yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+                                                isOneDataset = {"true": ["rooms"]} //dummy line of code so further check would be done outside of for-loop
+                                            } else if (yesOrNo == "true" && (dataSet[0] != "rooms")) {
+                                                var invalidIdLists = columnsValidKeyArray[x].split("_");
+
+                                                if (invalidIdArray.includes(invalidIdLists[0])) {
+                                                    invalidIdLists = [];
+                                                } else {
+                                                    invalidIdArray.push(invalidIdLists[0]);
+                                                }
+                                                isOneDataset = {"false": invalidIdArray}
+                                                //return isOneDataset;
+
+                                            } else continue;
+                                        } else {
+
+                                            continue;
+                                        }
                                     } else return false;
                                 }
                             } else {
@@ -2061,13 +2103,20 @@ export default class InsightFacade implements IInsightFacade {
                                     }
                                     var applyTokenWithKey;
                                     var applyKeyArray;
+                                    var applyString;
+                                    var applyStringArray:any[] = [];
                                     //check if Apply is empty or not
                                     for(let x in Apply){
                                         var oneApply = Apply[x];
                                         applyKeyArray = Object.keys(oneApply);
                                         //TODO: only one apply target string may occur in each query
                                         for(let x in applyKeyArray){
-                                            applyTokenWithKey = oneApply[applyKeyArray[x]]
+                                            applyString = applyKeyArray[x];
+                                            if(applyStringArray.includes(applyString)){
+                                                return false
+                                            }
+                                            applyStringArray.push(applyString)
+                                            applyTokenWithKey = oneApply[applyString]
                                             var applyToken:any = Object.keys(applyTokenWithKey)[0];
                                             if((applyToken == "MAX" || applyToken == "MIN" || applyToken == "AVG"
                                                 || applyToken == "COUNT")){
