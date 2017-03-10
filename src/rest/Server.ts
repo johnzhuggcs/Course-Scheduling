@@ -125,16 +125,16 @@ export default class Server {
                                 res.send(200);
                                 return next();
                             }
-                            if (insightResponsePromise.code == 204) {
-                                res.send(204);
+                            if (insightResponsePromise.code == 400) {
+                                res.send(400);
                                 return next();
                             }
-                            if (insightResponsePromise.code == 404) {
-                                res.send(404);
+                            if (insightResponsePromise.code == 424) {
+                                res.send(424);
                                 return next();
                             }
                         }).catch(function (err) {
-                            res.send(404);
+                            res.send(400);
                             return next();
                         });
                     }catch (e) {
