@@ -7,7 +7,7 @@ import Log from "../Util";
 import {isString} from "util";
 import {isNumber} from "util";
 import {isUndefined} from "util";
-import {read} from "fs";
+//import {read} from "fs";
 import {isNullOrUndefined} from "util";
 
 //import {objectify} from "tslint/lib/utils";
@@ -1016,7 +1016,8 @@ export default class InsightFacade implements IInsightFacade {
                                                     if (isNullOrUndefined(returnInfo)) {
                                                         cachedReturnInfo = cachedReturnInfo;
                                                     } else if(transformationExists == true){
-                                                        continue;
+                                                        cachedReturnInfo = Object.assign({}, cachedReturnInfo, returnInfo);
+
                                                     }
                                                     else if (returnInfo.hasOwnProperty(singleColumnKey)) {
                                                         /**if(Number(x) == 0){
@@ -1166,7 +1167,7 @@ export default class InsightFacade implements IInsightFacade {
                                         return a[order] - b[order];
                                     });
 
-                                } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
+                                } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
                                     || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")) {
                                     finalReturn = finalReturn.sort(function (a:any, b:any) {
                                         var nameA = a[order].toUpperCase(); // ignore upper and lowercase
@@ -1351,8 +1352,11 @@ export default class InsightFacade implements IInsightFacade {
                     catch(err){
                         if (err.code === 'ENOENT') {
                             unloadedDatasets.push(oneDataset);
-                        } else {
-                            throw err;
+                        } else if(err.code === 'EISDIR'){
+                            unloadedDatasets.push(oneDataset)
+
+                        } else{
+                            unloadedDatasets.push(oneDataset)
                         }
                     }
                 }
@@ -2023,8 +2027,12 @@ export default class InsightFacade implements IInsightFacade {
                                 for (let x in columnsValidKeyArray) {
                                     yesOrNo = Object.keys(isOneDataset)[0];
                                     dataSet = isOneDataset[yesOrNo];
+
                                     if (typeof columnsValidKeyArray[x] == "string") {
-                                        if (typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
+                                        if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_"))){
+                                            continue;
+                                        }
+                                        else if (typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
                                             || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                                             || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
                                             || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
@@ -2064,8 +2072,19 @@ export default class InsightFacade implements IInsightFacade {
 
                                             } else continue;
                                         } else {
+                                            if(columnsValidKeyArray[x].includes("_")){
+                                                invalidIdLists = columnsValidKeyArray[x].split("_")[0]
+                                            }else{
+                                                invalidIdArray = columnsValidKeyArray[x]
+                                            }
 
-                                            continue;
+
+                                            if (invalidIdArray.includes(invalidIdLists)) {
+                                                invalidIdLists = [];
+                                            } else {
+                                                invalidIdArray.push(invalidIdLists);
+                                            }
+                                            isOneDataset = {"false": invalidIdArray}
                                         }
                                     } else return false;
                                 }
@@ -2156,8 +2175,11 @@ export default class InsightFacade implements IInsightFacade {
                                         }
                                         isOneDataset = {"false": invalidIdArray}
 
-                                    } else
+                                    } else{
+
+
                                         return false
+                                    }
                                 }
                             }
                             if (columnsEtcKey[1] == "ORDER") {
@@ -2357,7 +2379,14 @@ export default class InsightFacade implements IInsightFacade {
                                                 } else {
                                                     var applyDatasetArray = applyTokenWithKey[applyToken].split("_")
                                                     var applyDataset = applyDatasetArray[0]
-                                                    isOneDataset = {"false": [applyDataset]}
+
+
+                                                    if (invalidIdArray.includes(applyDataset)) {
+                                                        continue;
+                                                    } else {
+                                                        invalidIdArray.push(applyDataset);
+                                                    }
+                                                    isOneDataset = {"false": invalidIdArray}
 
                                                     return isOneDataset
                                                 }
@@ -2377,7 +2406,12 @@ export default class InsightFacade implements IInsightFacade {
                                                 } else {
                                                     var applyDatasetArray = applyTokenWithKey[applyToken].split("_")
                                                     var applyDataset = applyDatasetArray[0]
-                                                    isOneDataset = {"false": [applyDataset]}
+                                                    if (invalidIdArray.includes(applyDataset)) {
+                                                        continue;
+                                                    } else {
+                                                        invalidIdArray.push(applyDataset);
+                                                    }
+                                                    isOneDataset = {"false": invalidIdArray}
 
                                                     return isOneDataset
                                                 }
