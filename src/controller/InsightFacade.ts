@@ -1,7 +1,7 @@
 /**
  * This is the main programmatic entry point for the project.
  */
-import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery} from "./IInsightFacade";
+import {IInsightFacade, InsightResponse, QueryRequest, FilterQuery, TransformationQuery} from "./IInsightFacade";
 
 import Log from "../Util";
 import {isString} from "util";
@@ -811,6 +811,12 @@ export default class InsightFacade implements IInsightFacade {
                 var columns = query.OPTIONS.COLUMNS;
                 var order:any =  query.OPTIONS.ORDER;
                 var table = query.OPTIONS.FORM;
+                var transformation:TransformationQuery = query.TRANSFORMATIONS;
+                var transformationGroup;
+                var transformationApply;
+                var newTransformationApply = [];
+                var applyExists:boolean = true;
+                var transformationExists:any = false;
                 var keys = Object.keys(filter);
                 var result = filter[keys[0]]; //value of the WHERE Filters
                 var validKey;
@@ -820,88 +826,11 @@ export default class InsightFacade implements IInsightFacade {
                 //var cachedIdArray = cachedId.split("\r\n");
                 //var nonExistIdArray = [];
 
-
-
-                /**if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
-                    var nonLogicFilter;
-                    //console.time("testing get filter");
-                    nonLogicFilter = newThis.getFilterArray(result);
-                    //console.timeEnd("testing get filter")
-                    if(nonLogicFilter instanceof Array) {
-                        var nonLogicFilterVals = nonLogicFilter[0];
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                        var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
-                        var validTestKeyArray = Object.keys(validTestKeyValue)
-                        validKey = validTestKeyArray[0].split("_");
-
-
-                        var testingResult = validKey[0]
-
-
-                        // for future projects
-
-                        //console.time("testing read file AND OR")
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                         catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                reject(code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-                        //console.timeEnd("testing read file AND OR")
-
-                    } else{ //this is for when keys[0] is NOT;
-                        //var nonLogicFilterVals = result[0];
-
-                        //var notKeys = Object.keys(nonLogicFilter);
-                        //var notResult = nonLogicFilter[notKeys[0]];
-                        //console.time("testing read file NOT")
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilter);
-                        validKey = nonLogicFilterKeys[0].split("_");
-                        var testingResult:string = validKey[0]
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                reject(code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-
-                        //console.timeEnd("testing read file NOT")
-                }}
-                else {
-
-                    //var nonLogicFilterVals = result[0];
-                    var nonLogicFilterKeys = Object.keys(result);
-                    validKey = nonLogicFilterKeys[0].split("_");
-                    var testingResult = validKey[0]
-                        try {
-                            //console.time("testing read file filters general")
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                            //console.timeEnd("testing read file filters general")
-
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                reject(code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-
-                }*/
+                if(!isUndefined(transformation)){
+                    transformationExists = true;
+                    transformationApply = query.TRANSFORMATIONS.APPLY
+                    transformationGroup = transformation.GROUP
+                }
 
                 var grabbingIDColumnKey = columns[0];
                 validKey = grabbingIDColumnKey.split("_");
@@ -957,7 +886,7 @@ export default class InsightFacade implements IInsightFacade {
                                     code: 400,
                                     body: {"error": "malformed dataset with no result in array"}
                                 };
-                                reject(code400InvalidQuery);*/
+                                return reject(code400InvalidQuery);*/
                             } else {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
                                     //console.time("one course")
@@ -1047,28 +976,57 @@ export default class InsightFacade implements IInsightFacade {
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
+                                            var tempApplyKey;
                                             //returnInfo = {}
                                             for (let x in columns) {
+
                                                 singleColumnKey = columns[x].toString()
 
+                                                if(transformationExists == true) {
+                                                    if (transformationApply.length == 0){
+                                                        applyExists = false;
+                                                    }
 
-                                                //translatedKey = newThis.vocabValidKey(singleColumnKey);
-                                                /**if(translatedKey == false){
+                                                     //checking apply is in columns and vice versa
+                                                        if(applyExists == true && newThis.applyHasColumn(transformationApply, singleColumnKey)) {
+                                                            tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
+                                                            if (isUndefined(tempApplyKey) || tempApplyKey.some(isUndefined)) {
+                                                                continue;
+                                                            } else {
+                                                                newTransformationApply.push(tempApplyKey[0])
+                                                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, returnInfo)
+                                                            }
+                                                        }
+
+
+
+
+
+
+                                                }
+
+                                                    //translatedKey = newThis.vocabValidKey(singleColumnKey);
+                                                    /**if(translatedKey == false){
                                                     var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
                                                     reject(code400InvalidQuery);
                                                 }   else if(translatedKey == true) {
                                                     continue;
                                                 }else{*/
 
-                                                    if(isNullOrUndefined(returnInfo)){
-                                                       cachedReturnInfo = cachedReturnInfo;
-                                                    }else if(returnInfo.hasOwnProperty(singleColumnKey)){
+                                                    if (isNullOrUndefined(returnInfo)) {
+                                                        cachedReturnInfo = cachedReturnInfo;
+                                                    } else if(transformationExists == true){
+                                                        continue;
+                                                    }
+                                                    else if (returnInfo.hasOwnProperty(singleColumnKey)) {
                                                         /**if(Number(x) == 0){
                                                             returnInfo = {};
                                                         }*/
 
 
                                                         cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+
+
 
                                                     } else
                                                     /**if (isUndefined(returnInfo[singleColumnKey])) {
@@ -1089,10 +1047,12 @@ export default class InsightFacade implements IInsightFacade {
 
                                                         //should look like {"courses_avg":95, "courses_instructor":"bleh"]
                                                     }
-                                                //}
-                                                /**if(result instanceof Array && result.length == 0){
+                                                    //}
+                                                    /**if(result instanceof Array && result.length == 0){
                                                 result = result[0]
                                             }*/
+
+
                                             }returnInfo = null;
                                             if(isNullOrUndefined(cachedReturnInfo)){
                                                 continue;
@@ -1118,7 +1078,7 @@ export default class InsightFacade implements IInsightFacade {
                                         code: 400,
                                         body: {"error": "malformed dataset with empty result in array"}
                                     };
-                                    reject(code400InvalidQuery)
+                                    return reject(code400InvalidQuery)
                                 }
 
 
@@ -1126,6 +1086,71 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
+
+                    if(transformationExists == true) {
+                        var applyString:any;
+
+                        var singleApply;
+                        var tokenPlusKey;
+                        var tempToken;
+                        var applyFinalKey;
+                        /**
+                        for(let x in transformationApply){
+
+                            applyString = Object.keys(transformationApply[x])[0]
+                            singleApply = transformationApply[x];
+                            tokenPlusKey = singleApply[applyString]
+                            tempToken = Object.keys(applyString)[0];
+                            applyFinalKey = tokenPlusKey[tempToken];
+
+                            if(returnInfo.hasOwnPropety(applyFinalKey)){
+                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[applyString]:returnInfo[applyFinalKey]})
+                            } else{
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "malformed transformation"}
+                                };
+                                return reject(code400InvalidQuery)
+                            }
+                        }*/
+                        finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists);
+                        var singleReturn;
+                        var returnInfoKeys;
+                        var newCache;
+                        var tempFinal = finalReturn;
+                        finalReturn = []
+                        for(let x in tempFinal){
+                            singleReturn = tempFinal[x]
+                            singleReturn = newThis.finishApply(singleReturn)
+
+                            for (let x in columns) {
+
+                                singleColumnKey = columns[x].toString()
+
+                                if (singleReturn.hasOwnProperty(singleColumnKey)) {
+
+
+                                    newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturn[singleColumnKey]});
+
+
+
+                                } else {
+
+                                    //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                    newCache = null;
+                                    singleReturn = null;
+
+                                    //returnInfo = returnInfo
+                                    //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                    //Log.info(returnInfo);
+
+                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                }
+
+                            }
+                            finalReturn.push(newCache);
+                        }
+                    }
 
                    //console.time("sort through result")
                     if(!(isUndefined(order))) {
@@ -1137,13 +1162,13 @@ export default class InsightFacade implements IInsightFacade {
                                 if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
                                     || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
-                                    finalReturn = finalReturn.sort(function (a, b) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
                                         return a[order] - b[order];
                                     });
 
                                 } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
                                     || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")) {
-                                    finalReturn = finalReturn.sort(function (a, b) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
                                         var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                         var nameB = b[order].toUpperCase(); // ignore upper and lowercase
                                         if (nameA < nameB) {
@@ -1156,7 +1181,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
                                 } else if (order.endsWith("_uuid")) {
-                                    finalReturn = finalReturn.sort(function (a, b) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
                                         var numA = Number(a[order]); // ignore upper and lowercase
                                         var numB = Number(b[order]); // ignore upper and lowercase
                                         /**if (nameA < nameB) {
@@ -1174,18 +1199,18 @@ export default class InsightFacade implements IInsightFacade {
                                         code: 400,
                                         body: {"error": "order error"}
                                     };
-                                    reject(code400InvalidQuery);
+                                    return reject(code400InvalidQuery);
                                 }
                             } else {
                                 var code400InvalidQuery: InsightResponse = {
                                     code: 400,
                                     body: {"error": "order not in column"}
                                 };
-                                reject(code400InvalidQuery);
+                                return reject(code400InvalidQuery);
                             }
                             //console.timeEnd("sort through result")
                         } else {
-                            console.time("sort through new order")
+                            //console.time("sort through new order")
                             var orderKeys = Object.keys(order);
                             var dir:any = order[orderKeys[0]];
                             var keysArray:any = order[orderKeys[1]];
@@ -1202,10 +1227,33 @@ export default class InsightFacade implements IInsightFacade {
                                     return reject(code400InvalidQuery);
                                 }
                             }
-                            if (keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
+                            if (keysArray[0].endsWith("_uuid")) {
+                                var tempKeysArray = keysArray.slice();
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                    var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
+                                    var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
+
+                                    if(dir == "DOWN") {
+                                        tempSortResult = numB - numA;
+                                        if(tempSortResult == 0){
+                                            tempKeysArray.shift()
+                                            return newThis.breakingTies(b, a, tempKeysArray, dir)
+                                        }else return tempSortResult
+                                    }else if(dir == "UP"){
+                                        tempSortResult = numA - numB;
+                                        if(tempSortResult == 0){
+                                            tempKeysArray.shift()
+                                            return newThis.breakingTies(a, b, tempKeysArray, dir);
+                                        }else return tempSortResult;
+                                    }
+                                });
+
+                                //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
+                            }
+                            else if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
                                || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats")) {
 
-                                finalReturn = finalReturn.sort(function (a, b) {
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
                                 if(dir == "DOWN") {
                                     tempSortResult = b[keysArray[0]] - a[keysArray[0]];
                                     if(tempSortResult == 0){
@@ -1221,11 +1269,11 @@ export default class InsightFacade implements IInsightFacade {
                                 }
                             });
 
-                            } else if (keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
+                            } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
                                    || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")) {
                                   // var x = 0;
                                    var tempKeysArray = keysArray.slice();
-                                    finalReturn = finalReturn.sort(function (a, b) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
 
                                         if (dir == "DOWN") {
 
@@ -1259,37 +1307,15 @@ export default class InsightFacade implements IInsightFacade {
                                    });
 
 
-                            } else if (keysArray[0].endsWith("_uuid")) {
-                                var tempKeysArray = keysArray.slice();
-                                        finalReturn = finalReturn.sort(function (a, b) {
-                                            var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
-                                            var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
-
-                                            if(dir == "DOWN") {
-                                                tempSortResult = numB - numA;
-                                                if(tempSortResult == 0){
-                                                    tempKeysArray.shift()
-                                                    return newThis.breakingTies(b, a, tempKeysArray, dir)
-                                                }else return tempSortResult
-                                            }else if(dir == "UP"){
-                                                tempSortResult = numA - numB;
-                                                if(tempSortResult == 0){
-                                                    tempKeysArray.shift()
-                                                    return newThis.breakingTies(a, b, tempKeysArray, dir);
-                                                }else return tempSortResult;
-                                            }
-                                        });
-
-
-                                    } else {
+                            } else {
                                         var code400InvalidQuery: InsightResponse = {
                                             code: 400,
                                             body: {"error": "order error"}
                                         };
-                                        reject(code400InvalidQuery);
+                                        return reject(code400InvalidQuery);
                                     }
 
-                            console.timeEnd("sort through new order")
+                            //console.timeEnd("sort through new order")
                         }
                     }
 
@@ -1351,8 +1377,204 @@ export default class InsightFacade implements IInsightFacade {
 
 
     //Helper function in main queryRequest()
-    transformationQueryHelper(returnInfo:any, transformation:any ):any{
 
+    finishApply(returnInfo:any):any{
+        var cachedInfo;
+        var singleInfo:any;
+        var infoKeys;
+        var valueArray;
+        var sum = returnInfo[0]
+        var size = returnInfo["has AVG"]
+        var average = sum/size
+
+        for(let x in returnInfo){
+            singleInfo= {[x]:returnInfo[x]}
+            infoKeys = Object.keys(singleInfo)[0]
+            valueArray = returnInfo[x]
+            if(valueArray instanceof Array){
+                if(valueArray[0] == "MAX"){
+                    returnInfo[x] = this.returnMax(valueArray)
+                }else if(valueArray[0] == "MIN"){
+                    returnInfo[x] = this.returnMin(valueArray)
+                }else if(valueArray[0] == "SUM"){
+                    returnInfo[x] = this.returnSum(valueArray)
+                }else if(valueArray[0] == "AVG"){
+                    returnInfo[x] = this.returnAVG(valueArray)
+                }else if(valueArray[0] == "COUNT"){
+                    returnInfo[x] = this.returnCOUNT(valueArray)
+                }
+            }
+
+        } return returnInfo;
+
+    }
+
+    transformationQueryHelper(finalReturnInfo:any, transformationGroup:any, transformationApply:any, applyExists:any ):any{
+        var transformReturnInfo:Array<string>;
+        var groupObjectArray:any = [];
+        var newValue;
+        var groupedApplyColumns;
+        var matchIndex;
+
+        var applyString = Object.keys(transformationApply)[0]
+        var applyKey = transformationApply[applyString]
+
+
+            for(let x in finalReturnInfo){
+                transformReturnInfo = finalReturnInfo[x];
+                groupedApplyColumns = this.applyObjects(transformationApply, transformReturnInfo)
+                if(Number(x) == 0){
+                    transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                    groupObjectArray.push(transformReturnInfo);
+                }else{
+                    matchIndex = groupObjectArray.findIndex(function (singleGroupedElement:any) {
+
+                        return transformationGroup.every(function (singleGroup:any) {
+                            newValue = transformReturnInfo[singleGroup];
+                            var result = (newValue == singleGroupedElement[singleGroup])
+                            return result
+                        })
+                    });
+                    if(matchIndex >= 0){
+                        transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                        groupObjectArray[matchIndex] = this.groupQueryHelper(groupObjectArray[matchIndex], transformReturnInfo, transformationApply)
+
+                    }else{
+                        transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                        groupObjectArray.push(transformReturnInfo);
+                    }
+                }
+
+            } return groupObjectArray;
+    }
+
+    groupQueryHelper(returnInfo:any, groupReturnInfo:any, transformationApply:any){
+        var singleApply;
+        var applyKey;
+        var applyToken;
+        for(let x in transformationApply){
+            singleApply = transformationApply[x]
+            applyKey = Object.keys(singleApply)[0]
+            applyToken = Object.keys(singleApply[applyKey])[0]
+
+            if(groupReturnInfo[applyKey][0] == returnInfo[applyKey][0]){
+                returnInfo[applyKey].shift();
+            }
+
+            groupReturnInfo[applyKey] = groupReturnInfo[applyKey].concat(returnInfo[applyKey])
+
+            /**if(applyToken == "MAX"){
+                groupReturnInfo[applyKey] = this.returnMax(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "MIN"){
+                groupReturnInfo[applyKey] = this.returnMin(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "SUM"){
+                groupReturnInfo[applyKey] = this.returnSum(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "COUNT"){
+                groupReturnInfo[applyKey] = this.returnCOUNT(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "AVG"){
+                groupReturnInfo = this.returnAVG(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }*/
+
+        }return groupReturnInfo
+    }
+
+    returnMax(valueArray:any):any{
+        valueArray.shift()
+
+        var max = valueArray.reduce(function(a:any, b:any) {
+            return Math.max(a, b);
+        });
+        return max
+    }
+
+    returnMin(valueArray:any):any{
+        valueArray.shift()
+
+        var min = valueArray.reduce(function(a:any, b:any) {
+            return Math.min(a, b);
+        });
+        return min
+    }
+
+    returnSum(valueArray:any):any{
+        var sum = valueArray.reduce(function (a:any, b:any) {
+            return a + b;
+        });
+        return sum
+    }
+
+    returnAVG(valueArray:any):any{
+
+        valueArray.shift();
+        var groupedSum = 0;
+        var averageCounter;
+        var oneNumber;
+        for(let x in valueArray){
+            if(Number(x) == 0){
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum = oneNumber;
+            }else {
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum += oneNumber;
+            }
+        }
+        groupedSum = groupedSum/(Number(valueArray.length));
+        groupedSum = groupedSum/10;
+        groupedSum = Number(groupedSum.toFixed(2));
+        return groupedSum
+    }
+
+    returnCOUNT(valueArray:any):any{
+        valueArray.shift();
+        valueArray = valueArray.filter (function (value:any, index:any, array:any) {
+            return array.indexOf (value) == index;
+        });
+        return valueArray;
+    }
+
+
+    applyObjects(transformationApply:any, returnInfo:any):any{
+        var applyString;
+        var singleApply;
+        var tokenPlusKey;
+        var tempToken;
+        var applyFinalKey;
+        var returnApply = {}
+        for(let x in transformationApply){
+
+            applyString = Object.keys(transformationApply[x])[0]
+            singleApply = transformationApply[x];
+            tokenPlusKey = singleApply[applyString]
+            tempToken = Object.keys(tokenPlusKey)[0];
+            applyFinalKey = tokenPlusKey[tempToken];
+
+            /**
+            if(tempToken == "AVG"){
+                returnApply = Object.assign({}, returnApply, {[applyString]:[returnInfo[applyFinalKey], 1]})
+            }*/
+
+            returnApply = Object.assign({}, returnApply, {[applyString]:[tempToken, returnInfo[applyFinalKey]]})
+            } return returnApply; /**else{
+                var code400InvalidQuery: InsightResponse = {
+                    code: 400,
+                    body: {"error": "malformed transformation"}
+                };
+                return reject(code400InvalidQuery)
+            }*/
+        }
+
+
+
+
+    applyHasColumn(Apply:any, columnsKey:any):any{
+        return Apply.map(function(applyKey:any){
+            var tempApplyString = Object.keys(applyKey)[0]
+            if(columnsKey == tempApplyString){
+                return applyKey;
+            }
+        })
     }
 
     breakingTies(a:any, b:any, sortArray:any, direction:string):any{
@@ -1763,7 +1985,7 @@ export default class InsightFacade implements IInsightFacade {
         var filter;  //returns value of FILTER
         var optionsValue; //returns value of OPTIONS
         var columnsEtcKey; //returns values including and after COLUMNS
-        var columnsValidKeyArray; //returns the array of Valid Keys assigned to COLUMNS
+        var columnsValidKeyArray:any; //returns the array of Valid Keys assigned to COLUMNS
         var orderValidKey; //returns the single valid key assigned to ORDER
         var Table; //returns TABLE from VIEW
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
@@ -2082,65 +2304,87 @@ export default class InsightFacade implements IInsightFacade {
                     } else return false;
                     //TRANSFORMERS, CRAP CODE IN DISGUISE
                     if(transformationExists == true){
+                        var Group:any;
+                        var Apply:any;
                         var transformationArray:any = Object.keys(transformationsValue);
                         if(transformationArray[0] == "GROUP" && transformationArray[1] == "APPLY") {
-                            try{
-                                var Group:any = transformationsValue[transformationArray[0]];
-                                var Apply = transformationsValue[transformationArray[1]];
-
+                            Group = transformationsValue[transformationArray[0]];
+                            Apply = transformationsValue[transformationArray[1]];
+                            if(Group.length == 0){
+                               return false
+                            }
                                 //var applyKeyArray:any = Object.keys(Apply[0]);
 
-                            }catch(err){
-                                return false;
-                            }
 
                         }else return false
-
-                            for(let x in Group){
-                                if(columnsValidKeyArray.includes(Group[x])){
-                                    if(Apply.length == 0){
+                        //Group = transformationsValue[transformationArray[0]];
+                        //Apply = transformationsValue[transformationArray[1]];
+                        if(Group.some(function (xGroup:any) {
+                                return columnsValidKeyArray.includes(xGroup);
+                            })) {
+                            for (let x in Group) {
+                                if (Apply.length == 0) {
                                         return isOneDataset;
                                     }
                                     var applyTokenWithKey;
                                     var applyKeyArray;
                                     var applyString;
-                                    var applyStringArray:any[] = [];
+                                    var applyStringArray: any[] = [];
                                     //check if Apply is empty or not
-                                    for(let x in Apply){
+                                    for (let x in Apply) {
                                         var oneApply = Apply[x];
                                         applyKeyArray = Object.keys(oneApply);
                                         //TODO: only one apply target string may occur in each query
-                                        for(let x in applyKeyArray){
+                                        for (let x in applyKeyArray) {
                                             applyString = applyKeyArray[x];
-                                            if(applyStringArray.includes(applyString)){
+                                            if(applyString.includes("_")){
+                                                return false
+                                            }
+                                            if (applyStringArray.includes(applyString)) {
                                                 return false
                                             }
                                             applyStringArray.push(applyString)
                                             applyTokenWithKey = oneApply[applyString]
-                                            var applyToken:any = Object.keys(applyTokenWithKey)[0];
-                                            if((applyToken == "MAX" || applyToken == "MIN" || applyToken == "AVG"
-                                                || applyToken == "COUNT")){
-                                                if(applyTokenWithKey[applyToken] == "rooms_fullname" || applyTokenWithKey[applyToken] == "rooms_shortname" || applyTokenWithKey[applyToken] == "rooms_number"
-                                                    || applyTokenWithKey[applyToken] == "rooms_number" || applyTokenWithKey[applyToken] == "rooms_address" || applyTokenWithKey[applyToken] == "rooms_lat"
-                                                    || applyTokenWithKey[applyToken] == "rooms_lon" || applyTokenWithKey[applyToken] == "rooms_seats" || applyTokenWithKey[applyToken] == "rooms_type"
-                                                    || applyTokenWithKey[applyToken] == "rooms_furniture"
-                                                    || applyTokenWithKey[applyToken] == "rooms_href" || applyTokenWithKey[applyToken] == "courses_dept" || applyTokenWithKey[applyToken] == "courses_id"
-                                                    || applyTokenWithKey[applyToken] == "courses_avg" || applyTokenWithKey[applyToken] == "courses_instructor" || applyTokenWithKey[applyToken] == "courses_title"
-                                                    || applyTokenWithKey[applyToken] == "courses_pass" || applyTokenWithKey[applyToken] == "courses_fail" || applyTokenWithKey[applyToken] == "courses_audit"
-                                                    || applyTokenWithKey[applyToken] == "courses_uuid"){
+                                            var applyToken: any = Object.keys(applyTokenWithKey)[0];
+                                            if ((applyToken == "MAX" || applyToken == "MIN" || applyToken == "AVG" || applyToken == "SUM")) {
+                                                if (applyTokenWithKey[applyToken] == "rooms_lat"
+                                                    || applyTokenWithKey[applyToken] == "rooms_lon" || applyTokenWithKey[applyToken] == "rooms_seats"
+                                                    || applyTokenWithKey[applyToken] == "courses_avg"
+                                                    || applyTokenWithKey[applyToken] == "courses_pass" || applyTokenWithKey[applyToken] == "courses_fail"
+                                                    || applyTokenWithKey[applyToken] == "courses_audit") {
 
                                                     return isOneDataset;
-                                                } else{
+                                                } else {
                                                     var applyDatasetArray = applyTokenWithKey[applyToken].split("_")
                                                     var applyDataset = applyDatasetArray[0]
-                                                    isOneDataset = {"false":[applyDataset]}
+                                                    isOneDataset = {"false": [applyDataset]}
 
                                                     return isOneDataset
                                                 }
-                                            }else return false;
+                                            } else if (applyToken == "COUNT") {
+                                                if (applyTokenWithKey[applyToken] == "rooms_fullname" || applyTokenWithKey[applyToken] == "rooms_shortname" || applyTokenWithKey[applyToken] == "rooms_number" || applyTokenWithKey[applyToken] == "rooms_address"
+                                                    || applyTokenWithKey[applyToken] == "rooms_type"
+                                                    || applyTokenWithKey[applyToken] == "rooms_furniture"
+                                                    || applyTokenWithKey[applyToken] == "rooms_href" || applyTokenWithKey[applyToken] == "courses_dept" || applyTokenWithKey[applyToken] == "courses_id"
+                                                    || applyTokenWithKey[applyToken] == "courses_instructor" || applyTokenWithKey[applyToken] == "courses_title"
+                                                    || applyTokenWithKey[applyToken] == "courses_uuid" || applyTokenWithKey[applyToken] == "rooms_lat"
+                                                    || applyTokenWithKey[applyToken] == "rooms_lon" || applyTokenWithKey[applyToken] == "rooms_seats"
+                                                    || applyTokenWithKey[applyToken] == "courses_avg"
+                                                    || applyTokenWithKey[applyToken] == "courses_pass" || applyTokenWithKey[applyToken] == "courses_fail"
+                                                    || applyTokenWithKey[applyToken] == "courses_audit") {
+
+                                                    return isOneDataset;
+                                                } else {
+                                                    var applyDatasetArray = applyTokenWithKey[applyToken].split("_")
+                                                    var applyDataset = applyDatasetArray[0]
+                                                    isOneDataset = {"false": [applyDataset]}
+
+                                                    return isOneDataset
+                                                }
+                                            }
+                                            else return false;
                                         }
                                     }
-
                             }
                         }
 

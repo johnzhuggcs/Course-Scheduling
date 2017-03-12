@@ -298,11 +298,22 @@ export interface IInsightFacade {
     occurrences(string: string, subString: string, allowOverlapping: boolean): any;
 
     /** Does Transformations
-     * @param returnInfo
-     * @param Transformations
+     * @param finalReturnInfo
+     * @param transformationGroup
+     * @param transformationApply
+     * @param transformationExists:any
      */
 
-    transformationQueryHelper(returnInfo: any, transformations: any): any;
+    transformationQueryHelper(finalReturnInfo: any, transformationGroup: any, transformationApply:any, applyExists:any): any;
+
+
+    /** Does Transformations
+     * @param returnInfo
+     * @param groupReturnInfos
+     * @param transformationApply
+     */
+
+    groupQueryHelper(returnInfo: any, groupReturnInfo:any, transformationApply:any): any;
 
     /** Breaks ties when sorting
      * @param a
@@ -310,4 +321,55 @@ export interface IInsightFacade {
      * @param sortArray
      */
     breakingTies(a: any, b: any, sortArray: any, direction:string): any
+
+
+    /** checks applykey has string from column
+     * @param apply
+     * @param columnsKey
+     */
+    applyHasColumn(Apply:any, columnsKey:any):any
+
+    /** gets objects from Apply to be added to each returnInfo
+     * @param tranformationApply
+     * @param returninfo
+     */
+    applyObjects(tranformationApply:any, returnInfo:any):any
+
+    /** calculates min
+     * @param groupedValue
+     * @param testValue
+     */
+
+    returnMin(groupedValue:any, testValue:any):any
+
+    /** calculates max
+     * @param groupedValue
+     * @param testValue
+     */
+    returnMax(groupedValu:any, testValue:any):any
+
+    /** calculates SUM
+     * @param groupedValue
+     * @param applyKey
+     * @param testValue
+     */
+    returnSum(groupedValue:any, testValue:any):any
+
+    /** calculates AVG
+     * @param groupedInfo
+     * @param testValue
+     */
+    returnAVG(groupedInfo:any, applyKey:any, testValue:any):any
+
+    /** calculates COUNT
+     * @param groupedValue
+     * @param testValue
+     */
+    returnCOUNT(groupedValue:any, testValue:any):any
+
+    /** finishes AVG
+     * @param returnInfo
+     */
+
+    finishApply(returnInfo:any):any
 }

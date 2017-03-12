@@ -94,7 +94,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it.only("checking out complex query provided in deliverable", function () {
+    it("checking out complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
                 "AND": [{
@@ -132,7 +132,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it("400 transform", function () {
+    it.only( "400 transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -166,13 +166,16 @@ describe("D3QueryTestSpec", function () {
             }
         }
         sanityCheck(queryTest);
+
+        var result = {"render":"TABLE","result":[{"rooms_shortname":"OSBO","anything":442},{"rooms_shortname":"HEBB","anything":375},{"rooms_shortname":"LSC","anything":350}]}
+
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
-            expect(value.code).to.equal(424);
-            expect(value.body).to.deep.equal({"missing":["fake", "sham"]})
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result)
         }).catch(function (err) {
             Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
-            expect(err.body).to.deep.equal({"error":"invalid query"})
+            expect(err.body).to.deep.equal({"error":"malformed transformation"})
         })
 
 
