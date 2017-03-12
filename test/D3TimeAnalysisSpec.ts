@@ -8,6 +8,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
+
 describe("D3TimeAnalysis", function () {
 
     var insightFacade: InsightFacade = null;
@@ -27,8 +28,8 @@ describe("D3TimeAnalysis", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
-        //return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
+        //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
+        return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -44,8 +45,8 @@ describe("D3TimeAnalysis", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         insightFacade = null
-        return insight.removeDataset('rooms');
-        //return insight.removeDataset('courses');
+        //return insight.removeDataset('rooms');
+        return insight.removeDataset('courses');
 
     });
 
@@ -201,6 +202,35 @@ describe("D3TimeAnalysis", function () {
 
 
     });
+    it("POST description - query", () => {
+        var queryTest:any = {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_uuid"
+                ],
+                "ORDER": {
+                    "dir": "UP",
+                    "keys": ["courses_uuid"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["courses_uuid"],
+                "APPLY": []
+            }
+        };
 
+        var result = fs.readFileSync("UUIDServerTest", "utf8")
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(JSON.stringify(value.body)).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"malformed transformation"})
+        });
+
+    });
 
 });

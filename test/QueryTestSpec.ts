@@ -1430,58 +1430,7 @@ describe("QueryTestSpec", function () {
         }
 
 
-        var result = { render: 'TABLE',
-            result:
-                [{courses_uuid:"2063"},
-                {courses_uuid:"2065"},
-                {courses_uuid:"2067"},
-                {courses_uuid:"2069"},
-                {courses_uuid:"2840"},
-                {courses_uuid:"9415"},
-                {courses_uuid:"9437"},
-                {courses_uuid:"9439"},
-                {courses_uuid:"9441"},
-                {courses_uuid:"9443"},
-                {courses_uuid:"10736"},
-                {courses_uuid:"14615"},
-                {courses_uuid:"19116"},
-                {courses_uuid:"23236"},
-                {courses_uuid:"23238"},
-                {courses_uuid:"23240"},
-                {courses_uuid:"23242"},
-                {courses_uuid:"26967"},
-                {courses_uuid:"28444"},
-                {courses_uuid:"30750"},
-                {courses_uuid:"30752"},
-                {courses_uuid:"30754"},
-                {courses_uuid:"30756"},
-                {courses_uuid:"39485"},
-                {courses_uuid:"45016"},
-                {courses_uuid:"45108"},
-                {courses_uuid:"47872"},
-                {courses_uuid:"47967"},
-                {courses_uuid:"53254"},
-                {courses_uuid:"56357"},
-                {courses_uuid:"58867"},
-                {courses_uuid:"58877"},
-                {courses_uuid:"66311"},
-                {courses_uuid:"66313"},
-                {courses_uuid:"66315"},
-                {courses_uuid:"66317"},
-                {courses_uuid:"73371"},
-                {courses_uuid:"73373"},
-                {courses_uuid:"73375"},
-                {courses_uuid:"73377"},
-                {courses_uuid:"79527"},
-                {courses_uuid:"79615"},
-                {courses_uuid:"83176"},
-                {courses_uuid:"83178"},
-                {courses_uuid:"83180"},
-                {courses_uuid:"83182"},
-                {courses_uuid:"83577"},
-                {courses_uuid:"84805"},
-                {courses_uuid:"84891"}]
-        }
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10736"},{"courses_uuid":"14615"},{"courses_uuid":"19116"},{"courses_uuid":"2063"},{"courses_uuid":"2065"},{"courses_uuid":"2067"},{"courses_uuid":"2069"},{"courses_uuid":"23236"},{"courses_uuid":"23238"},{"courses_uuid":"23240"},{"courses_uuid":"23242"},{"courses_uuid":"26967"},{"courses_uuid":"2840"},{"courses_uuid":"28444"},{"courses_uuid":"30750"},{"courses_uuid":"30752"},{"courses_uuid":"30754"},{"courses_uuid":"30756"},{"courses_uuid":"39485"},{"courses_uuid":"45016"},{"courses_uuid":"45108"},{"courses_uuid":"47872"},{"courses_uuid":"47967"},{"courses_uuid":"53254"},{"courses_uuid":"56357"},{"courses_uuid":"58867"},{"courses_uuid":"58877"},{"courses_uuid":"66311"},{"courses_uuid":"66313"},{"courses_uuid":"66315"},{"courses_uuid":"66317"},{"courses_uuid":"73371"},{"courses_uuid":"73373"},{"courses_uuid":"73375"},{"courses_uuid":"73377"},{"courses_uuid":"79527"},{"courses_uuid":"79615"},{"courses_uuid":"83176"},{"courses_uuid":"83178"},{"courses_uuid":"83180"},{"courses_uuid":"83182"},{"courses_uuid":"83577"},{"courses_uuid":"84805"},{"courses_uuid":"84891"},{"courses_uuid":"9415"},{"courses_uuid":"9437"},{"courses_uuid":"9439"},{"courses_uuid":"9441"},{"courses_uuid":"9443"}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
@@ -1518,58 +1467,7 @@ describe("QueryTestSpec", function () {
         }
 
 
-        var result = { render: 'TABLE',
-            result:
-                [{courses_uuid:"2063"},
-                    {courses_uuid:"2065"},
-                    {courses_uuid:"2067"},
-                    {courses_uuid:"2069"},
-                    {courses_uuid:"2840"},
-                    {courses_uuid:"9415"},
-                    {courses_uuid:"9437"},
-                    {courses_uuid:"9439"},
-                    {courses_uuid:"9441"},
-                    {courses_uuid:"9443"},
-                    {courses_uuid:"10736"},
-                    {courses_uuid:"14615"},
-                    {courses_uuid:"19116"},
-                    {courses_uuid:"23236"},
-                    {courses_uuid:"23238"},
-                    {courses_uuid:"23240"},
-                    {courses_uuid:"23242"},
-                    {courses_uuid:"26967"},
-                    {courses_uuid:"28444"},
-                    {courses_uuid:"30750"},
-                    {courses_uuid:"30752"},
-                    {courses_uuid:"30754"},
-                    {courses_uuid:"30756"},
-                    {courses_uuid:"39485"},
-                    {courses_uuid:"45016"},
-                    {courses_uuid:"45108"},
-                    {courses_uuid:"47872"},
-                    {courses_uuid:"47967"},
-                    {courses_uuid:"53254"},
-                    {courses_uuid:"56357"},
-                    {courses_uuid:"58867"},
-                    {courses_uuid:"58877"},
-                    {courses_uuid:"66311"},
-                    {courses_uuid:"66313"},
-                    {courses_uuid:"66315"},
-                    {courses_uuid:"66317"},
-                    {courses_uuid:"73371"},
-                    {courses_uuid:"73373"},
-                    {courses_uuid:"73375"},
-                    {courses_uuid:"73377"},
-                    {courses_uuid:"79527"},
-                    {courses_uuid:"79615"},
-                    {courses_uuid:"83176"},
-                    {courses_uuid:"83178"},
-                    {courses_uuid:"83180"},
-                    {courses_uuid:"83182"},
-                    {courses_uuid:"83577"},
-                    {courses_uuid:"84805"},
-                    {courses_uuid:"84891"}]
-        }
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10736"},{"courses_uuid":"14615"},{"courses_uuid":"19116"},{"courses_uuid":"2063"},{"courses_uuid":"2065"},{"courses_uuid":"2067"},{"courses_uuid":"2069"},{"courses_uuid":"23236"},{"courses_uuid":"23238"},{"courses_uuid":"23240"},{"courses_uuid":"23242"},{"courses_uuid":"26967"},{"courses_uuid":"2840"},{"courses_uuid":"28444"},{"courses_uuid":"30750"},{"courses_uuid":"30752"},{"courses_uuid":"30754"},{"courses_uuid":"30756"},{"courses_uuid":"39485"},{"courses_uuid":"45016"},{"courses_uuid":"45108"},{"courses_uuid":"47872"},{"courses_uuid":"47967"},{"courses_uuid":"53254"},{"courses_uuid":"56357"},{"courses_uuid":"58867"},{"courses_uuid":"58877"},{"courses_uuid":"66311"},{"courses_uuid":"66313"},{"courses_uuid":"66315"},{"courses_uuid":"66317"},{"courses_uuid":"73371"},{"courses_uuid":"73373"},{"courses_uuid":"73375"},{"courses_uuid":"73377"},{"courses_uuid":"79527"},{"courses_uuid":"79615"},{"courses_uuid":"83176"},{"courses_uuid":"83178"},{"courses_uuid":"83180"},{"courses_uuid":"83182"},{"courses_uuid":"83577"},{"courses_uuid":"84805"},{"courses_uuid":"84891"},{"courses_uuid":"9415"},{"courses_uuid":"9437"},{"courses_uuid":"9439"},{"courses_uuid":"9441"},{"courses_uuid":"9443"}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
@@ -1601,102 +1499,9 @@ describe("QueryTestSpec", function () {
             }
         }
 
-        /** 2063
-         2065
-         2067
-         2069
-         2840
-         9415
-         9437
-         9439
-         9441
-         9443
-         10736
-         14615
-         19116
-         23236
-         23238
-         23240
-         23242
-         28444
-         30750
-         30752
-         30754
-         30756
-         39485
-         45016
-         45108
-         47872
-         47967
-         53254
-         56357
-         66311
-         66313
-         66315
-         66317
-         73371
-         73373
-         73375
-         73377
-         79527
-         79615
-         83176
-         83178
-         83180
-         83182
-         83577
-         84805
-         84891 */
 
-        var result = { render: 'TABLE',
-            result:
-                [{courses_uuid:"2063"},
-                    {courses_uuid:"2065"},
-                    {courses_uuid:"2067"},
-                    {courses_uuid:"2069"},
-                    {courses_uuid:"2840"},
-                    {courses_uuid:"9415"},
-                    {courses_uuid:"9437"},
-                    {courses_uuid:"9439"},
-                    {courses_uuid:"9441"},
-                    {courses_uuid:"9443"},
-                    {courses_uuid:"10736"},
-                    {courses_uuid:"14615"},
-                    {courses_uuid:"19116"},
-                    {courses_uuid:"23236"},
-                    {courses_uuid:"23238"},
-                    {courses_uuid:"23240"},
-                    {courses_uuid:"23242"},
-                    {courses_uuid:"28444"},
-                    {courses_uuid:"30750"},
-                    {courses_uuid:"30752"},
-                    {courses_uuid:"30754"},
-                    {courses_uuid:"30756"},
-                    {courses_uuid:"39485"},
-                    {courses_uuid:"45016"},
-                    {courses_uuid:"45108"},
-                    {courses_uuid:"47872"},
-                    {courses_uuid:"47967"},
-                    {courses_uuid:"53254"},
-                    {courses_uuid:"56357"},
-                    {courses_uuid:"66311"},
-                    {courses_uuid:"66313"},
-                    {courses_uuid:"66315"},
-                    {courses_uuid:"66317"},
-                    {courses_uuid:"73371"},
-                    {courses_uuid:"73373"},
-                    {courses_uuid:"73375"},
-                    {courses_uuid:"73377"},
-                    {courses_uuid:"79527"},
-                    {courses_uuid:"79615"},
-                    {courses_uuid:"83176"},
-                    {courses_uuid:"83178"},
-                    {courses_uuid:"83180"},
-                    {courses_uuid:"83182"},
-                    {courses_uuid:"83577"},
-                    {courses_uuid:"84805"},
-                    {courses_uuid:"84891"}]
-        }
+
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10736"},{"courses_uuid":"14615"},{"courses_uuid":"19116"},{"courses_uuid":"2063"},{"courses_uuid":"2065"},{"courses_uuid":"2067"},{"courses_uuid":"2069"},{"courses_uuid":"23236"},{"courses_uuid":"23238"},{"courses_uuid":"23240"},{"courses_uuid":"23242"},{"courses_uuid":"2840"},{"courses_uuid":"28444"},{"courses_uuid":"30750"},{"courses_uuid":"30752"},{"courses_uuid":"30754"},{"courses_uuid":"30756"},{"courses_uuid":"39485"},{"courses_uuid":"45016"},{"courses_uuid":"45108"},{"courses_uuid":"47872"},{"courses_uuid":"47967"},{"courses_uuid":"53254"},{"courses_uuid":"56357"},{"courses_uuid":"66311"},{"courses_uuid":"66313"},{"courses_uuid":"66315"},{"courses_uuid":"66317"},{"courses_uuid":"73371"},{"courses_uuid":"73373"},{"courses_uuid":"73375"},{"courses_uuid":"73377"},{"courses_uuid":"79527"},{"courses_uuid":"79615"},{"courses_uuid":"83176"},{"courses_uuid":"83178"},{"courses_uuid":"83180"},{"courses_uuid":"83182"},{"courses_uuid":"83577"},{"courses_uuid":"84805"},{"courses_uuid":"84891"},{"courses_uuid":"9415"},{"courses_uuid":"9437"},{"courses_uuid":"9439"},{"courses_uuid":"9441"},{"courses_uuid":"9443"}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
@@ -1728,102 +1533,9 @@ describe("QueryTestSpec", function () {
             }
         }
 
-        /** 2063
-         2065
-         2067
-         2069
-         2840
-         9415
-         9437
-         9439
-         9441
-         9443
-         10736
-         14615
-         19116
-         23236
-         23238
-         23240
-         23242
-         28444
-         30750
-         30752
-         30754
-         30756
-         39485
-         45016
-         45108
-         47872
-         47967
-         53254
-         56357
-         66311
-         66313
-         66315
-         66317
-         73371
-         73373
-         73375
-         73377
-         79527
-         79615
-         83176
-         83178
-         83180
-         83182
-         83577
-         84805
-         84891 */
 
-        var result = { render: 'TABLE',
-            result:
-                [{courses_uuid:"2063"},
-                    {courses_uuid:"2065"},
-                    {courses_uuid:"2067"},
-                    {courses_uuid:"2069"},
-                    {courses_uuid:"2840"},
-                    {courses_uuid:"9415"},
-                    {courses_uuid:"9437"},
-                    {courses_uuid:"9439"},
-                    {courses_uuid:"9441"},
-                    {courses_uuid:"9443"},
-                    {courses_uuid:"10736"},
-                    {courses_uuid:"14615"},
-                    {courses_uuid:"19116"},
-                    {courses_uuid:"23236"},
-                    {courses_uuid:"23238"},
-                    {courses_uuid:"23240"},
-                    {courses_uuid:"23242"},
-                    {courses_uuid:"28444"},
-                    {courses_uuid:"30750"},
-                    {courses_uuid:"30752"},
-                    {courses_uuid:"30754"},
-                    {courses_uuid:"30756"},
-                    {courses_uuid:"39485"},
-                    {courses_uuid:"45016"},
-                    {courses_uuid:"45108"},
-                    {courses_uuid:"47872"},
-                    {courses_uuid:"47967"},
-                    {courses_uuid:"53254"},
-                    {courses_uuid:"56357"},
-                    {courses_uuid:"66311"},
-                    {courses_uuid:"66313"},
-                    {courses_uuid:"66315"},
-                    {courses_uuid:"66317"},
-                    {courses_uuid:"73371"},
-                    {courses_uuid:"73373"},
-                    {courses_uuid:"73375"},
-                    {courses_uuid:"73377"},
-                    {courses_uuid:"79527"},
-                    {courses_uuid:"79615"},
-                    {courses_uuid:"83176"},
-                    {courses_uuid:"83178"},
-                    {courses_uuid:"83180"},
-                    {courses_uuid:"83182"},
-                    {courses_uuid:"83577"},
-                    {courses_uuid:"84805"},
-                    {courses_uuid:"84891"}]
-        }
+
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10736"},{"courses_uuid":"14615"},{"courses_uuid":"19116"},{"courses_uuid":"2063"},{"courses_uuid":"2065"},{"courses_uuid":"2067"},{"courses_uuid":"2069"},{"courses_uuid":"23236"},{"courses_uuid":"23238"},{"courses_uuid":"23240"},{"courses_uuid":"23242"},{"courses_uuid":"2840"},{"courses_uuid":"28444"},{"courses_uuid":"30750"},{"courses_uuid":"30752"},{"courses_uuid":"30754"},{"courses_uuid":"30756"},{"courses_uuid":"39485"},{"courses_uuid":"45016"},{"courses_uuid":"45108"},{"courses_uuid":"47872"},{"courses_uuid":"47967"},{"courses_uuid":"53254"},{"courses_uuid":"56357"},{"courses_uuid":"66311"},{"courses_uuid":"66313"},{"courses_uuid":"66315"},{"courses_uuid":"66317"},{"courses_uuid":"73371"},{"courses_uuid":"73373"},{"courses_uuid":"73375"},{"courses_uuid":"73377"},{"courses_uuid":"79527"},{"courses_uuid":"79615"},{"courses_uuid":"83176"},{"courses_uuid":"83178"},{"courses_uuid":"83180"},{"courses_uuid":"83182"},{"courses_uuid":"83577"},{"courses_uuid":"84805"},{"courses_uuid":"84891"},{"courses_uuid":"9415"},{"courses_uuid":"9437"},{"courses_uuid":"9439"},{"courses_uuid":"9441"},{"courses_uuid":"9443"}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
