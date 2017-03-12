@@ -182,7 +182,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 multiple transform", function () {
+    it( "200 multiple transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -246,7 +246,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "424 dataset in apply", function () {
+    it.only( "424 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -261,26 +261,27 @@ describe("D3QueryTestSpec", function () {
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "test_shortname",
+                    "rooms_shortname",
                     "maxSeats"
                 ],
                 "ORDER": {
                     "dir": "DOWN",
-                    "keys": ["maxSeats"]
+                    "keys": ["maxSeats", "rooms_shortname"]
                 },
                 "FORM": "TABLE"
             },
             "TRANSFORMATIONS": {
-                "GROUP": ["test_shortname"],
+                "GROUP": ["rooms_shortname"],
                 "APPLY": [{
                     "maxSeats": {
-                        "MAX": "other_seats"
+                        "MAX": "rooms_seats"
                     }
                 }]
             }
         }
 
-        var result = {"render":"TABLE","result":[{"rooms_shortname":"OSBO","anything":442},{"rooms_shortname":"HEBB","anything":375},{"rooms_shortname":"LSC","anything":350}]}
+        var result =
+            {"render":"TABLE","result":[{"rooms_shortname":"OSBO","maxSeats":442},{"rooms_shortname":"HEBB","maxSeats":375},{"rooms_shortname":"LSC","maxSeats":350}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
