@@ -231,7 +231,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 simple query deliverable", function () {
+    it( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -284,7 +284,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 simple query no ORDER with TRANSFORMATION", function () {
+    it( "200 simple query no ORDER with TRANSFORMATION", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -324,7 +324,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: any =  {
             "WHERE": {
