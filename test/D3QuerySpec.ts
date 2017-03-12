@@ -231,7 +231,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 simple query deliverable", function () {
+    it.only( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
