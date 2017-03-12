@@ -7,7 +7,7 @@ import {InsightResponse, QueryRequest, IInsightFacade, FilterQuery, MCompare} fr
 import InsightFacade from "../src/controller/InsightFacade";
 
 
-describe("D3QueryTestSpec", function () {
+describe("D3LargeResultSpec", function () {
 
     var insightFacade: InsightFacade = null;
     var insight: InsightFacade = null;
@@ -55,7 +55,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 all result", function () {
+    it( "200 all result", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -86,7 +86,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 simple query deliverable", function () {
+    it( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {
                 "AND":[{

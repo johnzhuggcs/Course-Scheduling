@@ -94,7 +94,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it.only("checking out complex query provided in deliverable", function () {
+    it("checking out complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
                 "AND": [{
@@ -132,7 +132,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it.only( "200 transform", function () {
+    it( "200 transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -182,7 +182,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "424 dataset in apply", function () {
+    it( "424 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -284,7 +284,47 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it.only( "200 simple query no ORDER with TRANSFORMATION", function () {
+        var queryTest:any =   {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_furniture"
+                ],
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_furniture"],
+                "APPLY": []
+            }
+        }
+        sanityCheck(queryTest);
+
+        var result =
+            {"render":"TABLE","result":[{"rooms_furniture":"Classroom-Movable Tables & Chairs"},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs"},{"rooms_furniture":"Classroom-Movable Tablets"},{"rooms_furniture":"Classroom-Fixed Tablets"},{"rooms_furniture":"Classroom-Moveable Tables & Chairs"},{"rooms_furniture":"Classroom-Learn Lab"},{"rooms_furniture":"Classroom-Hybrid Furniture"},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs"},{"rooms_furniture":"Classroom-Fixed Tables/Moveable Chairs"},{"rooms_furniture":"Classroom-Moveable Tablets"}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: any){
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"];
+            var expectedResult:any = result["result"];
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).includes(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+            //expect(value.body).to.deep.equal(result);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"malformed transformation"})
+        })
+
+    });
+
+    it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: QueryRequest =  {
             "WHERE": {
