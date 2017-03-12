@@ -814,7 +814,7 @@ export default class InsightFacade implements IInsightFacade {
                 var transformation:TransformationQuery = query.TRANSFORMATIONS;
                 var transformationGroup;
                 var transformationApply;
-                var newTransformationApply = [];
+                var newTransformationApply:any[] = [];
                 var applyExists:boolean = true;
                 var transformationExists:any = false;
                 var keys = Object.keys(filter);
@@ -988,13 +988,23 @@ export default class InsightFacade implements IInsightFacade {
                                                     }
 
                                                      //checking apply is in columns and vice versa
-                                                        if(applyExists == true && newThis.applyHasColumn(transformationApply, singleColumnKey)) {
-                                                            tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
-                                                            if (isUndefined(tempApplyKey) || tempApplyKey.some(isUndefined)) {
+                                                        tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
+                                                        if(applyExists == true && tempApplyKey.length > 0) {
+
+                                                            if (tempApplyKey.some(isUndefined)) {
                                                                 continue;
                                                             } else {
-                                                                newTransformationApply.push(tempApplyKey[0])
-                                                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, returnInfo)
+                                                                for(let x in tempApplyKey){
+                                                                    if(isUndefined(tempApplyKey[x])){
+                                                                        continue;
+                                                                    }else{
+                                                                        if(newTransformationApply.includes(tempApplyKey[x])){
+                                                                            continue;
+                                                                        }else {
+                                                                            newTransformationApply.push(tempApplyKey[x])
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         }
 
@@ -1155,7 +1165,7 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     }
 
-                   //console.time("sort through result")
+                   console.time("sort through result")
                     if(!(isUndefined(order))) {
                         //TODO: check for new ORDER
                         if (typeof order == "string") {
@@ -1283,11 +1293,12 @@ export default class InsightFacade implements IInsightFacade {
                                 if(dir == "DOWN") {
                                     tempSortResult = b[keysArray[0]] - a[keysArray[0]];
 
-                                    while(tempSortResult == 0){
-                                        for(let x in keysArray){
+                                        let x = 0;
+                                        while(tempSortResult == 0 && Number(x) < keysArray.length){
                                             tempSortResult = b[keysArray[x]] - a[keysArray[x]];
+                                            x++;
                                         }
-                                    }
+
                                     return tempSortResult
 
                                     /**if(tempSortResult == 0){
@@ -1298,10 +1309,10 @@ export default class InsightFacade implements IInsightFacade {
                                 }else if(dir == "UP"){
                                     tempSortResult = a[keysArray[0]] - b[keysArray[0]];
 
-                                    while(tempSortResult == 0){
-                                        for(let x in keysArray){
-                                            tempSortResult = a[keysArray[x]] - b[keysArray[x]];
-                                        }
+                                    let x = 0;
+                                    while(tempSortResult == 0 && Number(x) < keysArray.length){
+                                        tempSortResult = a[keysArray[x]] - b[keysArray[x]];
+                                        x++;
                                     }
                                     return tempSortResult
 
@@ -1332,11 +1343,11 @@ export default class InsightFacade implements IInsightFacade {
                                             } else if (nameB > nameA) {
                                                 return 1;
                                             } else {
-                                                while(nameB == nameA){
-                                                    for(let x in keysArray){
-                                                        nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                        nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    }
+                                                let x = 0;
+                                                while(nameB == nameA && Number(x) < keysArray.length){
+                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    x++
                                                 }
                                                 if(nameB < nameA){
                                                     return -1;
@@ -1355,11 +1366,11 @@ export default class InsightFacade implements IInsightFacade {
                                             } else if (nameA > nameB) {
                                                 return 1;
                                             } else {
-                                                while(nameB == nameA){
-                                                    for(let x in keysArray){
-                                                        nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                        nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    }
+                                                let x = 0;
+                                                while(nameB == nameA && Number(x) < keysArray.length){
+                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    x++
                                                 }
                                                 if(nameB > nameA){
                                                     return -1;
@@ -1387,7 +1398,7 @@ export default class InsightFacade implements IInsightFacade {
 
                             //console.timeEnd("sort through new order")
                         }
-                    }
+                    }console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -1491,25 +1502,28 @@ export default class InsightFacade implements IInsightFacade {
         var matchIndex = -1;
         var newTransformGroup = transformationGroup.slice();
 
-        var applyString = Object.keys(transformationApply)[0]
-        var applyKey = transformationApply[applyString]
+        var applyString;
+        var applyKey;
 
-
-            for(let x in finalReturnInfo){
+        for(let x in transformationApply) {
+            //applyString = Object.keys(transformationApply)[0]
+            applyKey = transformationApply[x]
+            for (let x in finalReturnInfo) {
                 transformReturnInfo = finalReturnInfo[x];
                 groupedApplyColumns = this.applyObjects(transformationApply, transformReturnInfo)
-                if(Number(x) == 0){
+                if (Number(x) == 0) {
                     transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
                     groupObjectArray.push(transformReturnInfo);
-                }else{
-                    if(transformationGroup.includes("courses_uuid")){
+                } else {
+                    if (transformationGroup.includes("courses_uuid")) {
                         uuidIndex = transformationGroup.indexOf("courses_uuid")
                         newTransformGroup.splice(uuidIndex, 1);
                     }
 
-                    if(newTransformGroup.length == 0){
+                    if (newTransformGroup.length == 0) {
                         newTransformGroup = newTransformGroup;
-                    }else {
+                    } else {
+
                         matchIndex = groupObjectArray.findIndex(function (singleGroupedElement: any) {
                             return newTransformGroup.every(function (singleGroup: any) {
                                 newValue = transformReturnInfo[singleGroup];
@@ -1520,17 +1534,18 @@ export default class InsightFacade implements IInsightFacade {
                     }
 
 
-                    if(matchIndex >= 0){
+                    if (matchIndex >= 0) {
                         transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
                         groupObjectArray[matchIndex] = this.groupQueryHelper(groupObjectArray[matchIndex], transformReturnInfo, transformationApply)
 
-                    }else{
+                    } else {
                         transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
                         groupObjectArray.push(transformReturnInfo);
                     }
                 }
 
-            } return groupObjectArray;
+            }
+        }return groupObjectArray;
     }
 
     groupQueryHelper(returnInfo:any, groupReturnInfo:any, transformationApply:any){
@@ -1582,6 +1597,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     returnSum(valueArray:any):any{
+        valueArray.shift()
         var sum = valueArray.reduce(function (a:any, b:any) {
             return a + b;
         });
@@ -1616,7 +1632,7 @@ export default class InsightFacade implements IInsightFacade {
         valueArray = valueArray.filter (function (value:any, index:any, array:any) {
             return array.indexOf (value) == index;
         });
-        return valueArray;
+        return valueArray.length;
     }
 
 
@@ -1654,7 +1670,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
     applyHasColumn(Apply:any, columnsKey:any):any{
-        return Apply.map(function(applyKey:any){
+        return Apply.filter(function(applyKey:any){
             var tempApplyString = Object.keys(applyKey)[0]
             if(columnsKey == tempApplyString){
                 return applyKey;
