@@ -182,7 +182,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "424 dataset in apply", function () {
+    it.only( "424 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -326,7 +326,7 @@ describe("D3QueryTestSpec", function () {
 
     it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
 
-        var queryTest: QueryRequest =  {
+        var queryTest: any =  {
             "WHERE": {
                 "AND": [{
                     "OR":[{
@@ -396,7 +396,7 @@ describe("D3QueryTestSpec", function () {
         }).catch(function (err) {
             Log.test('Error: ' + err);
 
-            expect(err.code).to.equal(424);
+            expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"missing": ["rooms"]})
 
         })
