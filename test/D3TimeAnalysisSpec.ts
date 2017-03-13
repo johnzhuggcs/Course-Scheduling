@@ -202,7 +202,7 @@ describe("D3TimeAnalysis", function () {
 
 
     });
-    it.only("POST description - query", () => {
+    it("POST description - query", () => {
         var queryTest:any = {
             "WHERE": {},
             "OPTIONS": {
@@ -230,6 +230,44 @@ describe("D3TimeAnalysis", function () {
             expect(err.code).to.equal(400);
             expect(err.body).to.deep.equal({"error":"malformed transformation"})
         });
+
+    });
+
+    it( "200 piazza computational heavy", function () {
+        var queryTest:any =    {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_uuid", "minGrade"
+                ],
+                "ORDER": "minGrade",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["courses_uuid"],
+                "APPLY": [
+                    {
+                        "minGrade": {
+                            "SUM": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+        sanityCheck(queryTest);
+
+        var result = fs.readFileSync("calcHeavyResult", "utf8")
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            //Log.info(JSON.stringify(value.body));
+            //expect(value.body).to.deep.equal(JSON.parse(result))
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"malformed transformation"})
+        })
+
+
 
     });
 
