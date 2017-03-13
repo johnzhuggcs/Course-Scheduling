@@ -246,7 +246,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "424 dataset in apply", function () {
+    it.only( "200 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -255,7 +255,7 @@ describe("D3QueryTestSpec", function () {
                     }
                 }, {
                     "GT": {
-                        "rooms_seats": 300
+                        "rooms_seats": 100
                     }
                 }]
             },
@@ -281,7 +281,7 @@ describe("D3QueryTestSpec", function () {
         }
 
         var result =
-            {"render":"TABLE","result":[{"rooms_shortname":"OSBO","maxSeats":442},{"rooms_shortname":"HEBB","maxSeats":375},{"rooms_shortname":"LSC","maxSeats":350}]}
+            {"render":"TABLE","result":[{"rooms_shortname":"OSBO","maxSeats":442},{"rooms_shortname":"HEBB","maxSeats":375},{"rooms_shortname":"LSC","maxSeats":350},{"rooms_shortname":"SRC","maxSeats":299},{"rooms_shortname":"ANGU","maxSeats":260},{"rooms_shortname":"PHRM","maxSeats":236},{"rooms_shortname":"LSK","maxSeats":205},{"rooms_shortname":"CHBE","maxSeats":200},{"rooms_shortname":"SWNG","maxSeats":190},{"rooms_shortname":"FRDM","maxSeats":160},{"rooms_shortname":"DMP","maxSeats":160},{"rooms_shortname":"IBLC","maxSeats":154},{"rooms_shortname":"MCLD","maxSeats":136},{"rooms_shortname":"WOOD","maxSeats":120},{"rooms_shortname":"BUCH","maxSeats":108}]}
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);

@@ -1293,11 +1293,11 @@ export default class InsightFacade implements IInsightFacade {
                                 if(dir == "DOWN") {
                                     tempSortResult = b[keysArray[0]] - a[keysArray[0]];
 
-                                        let x = 0;
+                                        /**let x = 0;
                                         while(tempSortResult == 0 && Number(x) < keysArray.length){
                                             tempSortResult = b[keysArray[x]] - a[keysArray[x]];
                                             x++;
-                                        }
+                                        }*/
 
                                     return tempSortResult
 
@@ -1309,11 +1309,11 @@ export default class InsightFacade implements IInsightFacade {
                                 }else if(dir == "UP"){
                                     tempSortResult = a[keysArray[0]] - b[keysArray[0]];
 
-                                    let x = 0;
+                                    /**let x = 0;
                                     while(tempSortResult == 0 && Number(x) < keysArray.length){
                                         tempSortResult = a[keysArray[x]] - b[keysArray[x]];
                                         x++;
-                                    }
+                                    }*/
                                     return tempSortResult
 
                                     /**if(tempSortResult == 0){
@@ -1343,7 +1343,7 @@ export default class InsightFacade implements IInsightFacade {
                                             } else if (nameB > nameA) {
                                                 return 1;
                                             } else {
-                                                let x = 0;
+                                                /**let x = 0;
                                                 while(nameB == nameA && Number(x) < keysArray.length){
                                                     nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
                                                     nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
@@ -1353,10 +1353,8 @@ export default class InsightFacade implements IInsightFacade {
                                                     return -1;
                                                 }else{
                                                     return 1;
-                                                }
-                                                /**tempKeysArray.shift()
-                                                tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
-                                                return tempSortResult*/
+                                                }*/
+                                                return 0
                                             }
                                         } else if (dir == "UP") {
                                             var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
@@ -1366,7 +1364,7 @@ export default class InsightFacade implements IInsightFacade {
                                             } else if (nameA > nameB) {
                                                 return 1;
                                             } else {
-                                                let x = 0;
+                                                /**let x = 0;
                                                 while(nameB == nameA && Number(x) < keysArray.length){
                                                     nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
                                                     nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
@@ -1376,11 +1374,8 @@ export default class InsightFacade implements IInsightFacade {
                                                     return -1;
                                                 }else{
                                                     return 1;
-                                                }
-                                                /**
-                                                tempKeysArray.shift()
-                                                tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
-                                                return tempSortResult*/
+                                                }*/
+                                                return 0
                                             }
 
 
