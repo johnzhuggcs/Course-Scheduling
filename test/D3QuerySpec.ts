@@ -74,14 +74,13 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it("checking out weird query provided in deliverable", function () {
+    it.only("checking out weird query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {},
             "OPTIONS": {
                 "COLUMNS": [
                     "rooms_furniture"
                 ],
-                "ORDER": {},
                 "FORM": "TABLE"
             },
             "TRANSFORMATIONS": {
@@ -235,6 +234,8 @@ describe("D3QueryTestSpec", function () {
 
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
+            Log.info("actual: "+JSON.stringify(value.body))
+            Log.info("expected: "+JSON.stringify(result))
             expect(value.body).to.deep.equal(result)
         }).catch(function (err) {
             Log.test('Error: ' + err);
@@ -470,6 +471,7 @@ describe("D3QueryTestSpec", function () {
 
 
     });
+
 
 
 });

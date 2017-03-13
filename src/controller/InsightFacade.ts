@@ -1172,14 +1172,14 @@ export default class InsightFacade implements IInsightFacade {
                             if (columns.includes(order)) {
                                 /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
                                  validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
-                                if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
+                                if (typeof finalReturn[0][order] == "number" || order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
                                     || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
                                     finalReturn = finalReturn.sort(function (a:any, b:any) {
                                         return a[order] - b[order];
                                     });
 
-                                } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
+                                } else if (typeof finalReturn[0][order] == "string" || order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
                                     || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")
                                     || order.endsWith("_uuid")) {
                                     finalReturn = finalReturn.sort(function (a:any, b:any) {
@@ -1383,7 +1383,8 @@ export default class InsightFacade implements IInsightFacade {
                                    });
 
 
-                            } else {
+                            }
+                            else {
                                         var code400InvalidQuery: InsightResponse = {
                                             code: 400,
                                             body: {"error": "order error"}
