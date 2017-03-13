@@ -74,7 +74,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it.only("checking out weird query provided in deliverable", function () {
+    it("checking out weird query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {},
             "OPTIONS": {
@@ -86,6 +86,44 @@ describe("D3QueryTestSpec", function () {
             "TRANSFORMATIONS": {
                 "GROUP": ["rooms_furniture"],
                 "APPLY": []
+            }
+        }
+        sanityCheck(queryTest);
+        var result = {"true": ["rooms"]};
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
+    });
+
+    it("checking out complex query provided in deliverable", function () {
+        var queryTest: any = {
+            "WHERE": {
+                "AND": [{
+                    "IS": {
+                        "rooms_furniture": "*Tables*"
+                    }
+                }, {
+                    "GT": {
+                        "rooms_seats": 300
+                    }
+                }]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_shortname",
+                    "maxSeats"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["maxSeats"]
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_shortname"],
+                "APPLY": [{
+                    "maxSeats": {
+                        "MAX": "rooms_seats"
+                    }
+                }]
             }
         }
         sanityCheck(queryTest);

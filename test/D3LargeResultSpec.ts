@@ -55,7 +55,7 @@ describe("D3LargeResultSpec", function () {
 
     });
 
-    it.only( "200 all result", function () {
+    it( "200 all result", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {

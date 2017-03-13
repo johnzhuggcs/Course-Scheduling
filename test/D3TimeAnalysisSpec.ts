@@ -259,7 +259,7 @@ describe("D3TimeAnalysis", function () {
         var result = fs.readFileSync("calcHeavyResult", "utf8")
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
             expect(value.code).to.equal(200);
-            Log.info(JSON.stringify(value.body));
+            //Log.info(JSON.stringify(value.body));
             //expect(value.body).to.deep.equal(JSON.parse(result))
         }).catch(function (err) {
             Log.test('Error: ' + err);
