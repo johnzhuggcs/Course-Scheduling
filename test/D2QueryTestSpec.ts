@@ -760,7 +760,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it.only("200 testing out href", function () {
+    it("200 testing out href", function () {
 
         var queryTest: any = {
             "WHERE": {
