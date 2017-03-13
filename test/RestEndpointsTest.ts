@@ -45,7 +45,7 @@ describe("RestEndpointsTest.ts", function () {
     //import {Response} from "restify";
     //import Response = chaiHttp.Response;
 
-    it.only("PUT description (204)", function () {
+    it("PUT description (204)", function () {
         return chai.request("http://localhost:4321")
             .put('/dataset/courses')
             .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
@@ -56,7 +56,7 @@ describe("RestEndpointsTest.ts", function () {
                 expect.fail();
             });
     });
-    it.only("PUT description (201)", function () {
+    it("PUT description (201)", function () {
         return chai.request("http://localhost:4321")
             .put('/dataset/courses')
             .attach("body", fs.readFileSync("./courses.zip"), "courses.zip")
@@ -67,7 +67,7 @@ describe("RestEndpointsTest.ts", function () {
                 expect.fail();
             });
     });
-    it.only("PUT description (400)", function () {
+    it("PUT description (400)", function () {
         return chai.request("http://localhost:4321")
             .put('/dataset/failedFile')
             .attach("body", fs.readFileSync("./empty_zip.zip"), "empty_zip.zip")
@@ -79,7 +79,7 @@ describe("RestEndpointsTest.ts", function () {
             });
     });
 
-    it.only("POST description (200)", function () {
+    it("POST description (200)", function () {
         var queryJSONObject:QueryRequest = {
             "WHERE":{
                 "GT":{
@@ -110,7 +110,7 @@ describe("RestEndpointsTest.ts", function () {
             });
     });
 
-    it.only("POST description (400)", function () {
+    it("POST description (400)", function () {
         var queryJSONObject:QueryRequest = {
             "WHERE":
                 {"NOT":{"NOT":{"NOT":
@@ -145,7 +145,7 @@ describe("RestEndpointsTest.ts", function () {
             });
     });
 
-    it.only("POST description (424)", function () {
+    it("POST description (424)", function () {
         var queryJSONObject:any =     {
             "WHERE":{
                 "OR":[
@@ -205,7 +205,7 @@ describe("RestEndpointsTest.ts", function () {
             });
     });
 
-    it.only("DELETE description (204)", function () {
+    it("DELETE description (204)", function () {
         return chai.request("http://localhost:4321")
             .del('/dataset/courses')
             .then(function (res: any) {
@@ -215,7 +215,7 @@ describe("RestEndpointsTest.ts", function () {
                 expect.fail();
             });
     });
-    it.only("DELETE description (404)", function () {
+    it("DELETE description (404)", function () {
         return chai.request("http://localhost:4321")
             .del('/dataset/courses')
             .then(function (res: any) {
