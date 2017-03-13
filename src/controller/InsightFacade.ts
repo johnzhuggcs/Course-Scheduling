@@ -1123,9 +1123,9 @@ export default class InsightFacade implements IInsightFacade {
                                 return reject(code400InvalidQuery)
                             }
                         }*/
-                        console.time("start Group")
-                        finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists);
-                        console.timeEnd("start Group")
+                        //console.time("start Group")
+                            //TODO: original group space
+                        //console.timeEnd("start Group")
                         var singleReturn;
                         var returnInfoKeys;
                         var newCache;
@@ -1396,6 +1396,8 @@ export default class InsightFacade implements IInsightFacade {
                             //console.timeEnd("sort through new order")
                         }
                     }console.timeEnd("sort through result")
+
+                    finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists);
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
