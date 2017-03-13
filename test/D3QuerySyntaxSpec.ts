@@ -151,7 +151,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("isValid new ORDER with TRANSFORMATION", function () {
+    it("isValid new ORDER with TRANSFORMATION", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
@@ -186,7 +186,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("isValid no ORDER with TRANSFORMATION", function () {
+    it("isValid no ORDER with TRANSFORMATION", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
@@ -211,6 +211,35 @@ describe("D3QuerySyntaxSpec", function () {
         }
         var keyTest = Object.keys(queryTest);
         var result = {"true": ["rooms"]}
+        sanityCheck(queryTest);
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
+
+
+    });
+
+    it.only("isValid mixed Columns, weird ORDER with TRANSFORMATION", function () {
+        var queryTest: any =  {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_uuid", "minGrade"
+                ],
+                "ORDER": "minGrade",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["courses_uuid"],
+                "APPLY": [
+                    {
+                        "minGrade": {
+                            "SUM": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+        var keyTest = Object.keys(queryTest);
+        var result = {"true": ["courses"]}
         sanityCheck(queryTest);
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 

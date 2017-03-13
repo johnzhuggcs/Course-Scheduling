@@ -2362,7 +2362,9 @@ export default class InsightFacade implements IInsightFacade {
                                     isOneDataset = isOneDataset
                                 }else return isOneDataset;
 
-                            } else return false
+                            } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && transformationExists == true){
+                                orderValidKey = orderValidKey;
+                            }else return false
                         } else return false
                     }else if(transformationExists == true){
                         isOneDataset = isOneDataset
