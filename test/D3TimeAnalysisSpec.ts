@@ -202,7 +202,7 @@ describe("D3TimeAnalysis", function () {
 
 
     });
-    it("POST description - query", () => {
+    it.only("POST description - query", () => {
         var queryTest:any = {
             "WHERE": {},
             "OPTIONS": {

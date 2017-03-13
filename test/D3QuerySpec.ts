@@ -246,7 +246,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 dataset in apply", function () {
+    it( "200 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{

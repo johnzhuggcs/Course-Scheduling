@@ -1223,175 +1223,11 @@ export default class InsightFacade implements IInsightFacade {
                                 return reject(code400InvalidQuery);
                             }
                             //console.timeEnd("sort through result")
-                        } else {
-                            //console.time("sort through new order")
-                            var orderKeys = Object.keys(order);
-                            var dir:any = order[orderKeys[0]];
-                            var keysArray:any = order[orderKeys[1]];
-                            var tempSortResult;
-
-                            for(let x in keysArray) {
-                                if (columns.includes(keysArray[x])) {
-                                    continue;
-                                } else {
-                                    var code400InvalidQuery: InsightResponse = {
-                                        code: 400,
-                                        body: {"error": "order not in column"}
-                                    };
-                                    return reject(code400InvalidQuery);
-                                }
-                            }
-                            /**if (keysArray[0].endsWith("_uuid")) {
-                                var tempKeysArray = keysArray.slice();
-                                finalReturn = finalReturn.sort(function (a:any, b:any) {
-                                    var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
-                                    var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
-
-                                    if(dir == "DOWN") {
-                                        //tempSortResult = numB - numA;
-                                        tempSortResult = numB - numA
-
-                                        while(tempSortResult == 0){
-                                            for(let x in keysArray){
-                                                numA = Number(a[keysArray[x]])
-                                                numB = Number(b[keysArray[x]])
-                                                tempSortResult = numB - numA;
-                                            }
-                                        }
-                                        return tempSortResult
-                                        if(tempSortResult == 0){
-
-                                            tempKeysArray.shift()
-                                            tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
-                                            return tempSortResult
-                                        }else return tempSortResult
-                                    }else if(dir == "UP"){
-                                        tempSortResult = numA - numB;
-
-                                        while(tempSortResult == 0){
-                                            for(let x in keysArray){
-                                                numA = Number(a[keysArray[x]])
-                                                numB = Number(b[keysArray[x]])
-                                                tempSortResult = numA - numB;
-                                            }
-                                        }
-                                        return tempSortResult
-                                        if(tempSortResult == 0){
-                                            tempKeysArray.shift()
-                                            tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
-                                            return tempSortResult
-                                        }else return tempSortResult;
-                                    }
-                                });
-
-                                //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
-                            }*/
-                             if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
-                               || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats")) {
-
-                                finalReturn = finalReturn.sort(function (a:any, b:any) {
-                                if(dir == "DOWN") {
-                                    tempSortResult = b[keysArray[0]] - a[keysArray[0]];
-
-                                        /**let x = 0;
-                                        while(tempSortResult == 0 && Number(x) < keysArray.length){
-                                            tempSortResult = b[keysArray[x]] - a[keysArray[x]];
-                                            x++;
-                                        }*/
-
-                                    return tempSortResult
-
-                                    /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult*/
-                                }else if(dir == "UP"){
-                                    tempSortResult = a[keysArray[0]] - b[keysArray[0]];
-
-                                    /**let x = 0;
-                                    while(tempSortResult == 0 && Number(x) < keysArray.length){
-                                        tempSortResult = a[keysArray[x]] - b[keysArray[x]];
-                                        x++;
-                                    }*/
-                                    return tempSortResult
-
-                                    /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult;*/
-                                }
-                            });
-
-                            } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
-                                   || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")
-                                   || keysArray[0].endsWith("_uuid")) {
-                                  // var x = 0;
-                                   var tempKeysArray = keysArray.slice();
-                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
-
-                                        if (dir == "DOWN") {
-
-                                            //Log.info(JSON.stringify(a));
-                                            //Log.info(JSON.stringify(keysArray[0]))
-
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameB < nameA) {
-                                                return -1;
-                                            } else if (nameB > nameA) {
-                                                return 1;
-                                            } else {
-                                                /**let x = 0;
-                                                while(nameB == nameA && Number(x) < keysArray.length){
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if(nameB < nameA){
-                                                    return -1;
-                                                }else{
-                                                    return 1;
-                                                }*/
-                                                return 0
-                                            }
-                                        } else if (dir == "UP") {
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameA < nameB) {
-                                                return -1;
-                                            } else if (nameA > nameB) {
-                                                return 1;
-                                            } else {
-                                                /**let x = 0;
-                                                while(nameB == nameA && Number(x) < keysArray.length){
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if(nameB > nameA){
-                                                    return -1;
-                                                }else{
-                                                    return 1;
-                                                }*/
-                                                return 0
-                                            }
-
-
-                                       }
-                                   });
-
-
-                            } else {
-                                        var code400InvalidQuery: InsightResponse = {
-                                            code: 400,
-                                            body: {"error": "order error"}
-                                        };
-                                        return reject(code400InvalidQuery);
-                                    }
-
-                            //console.timeEnd("sort through new order")
+                        } else { var code400InvalidQuery: InsightResponse = {
+                            code: 400,
+                            body: {"error": "order error"}
+                        };
+                        return reject(code400InvalidQuery);
                         }
                     }//console.timeEnd("sort through result")
 
@@ -1511,10 +1347,12 @@ export default class InsightFacade implements IInsightFacade {
                     if (transformationGroup.includes("courses_uuid")) {
                         uuidIndex = transformationGroup.indexOf("courses_uuid")
                         newTransformGroup.splice(uuidIndex, 1);
+
                     }
 
                     if (newTransformGroup.length == 0) {
-                        newTransformGroup = newTransformGroup;
+                        transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                        groupObjectArray.push(transformReturnInfo);
                     } else {
 
                         /**
