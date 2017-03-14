@@ -796,7 +796,9 @@ export default class InsightFacade implements IInsightFacade {
      */  performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
         var fs = require("fs");
+        //console.time("start query check")
         var queryCheck = this.isValid(query);
+        //console.timeEnd("start query check")
         var newThis = this;
         var yesOrNo = Object.keys(queryCheck)[0];
         var dataSetId = queryCheck[yesOrNo];
@@ -808,6 +810,13 @@ export default class InsightFacade implements IInsightFacade {
                 var columns = query.OPTIONS.COLUMNS;
                 var order:any =  query.OPTIONS.ORDER;
                 var table = query.OPTIONS.FORM;
+                var transformation:TransformationQuery = query.TRANSFORMATIONS;
+                var transformationGroup:any;
+                var singleGroup;
+                var transformationApply:any;
+                var newTransformationApply:any[] = [];
+                var applyExists:boolean = true;
+                var transformationExists:any = false;
                 var keys = Object.keys(filter);
                 var result = filter[keys[0]]; //value of the WHERE Filters
                 var validKey;
@@ -817,107 +826,29 @@ export default class InsightFacade implements IInsightFacade {
                 //var cachedIdArray = cachedId.split("\r\n");
                 //var nonExistIdArray = [];
 
+                if(!isUndefined(transformation)){
+                    transformationExists = true;
+                    transformationApply = query.TRANSFORMATIONS.APPLY
+                    transformationGroup = transformation.GROUP
+                }
 
+                var grabbingIDColumnKey = columns[0];
+                validKey = grabbingIDColumnKey.split("_");
+                var testingResult = validKey[0]
+                try {
+                    //console.time("testing read file filters general")
+                    contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                    //console.timeEnd("testing read file filters general")
 
-                if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
-                    var nonLogicFilter;
-                    //console.time("testing get filter");
-                    nonLogicFilter = newThis.getFilterArray(result);
-                    //console.timeEnd("testing get filter")
-                    if(nonLogicFilter instanceof Array) {
-                        var nonLogicFilterVals = nonLogicFilter[0];
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                        var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
-                        var validTestKeyArray = Object.keys(validTestKeyValue)
-                        validKey = validTestKeyArray[0].split("_");
+                }
+                catch(err){
+                    if (err.code === 'ENOENT') {
+                        var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
+                        return reject(code424InvalidQuery);
 
-
-                        var testingResult = validKey[0]
-
-
-                        // for future projects
-                        /**for(let x in cachedIdArray){
-                            if(validKey == cachedIdArray[x]){
-                                contentDatasetResult = fs.readFileSync(validKey);
-                            } else nonExistIdArray.push(validKey);
-                        }*/
-
-                        /**try {
-                        contentDatasetResult = fs.readFileSync(validKey);
-                    } catch (err) {
-                        if (err.code === 'ENOENT') {
-                            var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":queryCheck}};
-                            reject(code424InvalidQuery);
-
-                        } else {
-                            throw err;
-                        }
-                        // Here you get the error when the file was not found,
-                        // but you also get any other error
-                    } */
-                        //console.time("testing read file AND OR")
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                return reject(code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-                        //console.timeEnd("testing read file AND OR")
-
-                    } else{ //this is for when keys[0] is NOT;
-                        //var nonLogicFilterVals = result[0];
-
-                        //var notKeys = Object.keys(nonLogicFilter);
-                        //var notResult = nonLogicFilter[notKeys[0]];
-                        //console.time("testing read file NOT")
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilter);
-                        validKey = nonLogicFilterKeys[0].split("_");
-                        var testingResult:string = validKey[0]
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                return (code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-
-                        //console.timeEnd("testing read file NOT")
-                    }} /**else if(keys[0] == "NOT"){
-
-                }*/
-                else {
-
-                    //var nonLogicFilterVals = result[0];
-                    var nonLogicFilterKeys = Object.keys(result);
-                    validKey = nonLogicFilterKeys[0].split("_");
-                    var testingResult = validKey[0]
-                    try {
-                        //console.time("testing read file filters general")
-                        contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        //console.timeEnd("testing read file filters general")
-
+                    } else {
+                        throw err;
                     }
-                    catch(err){
-                        if (err.code === 'ENOENT') {
-                            var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                            return reject(code424InvalidQuery);
-
-                        } else {
-                            throw err;
-                        }
-                    }
-
                 }
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
@@ -930,7 +861,8 @@ export default class InsightFacade implements IInsightFacade {
 
                 if(datasetResultArray.length > 0) {
                     var lmaoWeDone;
-                    var finalReturn = [];
+                    var finalReturn:any[] = [];
+                    var groupedApplyArray:any[] = [];
                     var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
@@ -955,7 +887,7 @@ export default class InsightFacade implements IInsightFacade {
                                     code: 400,
                                     body: {"error": "malformed dataset with no result in array"}
                                 };
-                                 reject(code400InvalidQuery);*/
+                                 return reject(code400InvalidQuery);*/
                             } else {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
                                     //console.time("one course")
@@ -1036,16 +968,74 @@ export default class InsightFacade implements IInsightFacade {
                                                     //}
                                                 }
                                             }
-                                        }returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
+                                        }
+                                        if(!isUndefined(result)) {
+                                            returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
+                                        }
                                         //Log.info(returnInfo);
                                         if(returnInfo.length == 0){
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
+                                            var tempApplyKey;
+                                            var groupedApplyColumns
                                             //returnInfo = {}
                                             for (let x in columns) {
+
                                                 singleColumnKey = columns[x].toString()
 
+                                                if(transformationExists == true) {
+                                                    if (transformationApply.length == 0){
+                                                        applyExists = false;
+                                                    }
+
+                                                    //checking apply is in columns and vice versa
+                                                    tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
+                                                    if (isNullOrUndefined(returnInfo)) {
+                                                        cachedReturnInfo = cachedReturnInfo;
+                                                    }else
+                                                    if(applyExists == true && tempApplyKey.length > 0) {
+                                                        //console.time("new transformation")
+                                                        for (let x in transformationGroup) {
+
+                                                            singleGroup = transformationGroup[x].toString()
+
+                                                            if (returnInfo.hasOwnProperty(singleGroup)) {
+
+                                                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleGroup]: returnInfo[singleGroup]});
+
+                                                            }
+
+                                                        }
+                                                    }
+
+                                                        if (tempApplyKey.some(isUndefined)) {
+                                                            continue;
+                                                        } else {
+                                                            for(let x in tempApplyKey){
+                                                                if(isUndefined(tempApplyKey[x])){
+                                                                    continue;
+                                                                }else{
+                                                                    if(newTransformationApply.includes(tempApplyKey[x])){
+                                                                        continue;
+                                                                    }else {
+                                                                        newTransformationApply.push(tempApplyKey[x])
+                                                                            //newTransformReturnInfo = null
+
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                  groupedApplyColumns = newThis.applyObjects(newTransformationApply, cachedReturnInfo)
+
+
+
+
+
+
+
+
+                                                }
 
                                                 //translatedKey = newThis.vocabValidKey(singleColumnKey);
                                                 /**if(translatedKey == false){
@@ -1055,15 +1045,21 @@ export default class InsightFacade implements IInsightFacade {
                                                     continue;
                                                 }else{*/
 
-                                                if(isNullOrUndefined(returnInfo)){
+                                                if (isNullOrUndefined(returnInfo)) {
                                                     cachedReturnInfo = cachedReturnInfo;
-                                                }else if(returnInfo.hasOwnProperty(singleColumnKey)){
+                                                } else if(transformationExists == true){
+                                                    cachedReturnInfo = Object.assign({}, cachedReturnInfo, returnInfo);
+
+                                                }
+                                                else if (returnInfo.hasOwnProperty(singleColumnKey)) {
                                                     /**if(Number(x) == 0){
                                                             returnInfo = {};
                                                         }*/
 
 
                                                     cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+
+
 
                                                 } else
                                                 /**if (isUndefined(returnInfo[singleColumnKey])) {
@@ -1088,11 +1084,14 @@ export default class InsightFacade implements IInsightFacade {
                                                 /**if(result instanceof Array && result.length == 0){
                                                 result = result[0]
                                             }*/
+
+
                                             }returnInfo = null;
-                                            if(isNullOrUndefined(cachedReturnInfo)){
+                                            if(isNullOrUndefined(cachedReturnInfo) || isNullOrUndefined(groupedApplyColumns)){
                                                 continue;
                                             }else {
                                                 finalReturn.push(cachedReturnInfo);
+                                                groupedApplyArray.push(groupedApplyColumns);
                                             }
                                         }
 
@@ -1122,59 +1121,307 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
 
-                    //console.time("sort through result")
+                    if(transformationExists == true) {
+                        var applyString:any;
+
+                        var singleApply;
+                        var tokenPlusKey;
+                        var tempToken;
+                        var applyFinalKey;
+                        /**
+                         for(let x in transformationApply){
+
+                            applyString = Object.keys(transformationApply[x])[0]
+                            singleApply = transformationApply[x];
+                            tokenPlusKey = singleApply[applyString]
+                            tempToken = Object.keys(applyString)[0];
+                            applyFinalKey = tokenPlusKey[tempToken];
+
+                            if(returnInfo.hasOwnPropety(applyFinalKey)){
+                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[applyString]:returnInfo[applyFinalKey]})
+                            } else{
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "malformed transformation"}
+                                };
+                                return reject(code400InvalidQuery)
+                            }
+                        }*/
+                        console.time("start Group")
+
+                        //console.time("hashing")
+                        //var finalHashed:any = new Map()
+                        //console.timeEnd("hashing")
+                        finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists, groupedApplyArray);
+                        console.timeEnd("start Group")
+                        var singleReturn;
+                        var returnInfoKeys;
+                        var newCache;
+                        var tempFinal = finalReturn;
+                        finalReturn = []
+                        for(let x in tempFinal){
+                            singleReturn = tempFinal[x]
+                            singleReturn = newThis.finishApply(singleReturn)
+
+                            for (let x in columns) {
+
+                                        singleColumnKey = columns[x].toString()
+
+                                        if (singleReturn.hasOwnProperty(singleColumnKey)) {
+
+
+                                            newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturn[singleColumnKey]});
+
+
+
+                                } else {
+
+                                    //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                    newCache = null;
+                                    singleReturn = null;
+
+                                    //returnInfo = returnInfo
+                                    //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                    //Log.info(returnInfo);
+
+                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                }
+
+                            }
+                            finalReturn.push(newCache);
+                        }
+                    }
+
+                    console.time("sort through result")
                     if(!(isUndefined(order))) {
-                        if (columns.includes(order)) {
-                            /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
-                             validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
-                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
-                                || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
+                        //TODO: check for new ORDER
+                        if (typeof order == "string") {
+                            if (columns.includes(order)) {
+                                /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
+                                 validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
+                                if (typeof finalReturn[0][order] == "number" || order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
+                                    || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    return a[order] - b[order];
-                                });
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                        return a[order] - b[order];
+                                    });
 
-                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
-                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")) {
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    var nameA = a[order].toUpperCase(); // ignore upper and lowercase
-                                    var nameB = b[order].toUpperCase(); // ignore upper and lowercase
-                                    if (nameA < nameB) {
-                                        return -1;
-                                    } else if (nameA > nameB) {
-                                        return 1;
-                                    } else
-                                        return 0;
-                                });
+                                } else if (typeof finalReturn[0][order] == "string" || order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
+                                    || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")
+                                    || order.endsWith("_uuid")) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                        var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                                        var nameB = b[order].toUpperCase(); // ignore upper and lowercase
+                                        if (nameA < nameB) {
+                                            return -1;
+                                        } else if (nameA > nameB) {
+                                            return 1;
+                                        } else
+                                            return 0;
+                                    });
 
 
-                            } else if (order.endsWith("_uuid")) {
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    var numA = Number(a[order]); // ignore upper and lowercase
-                                    var numB = Number(b[order]); // ignore upper and lowercase
-                                    /**if (nameA < nameB) {
+                                } /**else if (order.endsWith("_uuid")) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                        var numA = Number(a[order]); // ignore upper and lowercase
+                                        var numB = Number(b[order]); // ignore upper and lowercase
+                                        if (nameA < nameB) {
                                     return -1;
                                 } else if (nameA > nameB) {
                                     return 1;
                                 } else
-                                     return 0;*/
-                                    return numA - numB;
+                                         return 0;
+                                        return numA - numB;
+                                    });
+
+
+                                }*/ else {
+                                    var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "order error"}
+                                    };
+                                    return reject(code400InvalidQuery);
+                                }
+                            } else {
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "order not in column"}
+                                };
+                                return reject(code400InvalidQuery);
+                            }
+                            //console.timeEnd("sort through result")
+                        } else {
+                            //console.time("sort through new order")
+                            var orderKeys = Object.keys(order);
+                            var dir:any = order[orderKeys[0]];
+                            var keysArray:any = order[orderKeys[1]];
+                            var tempSortResult;
+
+                            for(let x in keysArray) {
+                                if (columns.includes(keysArray[x])) {
+                                    continue;
+                                } else {
+                                    var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "order not in column"}
+                                    };
+                                    return reject(code400InvalidQuery);
+                                }
+                            }
+                            /**if (keysArray[0].endsWith("_uuid")) {
+                                var tempKeysArray = keysArray.slice();
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                    var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
+                                    var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
+
+                                    if(dir == "DOWN") {
+                                        //tempSortResult = numB - numA;
+                                        tempSortResult = numB - numA
+
+                                        while(tempSortResult == 0){
+                                            for(let x in keysArray){
+                                                numA = Number(a[keysArray[x]])
+                                                numB = Number(b[keysArray[x]])
+                                                tempSortResult = numB - numA;
+                                            }
+                                        }
+                                        return tempSortResult
+                                        if(tempSortResult == 0){
+
+                                            tempKeysArray.shift()
+                                            tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
+                                            return tempSortResult
+                                        }else return tempSortResult
+                                    }else if(dir == "UP"){
+                                        tempSortResult = numA - numB;
+
+                                        while(tempSortResult == 0){
+                                            for(let x in keysArray){
+                                                numA = Number(a[keysArray[x]])
+                                                numB = Number(b[keysArray[x]])
+                                                tempSortResult = numA - numB;
+                                            }
+                                        }
+                                        return tempSortResult
+                                        if(tempSortResult == 0){
+                                            tempKeysArray.shift()
+                                            tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
+                                            return tempSortResult
+                                        }else return tempSortResult;
+                                    }
+                                });
+
+                                //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
+                            }*/
+                            if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
+                                || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats")) {
+
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                    if(dir == "DOWN") {
+                                        tempSortResult = b[keysArray[0]] - a[keysArray[0]];
+
+                                        let x = 0;
+                                        while(tempSortResult == 0 && Number(x) < keysArray.length){
+                                            tempSortResult = b[keysArray[x]] - a[keysArray[x]];
+                                            x++;
+                                        }
+
+                                        return tempSortResult
+
+                                        /**if(tempSortResult == 0){
+                                        tempKeysArray = keysArray.shift()
+                                        tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
+                                        return tempSortResult
+                                    }else return tempSortResult*/
+                                    }else if(dir == "UP"){
+                                        tempSortResult = a[keysArray[0]] - b[keysArray[0]];
+
+                                        let x = 0;
+                                        while(tempSortResult == 0 && Number(x) < keysArray.length){
+                                            tempSortResult = a[keysArray[x]] - b[keysArray[x]];
+                                            x++;
+                                        }
+                                        return tempSortResult
+
+                                        /**if(tempSortResult == 0){
+                                        tempKeysArray = keysArray.shift()
+                                        tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
+                                        return tempSortResult
+                                    }else return tempSortResult;*/
+                                    }
+                                });
+
+                            } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
+                                || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")
+                                || keysArray[0].endsWith("_uuid")) {
+                                // var x = 0;
+                                var tempKeysArray = keysArray.slice();
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
+
+                                    if (dir == "DOWN") {
+
+                                        //Log.info(JSON.stringify(a));
+                                        //Log.info(JSON.stringify(keysArray[0]))
+
+                                        var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                        var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                        if (nameB < nameA) {
+                                            return -1;
+                                        } else if (nameB > nameA) {
+                                            return 1;
+                                        } else {
+                                            let x = 0;
+                                            while(nameB == nameA && Number(x) < keysArray.length){
+                                                nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                x++
+                                            }
+                                            if(nameB < nameA){
+                                                return -1;
+                                            }else{
+                                                return 1;
+                                            }
+                                            //return 0
+                                        }
+                                    } else if (dir == "UP") {
+                                        var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                        var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                        if (nameA < nameB) {
+                                            return -1;
+                                        } else if (nameA > nameB) {
+                                            return 1;
+                                        } else {
+                                            let x = 0;
+                                            while(nameB == nameA && Number(x) < keysArray.length){
+                                                nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                x++
+                                            }
+                                            if(nameB > nameA){
+                                                return -1;
+                                            }else{
+                                                return 1;
+                                            }
+                                            //return 0
+                                        }
+
+
+                                    }
                                 });
 
 
-                            } else {
-                                var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
-                                reject(code400InvalidQuery);
                             }
-                        } else {
-                            var code400InvalidQuery: InsightResponse = {
-                                code: 400,
-                                body: {"error": "order not in column"}
-                            };
-                            return reject(code400InvalidQuery);
+                            else {
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "order error"}
+                                };
+                                return reject(code400InvalidQuery);
+                            }
+
+                            //console.timeEnd("sort through new order")
                         }
-                        //console.timeEnd("sort through result")
-                    }
+                    }console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -1208,8 +1455,11 @@ export default class InsightFacade implements IInsightFacade {
                     catch(err){
                         if (err.code === 'ENOENT') {
                             unloadedDatasets.push(oneDataset);
-                        } else {
-                            throw err;
+                        } else if(err.code === 'EISDIR'){
+                            unloadedDatasets.push(oneDataset)
+
+                        } else{
+                            unloadedDatasets.push(oneDataset)
                         }
                     }
                 }
@@ -1228,6 +1478,395 @@ export default class InsightFacade implements IInsightFacade {
             }
         });
 
+    }
+
+    //perform query
+
+
+    //Helper function in main queryRequest()
+
+    finishApply(returnInfo:any):any{
+        var cachedInfo;
+        var singleInfo:any;
+        var infoKeys;
+        var valueArray;
+        var sum = returnInfo[0]
+        var size = returnInfo["has AVG"]
+        var average = sum/size
+
+        for(let x in returnInfo){
+            singleInfo= {[x]:returnInfo[x]}
+            infoKeys = Object.keys(singleInfo)[0]
+            valueArray = returnInfo[x]
+            if(valueArray instanceof Array){
+                if(valueArray[0] == "MAX"){
+                    returnInfo[x] = this.returnMax(valueArray)
+                }else if(valueArray[0] == "MIN"){
+                    returnInfo[x] = this.returnMin(valueArray)
+                }else if(valueArray[0] == "SUM"){
+                    returnInfo[x] = this.returnSum(valueArray)
+                }else if(valueArray[0] == "AVG"){
+                    returnInfo[x] = this.returnAVG(valueArray)
+                }else if(valueArray[0] == "COUNT"){
+                    returnInfo[x] = this.returnCOUNT(valueArray)
+                }
+            }
+
+        } return returnInfo;
+
+    }
+
+    transformationQueryHelper(finalReturnInfo:any, transformationGroup:any, transformationApply:any, applyExists:any, groupedApplyArray:any ):any{
+        var transformReturnInfo:any;
+        var newTransformReturnInfo:any;
+        let groupObjectArray:any = {};
+        var newValue = '';
+        var groupedApplyColumns;
+        var uuidIndex;
+        var matchIndex;
+        var singleGroup;
+        var newTransformGroup = transformationGroup.slice();
+        var concatenatedKey:any;
+        var mapElement:any;
+
+        var applyString;
+        var applyKey;
+
+
+        for (let x in finalReturnInfo) {
+            transformReturnInfo = finalReturnInfo[x];
+            newTransformReturnInfo = null;
+
+
+            //console.timeEnd("new transformation")
+
+            concatenatedKey = JSON.stringify(transformReturnInfo);
+
+            //console.time("new Apply")
+            groupedApplyColumns = groupedApplyArray[x];
+            //console.time("new Apply")
+            if (Number(x) == 0) {
+                //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+
+                groupObjectArray = Object.assign({}, groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+            } else {
+                if (transformationGroup.includes("courses_uuid")) {
+                    uuidIndex = transformationGroup.indexOf("courses_uuid")
+                    newTransformGroup.splice(uuidIndex, 1);
+
+                }
+
+                if (newTransformGroup.length == 0) {
+                    //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                    groupObjectArray = Object.assign({}, groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                } else {
+
+
+                    /**
+                     var singleGroupedElement:any;
+                     for(let x in groupObjectArray){
+                            singleGroupedElement = groupObjectArray[x];
+                            if(newTransformGroup.every(function (singleGroup: any) {
+                                newValue = transformReturnInfo[singleGroup];
+                                return newValue == singleGroupedElement[singleGroup]
+
+                            })){
+                                matchIndex = Number(x);
+                            }
+                        }*/
+
+                    /**if(groupObjectArray.length == 15){
+                            Log.info("conticnue")
+                        }*/
+
+                    /**
+                    matchIndex = groupObjectArray.findIndex(function (singleGroupedElement: any) {
+                        return newTransformGroup.every(function (singleGroup: any) {
+                            newValue = transformReturnInfo[singleGroup];
+                            return newValue == singleGroupedElement[singleGroup]
+
+                            })
+                        });*/
+                        //console.time("concat")
+                        /**for(let x in newTransformGroup){
+                            newValue = newValue.concat(JSON.stringify(newTransformGroup[x]));
+                        }*/
+                        //console.timeEnd("concat")
+                    console.time("group check")
+
+                    if(typeof (groupObjectArray[concatenatedKey]) != "undefined"){
+                        console.timeEnd("group check")
+                        console.time("group update")
+                        groupObjectArray[concatenatedKey] = this.groupQueryHelper(groupObjectArray[concatenatedKey], groupedApplyColumns, transformationApply)
+                        console.timeEnd("group update")
+                    }else{
+                        console.time("add group")
+                        groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                        console.timeEnd("add group")
+                    }
+
+                    /**if(newTransformReturnInfo == newValue){
+                        //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        console.time("group query")
+                        groupObjectArray[newValue] = this.groupQueryHelper(groupObjectArray[newValue], groupedApplyColumns, transformationApply)
+                        console.timeEnd("group query")
+                        //groupObjectArray.push(transformReturnInfo);
+                    }else{
+                        transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        groupObjectArray.push(transformReturnInfo);
+                    }*/
+                    }
+                }
+
+
+
+                /**
+                if (matchIndex >= 0) {
+                    transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                    groupObjectArray[matchIndex] = this.groupQueryHelper(groupObjectArray[matchIndex], transformReturnInfo, transformationApply)
+
+                } else if(matchIndex == -1){
+                    transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                    groupObjectArray.push(transformReturnInfo);
+                }else{
+                    groupObjectArray = groupObjectArray
+                }*/
+            }
+
+
+        return groupObjectArray;
+    }
+
+    groupQueryHelper(returnInfo:any, groupedApplyArray:any, transformationApply:any){
+        var singleApply;
+        var applyKey;
+        var applyToken;
+        var innerArray = new Array();
+
+        for(let x in groupedApplyArray){
+            innerArray = returnInfo[x]
+            if(typeof innerArray != "undefined"){
+                innerArray.push(groupedApplyArray[x])
+                returnInfo = innerArray;
+            }else{
+                x = x;
+            }
+        }return returnInfo;
+
+
+        /**
+        for(let x in transformationApply){
+            singleApply = transformationApply[x]
+            applyKey = Object.keys(singleApply)[0]
+            applyToken = Object.keys(singleApply[applyKey])[0]
+            console.time("search group")
+            if(groupedApplyArray[applyKey][0] == returnInfo[applyKey][0]){
+                returnInfo[applyKey].shift()
+            }
+            console.timeEnd("search group")
+
+            console.time("update group")
+            groupedApplyArray[applyKey] = groupedApplyArray[applyKey].concat(returnInfo[applyKey])
+            console.timeEnd("update group") */
+
+            /**if(groupReturnInfo[applyKey][0] == returnInfo[applyKey][0]){
+                returnInfo[applyKey].shift();
+            }
+
+            groupReturnInfo[applyKey] = groupReturnInfo[applyKey].concat(returnInfo[applyKey])*/
+
+            /**if(applyToken == "MAX"){
+                groupReturnInfo[applyKey] = this.returnMax(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "MIN"){
+                groupReturnInfo[applyKey] = this.returnMin(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "SUM"){
+                groupReturnInfo[applyKey] = this.returnSum(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "COUNT"){
+                groupReturnInfo[applyKey] = this.returnCOUNT(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "AVG"){
+                groupReturnInfo = this.returnAVG(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }*/
+
+        //}return groupedApplyArray;
+    }
+
+    returnMax(valueArray:any):any{
+        valueArray.shift()
+
+        var max = valueArray.reduce(function(a:any, b:any) {
+            return Math.max(a, b);
+        });
+        return max
+    }
+
+    returnMin(valueArray:any):any{
+        valueArray.shift()
+
+        var min = valueArray.reduce(function(a:any, b:any) {
+            return Math.min(a, b);
+        });
+        return min
+    }
+
+    returnSum(valueArray:any):any{
+        valueArray.shift()
+        var sum = valueArray.reduce(function (a:any, b:any) {
+            return a + b;
+        });
+        return sum
+    }
+
+    returnAVG(valueArray:any):any{
+
+        valueArray.shift();
+        var groupedSum = 0;
+        var averageCounter;
+        var oneNumber;
+        for(let x in valueArray){
+            if(Number(x) == 0){
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum = oneNumber;
+            }else {
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum += oneNumber;
+            }
+        }
+        groupedSum = groupedSum/(Number(valueArray.length));
+        groupedSum = groupedSum/10;
+        groupedSum = Number(groupedSum.toFixed(2));
+        return groupedSum
+    }
+
+    returnCOUNT(valueArray:any):any{
+        valueArray.shift();
+        valueArray = valueArray.filter (function (value:any, index:any, array:any) {
+            return array.indexOf (value) == index;
+        });
+        return valueArray.length;
+    }
+
+
+    applyObjects(transformationApply:any, returnInfo:any):any{
+        var applyString;
+        var singleApply;
+        var tokenPlusKey;
+        var tempToken;
+        var applyFinalKey;
+        var returnApply = {};
+        for(let x in transformationApply){
+
+            applyString = Object.keys(transformationApply[x])[0]
+            singleApply = transformationApply[x];
+            tokenPlusKey = singleApply[applyString]
+            tempToken = Object.keys(tokenPlusKey)[0];
+            applyFinalKey = tokenPlusKey[tempToken];
+
+            /**
+             if(tempToken == "AVG"){
+                returnApply = Object.assign({}, returnApply, {[applyString]:[returnInfo[applyFinalKey], 1]})
+            }*/
+
+            //returnApply.set(applyString.concat(tempToken), [returnInfo[applyFinalKey]]);
+            returnApply = Object.assign({}, returnApply, {[applyString.concat(tempToken)]:[returnInfo[applyFinalKey]]})
+        } return returnApply; /**else{
+                var code400InvalidQuery: InsightResponse = {
+                    code: 400,
+                    body: {"error": "malformed transformation"}
+                };
+                return reject(code400InvalidQuery)
+            }*/
+    }
+
+
+
+
+    applyHasColumn(Apply:any, columnsKey:any):any{
+        return Apply.filter(function(applyKey:any){
+            var tempApplyString = Object.keys(applyKey)[0]
+            if(columnsKey == tempApplyString){
+                return applyKey;
+            }
+        })
+    }
+
+    breakingTies(a:any, b:any, sortArray:any, direction:string):any{
+        var tempSortResult;
+
+        for(let x in sortArray){
+            var tempsortArray;
+            if (sortArray[x].endsWith("_avg") || sortArray[x].endsWith("_pass") || sortArray[x].endsWith("_fail") || sortArray[x].endsWith("_audit") || sortArray[x].endsWith("_year")
+                || sortArray[x].endsWith("_lat") || sortArray[x].endsWith("_lon") || sortArray[x].endsWith("_seats")) {
+                if (direction == "UP") {
+                    tempSortResult = a[sortArray[x]] - b[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
+                else if (direction == "DOWN") {
+                    tempSortResult = b[sortArray[x]] - a[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
+            }
+            else if (sortArray[x].endsWith("_dept") || sortArray[x].endsWith("_id") || sortArray[x].endsWith("_instructor") || sortArray[x].endsWith("_fullname")
+                || sortArray[x].endsWith("_shortname") || sortArray[x].endsWith("_number") || sortArray[x].endsWith("_name") || sortArray[x].endsWith("_address")
+                || sortArray[x].endsWith("_type") || sortArray[x].endsWith("_href")) {
+                if(direction == "UP") {
+                    var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    } else if (nameA > nameB) {
+                        return 1;
+                    } else {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction);
+                    }
+                }else if(direction == "DOWN"){
+                    var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    if (nameA > nameB) {
+                        return -1;
+                    } else if (nameA < nameB) {
+                        return 1;
+                    } else {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction);
+                    }
+                }
+
+
+
+            } else if (sortArray[x].endsWith("_uuid")) {
+                if(direction == "UP") {
+                    var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                    var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                    tempSortResult = numA - numB;
+
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a, b, tempsortArray, direction)
+                    } else return tempSortResult;
+                }else if(direction == "DOWN"){
+                    var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                    var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                    tempSortResult = numB - numA;
+
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b, a, tempsortArray, direction)
+                    } else return tempSortResult;
+                }
+
+
+
+            }
+        }
     }
 
     //perform query
@@ -1560,9 +2199,14 @@ export default class InsightFacade implements IInsightFacade {
         var filter;  //returns value of FILTER
         var optionsValue; //returns value of OPTIONS
         var columnsEtcKey; //returns values including and after COLUMNS
-        var columnsValidKeyArray; //returns the array of Valid Keys assigned to COLUMNS
+        var columnsValidKeyArray:any; //returns the array of Valid Keys assigned to COLUMNS
         var orderValidKey; //returns the single valid key assigned to ORDER
+        var newOrderKeys;
+        var direction;
+        var newOrderArray;
         var Table; //returns TABLE from VIEW
+        var Transformation:any;
+        var transformationExists;
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
@@ -1570,9 +2214,17 @@ export default class InsightFacade implements IInsightFacade {
 
             Where = keyArray[0]; //gets "WHERE"
             Options = keyArray[1]; //gets"OPTIONS"
+            Transformation = query[keyArray[2]]
             filter = query[Where]; //returns content of FILTER
 
-            isOneDataset = this.hasFilter(filter, invalidIdArray, isOneDataset);
+            if(!isUndefined(Transformation)){
+                transformationExists = true;
+            }
+
+            if(Object.keys(filter).length != 0){ //check if FILTER is empty
+                isOneDataset = this.hasFilter(filter, invalidIdArray, isOneDataset);
+            }
+
 
             if(isOneDataset != false) { //check if FILTER is valid, needed as FILTER is recursively nested && invalidIdArray.length == 0
                 optionsValue = query[Options]; //gets all values from OPTIONS
@@ -1663,12 +2315,38 @@ export default class InsightFacade implements IInsightFacade {
                                 invalidIdArray.push(invalidIdLists[0]);
                             }isOneDataset = {"false":invalidIdArray}
 
+                        }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_")) && transformationExists == true){
+                            continue;
                         }else
                             return false
                     } if(columnsEtcKey[1] == "ORDER") {
                         yesOrNo = Object.keys(isOneDataset)[0];
                         dataSet = isOneDataset[yesOrNo];
                         orderValidKey = optionsValue[columnsEtcKey[1]];//gets ORDER key
+                        if(orderValidKey !== null && typeof orderValidKey === "object"){
+
+                            if(orderValidKey.hasOwnProperty("dir") && (orderValidKey.hasOwnProperty("keys")) && (typeof orderValidKey["dir"] == "string")
+                            && orderValidKey["keys"] instanceof Array){
+                                direction = orderValidKey["dir"]
+                                keyArray = orderValidKey["keys"]
+                                if(direction == "UP" || direction == "DOWN"){
+
+                                   if(keyArray.every(function (key:any):any {
+                                        return columnsValidKeyArray.includes(key);
+                                    })){
+                                       if(transformationExists == true){
+                                           isOneDataset = isOneDataset;
+                                       }else {
+                                           Table = optionsValue[columnsEtcKey[2]];
+                                           if (Table == "TABLE") { //if value of FORM is TABLE
+                                               return isOneDataset
+                                           } else return false;
+                                       }
+                                   }else return false;
+
+                                }else return false;
+                            }else return false;
+                        }else
                         if (columnsValidKeyArray.includes(orderValidKey)) {
                             if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
                                 || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
@@ -1676,11 +2354,15 @@ export default class InsightFacade implements IInsightFacade {
                                 || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
                                 || orderValidKey == "courses_uuid" || orderValidKey == "courses_year")) { //checks for valid key
                                 if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
-                                    Table = optionsValue[columnsEtcKey[2]];
-                                    if (Table == "TABLE") { //if value of FORM is TABLE
+                                    if(transformationExists == true){
                                         isOneDataset = {"true":["courses"]}
-                                        return isOneDataset
-                                    } else return false;
+                                    }else {
+                                        Table = optionsValue[columnsEtcKey[2]];
+                                        if (Table == "TABLE") { //if value of FORM is TABLE
+                                            isOneDataset = {"true": ["courses"]}
+                                            return isOneDataset
+                                        } else return false;
+                                    }
 
                                 } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
                                     var invalidIdLists:any = orderValidKey.split("_");
@@ -1691,7 +2373,9 @@ export default class InsightFacade implements IInsightFacade {
                                         invalidIdArray.push(invalidIdLists[0]);
                                     }
                                     isOneDataset = {"false":invalidIdArray}
-                                    return isOneDataset;
+                                    if(transformationExists == true){
+                                        isOneDataset = isOneDataset
+                                    }else return isOneDataset;
 
                                 } return isOneDataset;
                             } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
@@ -1700,11 +2384,18 @@ export default class InsightFacade implements IInsightFacade {
                                 || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
                                 || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture")) { //checks for valid key
                                 if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+
+
                                     Table = optionsValue[columnsEtcKey[2]];
-                                    if (Table == "TABLE") { //if value of FORM is TABLE
+                                    if(transformationExists == true){
                                         isOneDataset = {"true":["rooms"]}
-                                        return isOneDataset
-                                    } else return false;
+                                    }else {
+                                        Table = optionsValue[columnsEtcKey[2]];
+                                        if (Table == "TABLE") { //if value of FORM is TABLE
+                                            isOneDataset = {"true": ["rooms"]}
+                                            return isOneDataset
+                                        } else return false;
+                                    }
 
                                 } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
                                     var invalidIdLists:any = orderValidKey.split("_");
@@ -1715,7 +2406,10 @@ export default class InsightFacade implements IInsightFacade {
                                         invalidIdArray.push(invalidIdLists[0]);
                                     }
                                     isOneDataset = {"false":invalidIdArray}
-                                    return isOneDataset;
+                                    if(transformationExists == true){
+                                        isOneDataset = isOneDataset
+                                    }else return isOneDataset;
+
 
                                 } return isOneDataset;
 
@@ -1732,7 +2426,10 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
                                 isOneDataset = {"false":invalidIdArray}
-                                return isOneDataset;
+                                if(transformationExists == true){
+                                    isOneDataset = isOneDataset
+                                }else return isOneDataset;
+
                             } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
                                 (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
                                 orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
@@ -1747,7 +2444,10 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
                                 isOneDataset = {"false":invalidIdArray}
-                                return isOneDataset;
+                                if(transformationExists == true){
+                                    isOneDataset = isOneDataset
+                                }else return isOneDataset;
+
                             } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
 
                                 invalidIdLists = orderValidKey.split("_");
@@ -1758,9 +2458,16 @@ export default class InsightFacade implements IInsightFacade {
                                     invalidIdArray.push(invalidIdLists[0]);
                                 }
                                 isOneDataset = {"false":invalidIdArray}
-                                return isOneDataset;
-                            } else return false
+                                if(transformationExists == true){
+                                    isOneDataset = isOneDataset
+                                }else return isOneDataset;
+
+                            } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && transformationExists == true){
+                                orderValidKey = orderValidKey
+                            }else return false
                         } else return false
+                    }else if(transformationExists == true){
+                        isOneDataset = isOneDataset
                     } else {
                         Table = optionsValue[columnsEtcKey[1]];
                         if (Table == "TABLE") { //if value of FORM is TABLE
@@ -1768,6 +2475,107 @@ export default class InsightFacade implements IInsightFacade {
                         } else return false;
                     }
                 } else return false;
+
+                //Transformers
+                yesOrNo = Object.keys(isOneDataset)[0];
+                dataSet = isOneDataset[yesOrNo];
+                var group:any;
+                var apply:any;
+                var columnsApplyArray;
+                var columnsGroupArray;
+                if(Transformation.hasOwnProperty("GROUP") && Transformation.hasOwnProperty("APPLY") && Transformation["GROUP"] instanceof Array
+                && Transformation["APPLY"] instanceof Array){
+                    group = Transformation["GROUP"]
+                    apply = Transformation["APPLY"]
+                    if(group.length <= 0){
+                        return false;
+                    }else{
+                        if(group.every(function (groupElement:any) {
+                            return groupElement.includes("_")
+                        })){
+                            columnsGroupArray = columnsValidKeyArray.filter(function (singleColumn:any) {
+                                return singleColumn.includes("_");
+                            })
+
+                            columnsApplyArray = columnsValidKeyArray.filter(function (singleColumn:any) {
+                                return !singleColumn.includes("_");
+                            })
+
+                            if((columnsGroupArray.length + columnsApplyArray.length) == columnsValidKeyArray.length){
+                                if(apply.length == 0){
+                                    if(columnsApplyArray.length == 0){
+                                        if(columnsGroupArray.every(function (columns:any) {
+                                                return group.includes(columns)
+                                            })){
+                                            if(optionsValue["FORM"] == "TABLE"){
+                                                return isOneDataset;
+                                            }else return false;
+
+                                        }else return false
+                                    }else return false;
+                                }else{
+
+                                    var applyString;
+                                    var tokenPlusKey;
+                                    var applyToken;
+                                    var applylittleKey;
+                                   if(apply.every(function (applyKey:any) {
+                                      applyString = Object.keys(applyKey)[0]
+                                      tokenPlusKey = applyKey[applyString];
+                                      applyToken = Object.keys(tokenPlusKey)[0];
+                                      applylittleKey = tokenPlusKey[applyToken];
+
+
+                                      if (typeof applyString == "string") {
+                                         if (applyToken == "COUNT" && (applylittleKey == "rooms_fullname" || applylittleKey == "rooms_shortname"
+                                            || applylittleKey == "rooms_number" || applylittleKey == "rooms_name" || applylittleKey == "rooms_address"
+                                            || applylittleKey == "rooms_lat" || applylittleKey == "rooms_lon" || applylittleKey == "rooms_seats"
+                                            || applylittleKey == "rooms_type" || applylittleKey == "rooms_furniture" || applylittleKey == "rooms_href"
+                                            || applylittleKey == "courses_year" || applylittleKey == "courses_dept" || applylittleKey == "courses_id"
+                                            || applylittleKey == "courses_avg" || applylittleKey == "courses_instructor" || applylittleKey == "courses_title"
+                                            || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
+                                            || applylittleKey == "courses_uuid")) {
+
+                                               return true;
+
+                                            } else if ((applyToken == "MAX" || applyToken == "MIN" || applyToken == "SUM" || applyToken == "AVG")
+                                              && (applylittleKey == "rooms_lat" || applylittleKey == "rooms_lon" || applylittleKey == "rooms_seats"
+                                              || applylittleKey == "courses_year"
+                                              || applylittleKey == "courses_avg" || applylittleKey == "courses_title"
+                                              || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
+                                            )) {
+                                               return true
+                                            } else return false;
+                                         } else return false
+                                     })){
+
+                                        if(columnsApplyArray.every(function (columns:any) {
+                                                var tempApplyStrings = apply.map(function (applyKey:any) {
+                                                    return Object.keys(applyKey)[0]
+                                                })
+                                                return tempApplyStrings.includes(columns)
+                                            })){
+
+                                            if(columnsGroupArray.every(function (columns:any) {
+                                                    return group.includes(columns)
+                                                })){
+                                                if(optionsValue["FORM"] == "TABLE"){
+                                                    return isOneDataset;
+                                                }else return false;
+
+                                            }else return false
+
+                                        }else return false
+                                    }else return false;
+
+
+                                }
+                            } else return false;
+                        } else return false;
+                    }
+                } else return false;
+
+
             } else if(invalidIdArray.length > 0){
                 Log.error(typeof invalidIdArray)
                 isOneDataset = {"false":invalidIdArray}
@@ -1879,7 +2687,7 @@ export default class InsightFacade implements IInsightFacade {
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
 
-                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+                    /**} else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1889,7 +2697,7 @@ export default class InsightFacade implements IInsightFacade {
                         invalidIdArray.push(invalidIdLists[0]);
                     }
                     isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
+                    return isOneDataset;*/
 
                 }else return false;
 
@@ -1969,7 +2777,18 @@ export default class InsightFacade implements IInsightFacade {
                     }
                     isOneDataset = {"false":invalidIdArray}
                     return isOneDataset;
-                }else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
+                }else if(typeof validProjectKey[0] == "string" && (!(validProjectKey[0].startsWith("courses")) || !(validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")) {
+
+                    var invalidIdLists = validProjectKey[0].split("_");
+
+                    if (invalidIdArray.includes(invalidIdLists[0])) {
+                        invalidIdLists = [];
+                    } else {
+                        invalidIdArray.push(invalidIdLists[0]);
+                    }
+                    isOneDataset = {"false": invalidIdArray}
+                    return isOneDataset;
+                    /**} else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 
@@ -1979,18 +2798,7 @@ export default class InsightFacade implements IInsightFacade {
                         invalidIdArray.push(invalidIdLists[0]);
                     }
                     isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
-                } else if(typeof validProjectKey[0] == "string" && ((validProjectKey[0].startsWith("courses")) || (validProjectKey[0].startsWith("rooms"))) && validProjectKey[0].includes("_")){
-
-                    var invalidIdLists = validProjectKey[0].split("_");
-
-                    if(invalidIdArray.includes(invalidIdLists[0])){
-                        invalidIdLists = [];
-                    } else {
-                        invalidIdArray.push(invalidIdLists[0]);
-                    }
-                    isOneDataset = {"false":invalidIdArray}
-                    return isOneDataset;
+                    return isOneDataset;*/
 
                 }else {
                     return false;

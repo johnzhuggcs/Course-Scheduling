@@ -510,7 +510,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 old ORDER with TRANSFORMATION", function () {
+    it( "200 old ORDER with TRANSFORMATION", function () {
         var queryTest:any =    {
             "WHERE": {},
             "OPTIONS": {

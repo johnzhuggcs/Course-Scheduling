@@ -139,17 +139,17 @@ export interface IInsightFacade {
 
     setZoomToTagName(dataToZoom: any, destination: string): any;
 
-    setZoomToClassOrId(dataToZoom: any, destination:string): any;
+    setZoomToClassOrId(dataToZoom: any, destination: string): any;
 
-    scanRowForInfoWithoutChildNodes(row:any,valueToGet:string):any;
+    scanRowForInfoWithoutChildNodes(row: any, valueToGet: string): any;
 
-    getInnerAttrInsteadOfChildNode(row:any,valueToGet:string):any;
+    getInnerAttrInsteadOfChildNode(row: any, valueToGet: string): any;
 
-    validStringListOfBuildings(isthis:any,shortNameList:string[],fullNameList:string[],addressList:string[],hrefList:string[],indexString:string): any;
+    validStringListOfBuildings(isthis: any, shortNameList: string[], fullNameList: string[], addressList: string[], hrefList: string[], indexString: string): any;
 
-    getLatLon(rooms_address:string,invalidRoomCounter:number):Promise<any>;
+    getLatLon(rooms_address: string, invalidRoomCounter: number): Promise<any>;
 
-    pushParsedJPromisesToArray(isthis:any,arrayOfPromises:any,arrayOfAddr:string[],invalidRoomCounter:number):any;
+    pushParsedJPromisesToArray(isthis: any, arrayOfPromises: any, arrayOfAddr: string[], invalidRoomCounter: number): any;
 
     removeDataset(id: string): Promise<InsightResponse>;
 
@@ -180,26 +180,26 @@ export interface IInsightFacade {
      * @param query
      */
 
-    isValid(query:QueryRequest):any;
+    isValid(query: QueryRequest): any;
 
     /** Checks if query provided has filter
      * needed as LOGICCOMPARISON and NEGATION recursively contains FILTER
      * @param filter
      */
-    hasFilter(filter:FilterQuery, invalidIdArray:string[], isOneDataset:any):any;
+    hasFilter(filter: FilterQuery, invalidIdArray: string[], isOneDataset: any): any;
 
     /** Used if encounters array of filter, iterates and calls hasFilter() for each element
      *
      * @param filterArray, invalidIdArray
      */
-    hasArrayFilter(filterArray:FilterQuery[], invalidIdArray:string[], isOneDataset:any):boolean|string[];
+    hasArrayFilter(filterArray: FilterQuery[], invalidIdArray: string[], isOneDataset: any): boolean|string[];
 
     /** Used for iterating through logic comparisons
      *
      * @param logicFilter
      */
 
-    getFilterArray(logicFilter:any):any;
+    getFilterArray(logicFilter: any): any;
 
     /** Translates valid keys into database
      *
@@ -211,7 +211,7 @@ export interface IInsightFacade {
      *
      * @param validKey
      */
-    vocabDataBase(databaseKey:string):string|boolean;
+    vocabDataBase(databaseKey: string): string|boolean;
 
     /** General filter function that filters out unneeded fields in atomicReturnInfo
      *
@@ -220,7 +220,7 @@ export interface IInsightFacade {
      * @param keys, which is the key in the filter, so {"LT":{"courses_avg":97)}
      */
 
-    filterQueryRequest(returnInfo:any, resultOfWhere:any, keys:any):any;
+    filterQueryRequest(returnInfo: any, resultOfWhere: any, keys: any): any;
 
     /** is lessthan, returns a new returnInfo
      *
@@ -230,7 +230,7 @@ export interface IInsightFacade {
      * @param sortVal
      */
 
-    isLessThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+    isLessThan(returnInfo: any, resultKeyArray: any, keys: string[], sortVal: any): any;
 
     /** is greaterthan, returns a new returnInfo
      *
@@ -240,7 +240,7 @@ export interface IInsightFacade {
      * @param sortVal
      */
 
-    isGreaterThan(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+    isGreaterThan(returnInfo: any, resultKeyArray: any, keys: string[], sortVal: any): any;
 
     /** is equalTo, returns a new returnInfo
      *
@@ -250,7 +250,7 @@ export interface IInsightFacade {
      * @param sortVal
      */
 
-    isEqualTo(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:any):any;
+    isEqualTo(returnInfo: any, resultKeyArray: any, keys: string[], sortVal: any): any;
 
     /** is IS, returns a new returnInfo, handles wildcard search strings
      *
@@ -260,7 +260,7 @@ export interface IInsightFacade {
      * @param sortVal
      */
 
-    isIsLOL(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:string):any;
+    isIsLOL(returnInfo: any, resultKeyArray: any, keys: string[], sortVal: string): any;
 
     /** is NOT, removes atomicInfos in returnInfo from the subsequent filters returned with tempReturnInfos
      *
@@ -269,7 +269,7 @@ export interface IInsightFacade {
 
      */
 
-    isNOT(returnInfo:any, tempReturnInfo:any, sortKey:any, resultKeyArray:any):any;
+    isNOT(returnInfo: any, tempReturnInfo: any, sortKey: any, resultKeyArray: any): any;
 
     /** gets the id of dataset from valid keys
      *
@@ -283,7 +283,7 @@ export interface IInsightFacade {
      * @param theIteratedArray
      */
 
-    mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any;
+    mergeDeDuplicate(theWaitingKeyValue: any, theIteratedKeyValue: any): any;
 
     /** Function that count occurrences of a substring in a string;
      * @param {String} string               The string
@@ -295,5 +295,81 @@ export interface IInsightFacade {
      * @see http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string/7924240#7924240
      */
 
-    occurrences(string:string, subString:string, allowOverlapping:boolean):any;
+    occurrences(string: string, subString: string, allowOverlapping: boolean): any;
+
+    /** Does Transformations
+     * @param finalReturnInfo
+     * @param transformationGroup
+     * @param transformationApply
+     * @param transformationExists:any
+     */
+
+    transformationQueryHelper(finalReturnInfo: any, transformationGroup: any, transformationApply:any, applyExists:any, groupedApplyArray:any): any;
+
+
+    /** Does Transformations
+     * @param returnInfo
+     * @param groupReturnInfos
+     * @param transformationApply
+     */
+
+    groupQueryHelper(returnInfo: any, groupReturnInfo:any, transformationApply:any): any;
+
+    /** Breaks ties when sorting
+     * @param a
+     * @param b
+     * @param sortArray
+     */
+    breakingTies(a: any, b: any, sortArray: any, direction:string): any
+
+
+    /** checks applykey has string from column
+     * @param apply
+     * @param columnsKey
+     */
+    applyHasColumn(Apply:any, columnsKey:any):any
+
+    /** gets objects from Apply to be added to each returnInfo
+     * @param tranformationApply
+     * @param returninfo
+     */
+    applyObjects(tranformationApply:any, returnInfo:any):any
+
+    /** calculates min
+     * @param groupedValue
+     * @param testValue
+     */
+
+    returnMin(groupedValue:any, testValue:any):any
+
+    /** calculates max
+     * @param groupedValue
+     * @param testValue
+     */
+    returnMax(groupedValu:any, testValue:any):any
+
+    /** calculates SUM
+     * @param groupedValue
+     * @param applyKey
+     * @param testValue
+     */
+    returnSum(groupedValue:any, testValue:any):any
+
+    /** calculates AVG
+     * @param groupedInfo
+     * @param testValue
+     */
+    returnAVG(groupedInfo:any, applyKey:any, testValue:any):any
+
+    /** calculates COUNT
+     * @param groupedValue
+     * @param testValue
+     */
+    returnCOUNT(groupedValue:any, testValue:any):any
+
+    /** finishes AVG
+     * @param returnInfo
+     */
+
+    finishApply(returnInfo:any):any
 }
