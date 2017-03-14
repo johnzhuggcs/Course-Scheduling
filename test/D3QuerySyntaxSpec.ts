@@ -217,7 +217,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("isValid mixed Columns, weird ORDER with TRANSFORMATION", function () {
+    it("isValid mixed Columns, weird ORDER with TRANSFORMATION", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
@@ -242,6 +242,40 @@ describe("D3QuerySyntaxSpec", function () {
         var result = {"true": ["courses"]}
         sanityCheck(queryTest);
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
+
+
+    });
+
+    it.only("400 isValid with apply with underscore", function () {
+        var queryTest: any =  {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_uuid", "minGrade"
+                ],
+                "ORDER": "minGrade",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["minGrade"],
+                "APPLY": [
+                    {
+                        "minGrade": {
+                            "SUM": "courses_avg"
+                        }
+                    },
+                    {
+                        "testthings": {
+                            "COUNT": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+        var keyTest = Object.keys(queryTest);
+        var result = {"true": ["courses"]}
+        sanityCheck(queryTest);
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(false);
 
 
     });
