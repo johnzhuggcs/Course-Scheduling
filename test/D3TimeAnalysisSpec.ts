@@ -269,7 +269,7 @@ describe("D3TimeAnalysis", function () {
 
     });
 
-    it.only( "200 BIG RESULT new ORDER with TRANSFORMATION", function () {
+    it( "200 BIG RESULT new ORDER with TRANSFORMATION", function () {
         var queryTest:any =     {
             "WHERE": {},
             "OPTIONS": {
@@ -302,6 +302,7 @@ describe("D3TimeAnalysis", function () {
         var result = fs.readFileSync("OverloadSortingTest", "utf8")
         //console.time("start Test")
         return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            //Log.info(JSON.parse(result)["result"].length)
             expect(value.code).to.equal(200);
             //console.timeEnd("start Test")
             expect(JSON.stringify(value.body)).to.deep.equal(result)

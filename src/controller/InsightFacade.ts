@@ -1154,31 +1154,42 @@ export default class InsightFacade implements IInsightFacade {
                         //console.timeEnd("hashing")
                         finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists, groupedApplyArray);
                         console.timeEnd("start Group")
-                        var singleReturn;
+                        var singleReturnInfo;
+                        var singleAppliedInfo;
                         var returnInfoKeys;
                         var newCache;
                         var tempFinal = finalReturn;
                         finalReturn = []
                         for(let x in tempFinal){
-                            singleReturn = tempFinal[x]
-                            singleReturn = newThis.finishApply(singleReturn)
+                            try {
+                                singleReturnInfo = JSON.parse(x);
+                            }catch(err){
+                                Log.info("Return Info invalid JSON parsing")
+                                throw err
+                            }
+                            singleAppliedInfo = tempFinal[x]
+                            singleAppliedInfo = newThis.finishApply(singleAppliedInfo)
+                            singleReturnInfo = Object.assign(singleReturnInfo, singleAppliedInfo);
 
+                            /**if(isNullOrUndefined(singleReturnInfo)){
+                                Log.info(JSON.stringify(x));
+                            }*/
                             for (let x in columns) {
 
-                                        singleColumnKey = columns[x].toString()
+                                singleColumnKey = columns[x].toString()
 
-                                        if (singleReturn.hasOwnProperty(singleColumnKey)) {
+                                if (singleReturnInfo.hasOwnProperty(singleColumnKey)) {
 
-
-                                            newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturn[singleColumnKey]});
+                                    newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturnInfo[singleColumnKey]});
 
 
 
                                 } else {
 
+
                                     //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
-                                    newCache = null;
-                                    singleReturn = null;
+                                    //newCache = null;
+                                    singleReturnInfo = null;
 
                                     //returnInfo = returnInfo
                                     //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
@@ -1490,29 +1501,31 @@ export default class InsightFacade implements IInsightFacade {
         var singleInfo:any;
         var infoKeys;
         var valueArray;
+        var newReturnInfo:any = {}
         var sum = returnInfo[0]
         var size = returnInfo["has AVG"]
         var average = sum/size
 
         for(let x in returnInfo){
-            singleInfo= {[x]:returnInfo[x]}
+            //singleInfo= {[x]:returnInfo[x]}
+            singleInfo = x
             infoKeys = Object.keys(singleInfo)[0]
             valueArray = returnInfo[x]
             if(valueArray instanceof Array){
-                if(valueArray[0] == "MAX"){
-                    returnInfo[x] = this.returnMax(valueArray)
-                }else if(valueArray[0] == "MIN"){
-                    returnInfo[x] = this.returnMin(valueArray)
-                }else if(valueArray[0] == "SUM"){
-                    returnInfo[x] = this.returnSum(valueArray)
-                }else if(valueArray[0] == "AVG"){
-                    returnInfo[x] = this.returnAVG(valueArray)
-                }else if(valueArray[0] == "COUNT"){
-                    returnInfo[x] = this.returnCOUNT(valueArray)
+                if(x.endsWith("MAX")){
+                    newReturnInfo[x.replace("MAX", "")] = this.returnMax(valueArray)
+                }else if(x.endsWith("MIN")){
+                    newReturnInfo[x.replace("MIN", "")] = this.returnMin(valueArray)
+                }else if(x.endsWith("SUM")){
+                    newReturnInfo[x.replace("SUM", "")] = this.returnSum(valueArray)
+                }else if(x.endsWith("AVG")){
+                    newReturnInfo[x.replace("AVG", "")] = this.returnAVG(valueArray)
+                }else if(x.endsWith("COUNT")){
+                    newReturnInfo[x.replace("COUNT", "")] = this.returnCOUNT(valueArray)
                 }
             }
 
-        } return returnInfo;
+        } return newReturnInfo;
 
     }
 
@@ -1691,7 +1704,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     returnMax(valueArray:any):any{
-        valueArray.shift()
+        //valueArray.shift()
 
         var max = valueArray.reduce(function(a:any, b:any) {
             return Math.max(a, b);
@@ -1700,7 +1713,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     returnMin(valueArray:any):any{
-        valueArray.shift()
+        //valueArray.shift()
 
         var min = valueArray.reduce(function(a:any, b:any) {
             return Math.min(a, b);
@@ -1709,7 +1722,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     returnSum(valueArray:any):any{
-        valueArray.shift()
+        //valueArray.shift()
         var sum = valueArray.reduce(function (a:any, b:any) {
             return a + b;
         });
@@ -1718,7 +1731,7 @@ export default class InsightFacade implements IInsightFacade {
 
     returnAVG(valueArray:any):any{
 
-        valueArray.shift();
+        //valueArray.shift();
         var groupedSum = 0;
         var averageCounter;
         var oneNumber;
@@ -1740,7 +1753,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
     returnCOUNT(valueArray:any):any{
-        valueArray.shift();
+        //valueArray.shift();
         valueArray = valueArray.filter (function (value:any, index:any, array:any) {
             return array.indexOf (value) == index;
         });
