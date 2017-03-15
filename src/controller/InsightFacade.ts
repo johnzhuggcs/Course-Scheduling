@@ -2359,22 +2359,26 @@ export default class InsightFacade implements IInsightFacade {
                             && orderValidKey["keys"] instanceof Array){
                                 direction = orderValidKey["dir"]
                                 keyArray = orderValidKey["keys"]
-                                if(direction == "UP" || direction == "DOWN"){
+                                if(keyArray.length == 0){
+                                    return false
+                                }else {
+                                    if (direction == "UP" || direction == "DOWN") {
 
-                                   if(keyArray.every(function (key:any):any {
-                                        return columnsValidKeyArray.includes(key);
-                                    })){
-                                       if(transformationExists == true){
-                                           isOneDataset = isOneDataset;
-                                       }else {
-                                           Table = optionsValue[columnsEtcKey[2]];
-                                           if (Table == "TABLE") { //if value of FORM is TABLE
-                                               return isOneDataset
-                                           } else return false;
-                                       }
-                                   }else return false;
+                                        if (keyArray.every(function (key: any): any {
+                                                return columnsValidKeyArray.includes(key);
+                                            })) {
+                                            if (transformationExists == true) {
+                                                isOneDataset = isOneDataset;
+                                            } else {
+                                                Table = optionsValue[columnsEtcKey[2]];
+                                                if (Table == "TABLE") { //if value of FORM is TABLE
+                                                    return isOneDataset
+                                                } else return false;
+                                            }
+                                        } else return false;
 
-                                }else return false;
+                                    } else return false;
+                                }
                             }else return false;
                         }else
                         if (columnsValidKeyArray.includes(orderValidKey)) {

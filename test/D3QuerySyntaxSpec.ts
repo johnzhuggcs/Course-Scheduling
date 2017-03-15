@@ -280,4 +280,37 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
+    it.only("400 no order", function () {
+        var queryTest: any =  {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_uuid", "minGrade"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": []
+                },
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP":["courses_uuid"],
+                "APPLY": [
+                    {
+                        "minGrade": {
+                            "SUM": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+        var keyTest = Object.keys(queryTest);
+        var result = {"true": ["courses"]}
+        sanityCheck(queryTest);
+        Log.info(insightFacade.isValid(queryTest))
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(false);
+
+
+    });
+
 });
