@@ -973,7 +973,7 @@ export default class InsightFacade implements IInsightFacade {
                                             returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
                                         }
                                         //Log.info(returnInfo);
-                                        if(returnInfo.length == 0){
+                                        if(JSON.stringify(returnInfo) == "{}"){
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
@@ -2033,6 +2033,9 @@ export default class InsightFacade implements IInsightFacade {
             var newResult;
             var tempReturnInfo;
             var tempReturnInfo2;
+            var accumulatedReturn = {};
+            var returnInfoKeys:any[] = []
+            var returnInfo2Keys:any[] = []
 
             for(let x in resultOfWhere){
 
@@ -2041,25 +2044,45 @@ export default class InsightFacade implements IInsightFacade {
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
-                    if(resultOfWhere.length == 1){
+                    //console.time("start object keys")
+                    if(Object.keys(tempReturnInfo).length > 0) {
+                        accumulatedReturn = tempReturnInfo
+                    }
+                    //console.timeEnd("start object keys")
+
+                    /**if(resultOfWhere.length == 1){
                         returnInfo = tempReturnInfo
-                    }else{tempReturnInfo = tempReturnInfo}
+                    }else{
+                        tempReturnInfo = tempReturnInfo
+                    }*/
                 }else {
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
                     newFilter = resultOfWhere[x];
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo2 = this.filterQueryRequest(returnInfo, newResult, newKeys);
-                    if(tempReturnInfo2.length == 0){
-                        returnInfo = tempReturnInfo;
-                    }else if(tempReturnInfo.length == 0){
-                        returnInfo = tempReturnInfo2;
+                    returnInfoKeys = Object.keys(tempReturnInfo);
+                    returnInfo2Keys = Object.keys(tempReturnInfo2);
+                    if(tempReturnInfo2.length == 0 && returnInfoKeys.length > 0){
+                        accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo);
+                    }else if(tempReturnInfo.length == 0 && returnInfo2Keys.length > 0){
+
+                        accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2);
+                    }else if(tempReturnInfo.length == 0 && tempReturnInfo2.length == 0){
+                        continue;
                     }else {
-                        returnInfo = this.mergeDeDuplicate(tempReturnInfo2, tempReturnInfo);
+                        if(Object.keys(accumulatedReturn).length == 0){
+                            accumulatedReturn = tempReturnInfo
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2)
+                        }else {
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo);
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2)
+                        }
                     }
 
                 }
             }//console.timeEnd("Go through OR")
+            returnInfo = accumulatedReturn
             return returnInfo
 
         }else if(keys[0] == "NOT"){
@@ -2105,13 +2128,22 @@ export default class InsightFacade implements IInsightFacade {
 
     mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any{
         var theIteratedKeyArray = Object.keys(theIteratedKeyValue)
+        if(Object.keys(theWaitingKeyValue).length == 0){
+            theWaitingKeyValue = theIteratedKeyValue
+            return theWaitingKeyValue;
+        }
         for(let x in theIteratedKeyArray){
             var theIteratedKey = theIteratedKeyArray[x];
             var theIteratedValue = theIteratedKeyValue[theIteratedKey];
             if(theWaitingKeyValue.hasOwnProperty(theIteratedKey) && theWaitingKeyValue[theIteratedKey] == theIteratedValue){
                 //Log.info("merging duplicates"+theWaitingKeyValue.toString()+theIteratedKeyValue.toString())
             } else {
-                theWaitingKeyValue.assign({}, {[theIteratedKey]:theIteratedValue});
+                try {
+                    theWaitingKeyValue.assign(theWaitingKeyValue, {[theIteratedKey]: theIteratedValue});
+                }catch(err){
+
+                    Log.info(JSON.stringify(theWaitingKeyValue));
+                }
             }
 
         } return theWaitingKeyValue

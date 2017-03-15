@@ -26,8 +26,8 @@ describe("D3QueryTestSpec", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
-        //return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
+        //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
+        return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -43,8 +43,8 @@ describe("D3QueryTestSpec", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         insightFacade = null
-        return insight.removeDataset('rooms');
-        //return insight.removeDataset('courses');
+        //return insight.removeDataset('rooms');
+        return insight.removeDataset('courses');
 
     });
 
@@ -219,7 +219,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 multiple transform", function () {
+    it( "200 multiple transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -550,7 +550,7 @@ describe("D3QueryTestSpec", function () {
     });
 
 
-    it( "200 new ORDER with TRANSFORMATION", function () {
+    it( "200 new ORDER with TRANSFORMATION ROOM courses", function () {
         var queryTest:any =     {
             "WHERE": {},
             "OPTIONS": {
@@ -590,6 +590,106 @@ describe("D3QueryTestSpec", function () {
             expect(err.body).to.deep.equal({"missing":["test","other"]})
         })
 
+    });
+
+    it.only("200 Titanium for COURSES", function () {
+        var queryTest: any = {
+            "WHERE": {
+                "OR": [/**{
+                    "IS": {
+                        "courses_uuid": "31379"
+                    }
+                },*/{
+                    "IS": {
+                        "courses_uuid": "10235"
+                    }
+                },
+                    {
+                        "IS": {
+                            "courses_uuid": "10236"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10237"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10238"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10239"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10240"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10250"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "20135"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "maxGrade",
+                    "courses_uuid"
+                ],
+                    "ORDER": "courses_uuid",
+                    "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP":["courses_uuid", "courses_dept"],
+                    "APPLY": [
+                    {
+                        "minGrade": {
+                            "MIN": "courses_avg"
+                        }
+                    },
+                    {
+                        "maxGrade": {
+                            "MAX": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10235","courses_dept":"eece","maxGrade":98.75},{"courses_uuid":"10236","courses_dept":"eece","maxGrade":98.75},{"courses_uuid":"10237","courses_dept":"eece","maxGrade":87.53},{"courses_uuid":"10238","courses_dept":"eece","maxGrade":87.53},{"courses_uuid":"10239","courses_dept":"eece","maxGrade":90.27},{"courses_uuid":"10240","courses_dept":"eece","maxGrade":90.27},{"courses_uuid":"10250","courses_dept":"eece","maxGrade":79.79}/**,{"courses_uuid":"31379","courses_dept":"aanb","maxGrade":94.44}*/]}
+
+
+        //sanityCheck(queryTest);
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["test","other"]})
+        })
     });
 
 
