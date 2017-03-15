@@ -280,7 +280,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("400 no order", function () {
+    it.only("400 new order with unknown key", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
@@ -289,8 +289,7 @@ describe("D3QuerySyntaxSpec", function () {
                 ],
                 "ORDER": {
                     "dir": "DOWN",
-                    "keys": ["courses_uuid"],
-                    "something":"bleh"
+                    "keys": ["courses_uuid", "maxGrade"]
                 },
                 "FORM": "TABLE"
             },
@@ -299,7 +298,7 @@ describe("D3QuerySyntaxSpec", function () {
                 "APPLY": [
                     {
                         "minGrade": {
-                            "SUM": "courses_avg"
+                            "COUNT": "courses_instructor"
                         }
                     }
                 ]

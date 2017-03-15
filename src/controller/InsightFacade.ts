@@ -2359,7 +2359,9 @@ export default class InsightFacade implements IInsightFacade {
                             && orderValidKey["keys"] instanceof Array){
                                 direction = orderValidKey["dir"]
                                 keyArray = orderValidKey["keys"]
-                                if(keyArray.length == 0){
+                                if(keyArray.length == 0 || !keyArray.every(function (singleKey) {
+                                        return columnsValidKeyArray.includes(singleKey);
+                                    })){
                                     return false
                                 }else {
                                     if (direction == "UP" || direction == "DOWN") {
