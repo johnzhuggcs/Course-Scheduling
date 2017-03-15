@@ -2354,8 +2354,8 @@ export default class InsightFacade implements IInsightFacade {
                         dataSet = isOneDataset[yesOrNo];
                         orderValidKey = optionsValue[columnsEtcKey[1]];//gets ORDER key
                         if(orderValidKey !== null && typeof orderValidKey === "object"){
-
-                            if(orderValidKey.hasOwnProperty("dir") && (orderValidKey.hasOwnProperty("keys")) && (typeof orderValidKey["dir"] == "string")
+                            var d3OrderObject = Object.keys(orderValidKey);
+                            if(d3OrderObject.length == 2 && d3OrderObject[0] == "dir" && d3OrderObject[1] == "keys" && (typeof orderValidKey["dir"] == "string")
                             && orderValidKey["keys"] instanceof Array){
                                 direction = orderValidKey["dir"]
                                 keyArray = orderValidKey["keys"]

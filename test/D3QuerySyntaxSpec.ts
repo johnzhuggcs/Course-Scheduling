@@ -289,7 +289,8 @@ describe("D3QuerySyntaxSpec", function () {
                 ],
                 "ORDER": {
                     "dir": "DOWN",
-                    "keys": []
+                    "keys": ["courses_uuid"],
+                    "something":"bleh"
                 },
                 "FORM": "TABLE"
             },
