@@ -289,7 +289,7 @@ describe("D3QuerySyntaxSpec", function () {
                 ],
                 "ORDER": {
                     "dir": "DOWN",
-                    "keys": ["courses_uuid", "maxGrade"]
+                    "keys": ["courses_uuid"]
                 },
                 "FORM": "TABLE"
             },
@@ -298,7 +298,12 @@ describe("D3QuerySyntaxSpec", function () {
                 "APPLY": [
                     {
                         "minGrade": {
-                            "COUNT": "courses_instructor"
+                            "MIN": "courses_avg"
+                        }
+                    },
+                    {
+                        "minGrade": {
+                            "MIN": "courses_avg"
                         }
                     }
                 ]

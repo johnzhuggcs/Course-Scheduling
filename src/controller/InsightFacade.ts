@@ -2555,6 +2555,17 @@ export default class InsightFacade implements IInsightFacade {
                                     var tokenPlusKey;
                                     var applyToken;
                                     var applylittleKey;
+
+                                    let duplicate = new Set();
+
+                                    var hasDuplicates = apply.some(function(currentObject:any) {
+                                        return duplicate.size === duplicate.add(Object.keys(currentObject)[0]).size;
+                                    });
+
+                                    if(hasDuplicates){
+                                        return false;
+                                    }
+
                                    if(apply.every(function (applyKey:any) {
                                       applyString = Object.keys(applyKey)[0]
                                       tokenPlusKey = applyKey[applyString];
