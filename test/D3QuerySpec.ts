@@ -26,8 +26,8 @@ describe("D3QueryTestSpec", function () {
         Log.test('Before: ' + (<any>this).test.parent.title);
         insightFacade = new InsightFacade();
         insight = new InsightFacade();
-        //return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
-        return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
+        return insight.addDataset('rooms', fs.readFileSync('rooms.zip').toString('base64'))
+        //return insight.addDataset('courses', fs.readFileSync('courses.zip').toString('base64'))
 
 
     });
@@ -43,8 +43,8 @@ describe("D3QueryTestSpec", function () {
     after(function () {
         Log.test('After: ' + (<any>this).test.parent.title);
         insightFacade = null
-        //return insight.removeDataset('rooms');
-        return insight.removeDataset('courses');
+        return insight.removeDataset('rooms');
+        //return insight.removeDataset('courses');
 
     });
 
@@ -169,7 +169,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it( "200 transform", function () {
+    it.only( "200 transform", function () {
             var queryTest:any =    {
                 "WHERE": {
                     "AND": [{
@@ -592,7 +592,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only("200 Titanium for COURSES", function () {
+    it("200 Titanium for COURSES", function () {
         var queryTest: any = {
             "WHERE": {
                 "OR": [/**{

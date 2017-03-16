@@ -973,7 +973,7 @@ export default class InsightFacade implements IInsightFacade {
                                             returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
                                         }
                                         //Log.info(returnInfo);
-                                        if(JSON.stringify(returnInfo) == "{}"){
+                                        if(isNullOrUndefined(returnInfo)){
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
@@ -991,7 +991,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                                     //checking apply is in columns and vice versa
                                                     tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
-                                                    if (isNullOrUndefined(returnInfo)) {
+                                                    if (isNullOrUndefined(returnInfo) || returnInfo.length == 0) {
                                                         cachedReturnInfo = cachedReturnInfo;
                                                     } else if (applyExists == true && tempApplyKey.length > 0) {
                                                         //console.time("new transformation")
@@ -1173,7 +1173,11 @@ export default class InsightFacade implements IInsightFacade {
                                 singleReturnInfo = JSON.parse(x);
                             }catch(err){
                                 Log.info("Return Info invalid JSON parsing")
-                                throw err
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "order error"}
+                                };
+                                return reject(code400InvalidQuery);
                             }
                             if(groupedApplyArray.length > 0) {
                                 singleAppliedInfo = tempFinal[x]
@@ -1561,40 +1565,43 @@ export default class InsightFacade implements IInsightFacade {
 
 
         for (let x in finalReturnInfo) {
-            transformReturnInfo = finalReturnInfo[x];
-            newTransformReturnInfo = null;
 
+                transformReturnInfo = finalReturnInfo[x];
+                newTransformReturnInfo = null;
 
-            //console.timeEnd("new transformation")
+                //console.timeEnd("new transformation")
 
-            concatenatedKey = JSON.stringify(transformReturnInfo);
+                concatenatedKey = JSON.stringify(transformReturnInfo);
 
-            //console.time("new Apply")
-            if(groupedApplyArray.length == 0){
-                groupedApplyColumns = ""
-            }
-            groupedApplyColumns = groupedApplyArray[x];
-            //console.time("new Apply")
-            if (Number(x) == 0) {
-                //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
-
-                groupObjectArray = Object.assign({}, groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
-            } else {
-                if (transformationGroup.includes("courses_uuid")) {
-                    uuidIndex = transformationGroup.indexOf("courses_uuid")
-                    newTransformGroup.splice(uuidIndex, 1);
-
+                //console.time("new Apply")
+                if (groupedApplyArray.length == 0) {
+                    groupedApplyColumns = ""
                 }
+                groupedApplyColumns = groupedApplyArray[x];
 
-                if (newTransformGroup.length == 0) {
+                //console.time("new Apply")
+                if (Number(x) == 0) {
                     //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
-                    groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+
+                    groupObjectArray = Object.assign({}, groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
                 } else {
+                    if (transformationGroup.includes("courses_uuid")) {
+                        uuidIndex = transformationGroup.indexOf("courses_uuid")
+                        newTransformGroup.splice(uuidIndex, 1);
+
+                    }
 
 
-                    /**
-                     var singleGroupedElement:any;
-                     for(let x in groupObjectArray){
+
+                    if (newTransformGroup.length == 0) {
+                        //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                    } else {
+
+
+                        /**
+                         var singleGroupedElement:any;
+                         for(let x in groupObjectArray){
                             singleGroupedElement = groupObjectArray[x];
                             if(newTransformGroup.every(function (singleGroup: any) {
                                 newValue = transformReturnInfo[singleGroup];
@@ -1605,12 +1612,12 @@ export default class InsightFacade implements IInsightFacade {
                             }
                         }*/
 
-                    /**if(groupObjectArray.length == 15){
+                        /**if(groupObjectArray.length == 15){
                             Log.info("conticnue")
                         }*/
 
-                    /**
-                    matchIndex = groupObjectArray.findIndex(function (singleGroupedElement: any) {
+                        /**
+                         matchIndex = groupObjectArray.findIndex(function (singleGroupedElement: any) {
                         return newTransformGroup.every(function (singleGroup: any) {
                             newValue = transformReturnInfo[singleGroup];
                             return newValue == singleGroupedElement[singleGroup]
@@ -1622,20 +1629,20 @@ export default class InsightFacade implements IInsightFacade {
                             newValue = newValue.concat(JSON.stringify(newTransformGroup[x]));
                         }*/
                         //console.timeEnd("concat")
-                    //console.time("group check")
+                        //console.time("group check")
 
-                        if(typeof (groupObjectArray[concatenatedKey]) != "undefined"){
-                        //console.timeEnd("group check")
-                        //console.time("group update")
-                        groupObjectArray[concatenatedKey] = this.groupQueryHelper(groupObjectArray[concatenatedKey], groupedApplyColumns, transformationApply)
-                        //console.timeEnd("group update")
-                    }else{
-                        //console.time("add group")
-                        groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
-                        //console.timeEnd("add group")
-                    }
+                        if (typeof (groupObjectArray[concatenatedKey]) != "undefined") {
+                            //console.timeEnd("group check")
+                            //console.time("group update")
+                            groupObjectArray[concatenatedKey] = this.groupQueryHelper(groupObjectArray[concatenatedKey], groupedApplyColumns, transformationApply)
+                            //console.timeEnd("group update")
+                        } else {
+                            //console.time("add group")
+                            groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                            //console.timeEnd("add group")
+                        }
 
-                    /**if(newTransformReturnInfo == newValue){
+                        /**if(newTransformReturnInfo == newValue){
                         //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
                         console.time("group query")
                         groupObjectArray[newValue] = this.groupQueryHelper(groupObjectArray[newValue], groupedApplyColumns, transformationApply)
@@ -1649,9 +1656,8 @@ export default class InsightFacade implements IInsightFacade {
                 }
 
 
-
                 /**
-                if (matchIndex >= 0) {
+                 if (matchIndex >= 0) {
                     transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
                     groupObjectArray[matchIndex] = this.groupQueryHelper(groupObjectArray[matchIndex], transformReturnInfo, transformationApply)
 
@@ -1661,6 +1667,7 @@ export default class InsightFacade implements IInsightFacade {
                 }else{
                     groupObjectArray = groupObjectArray
                 }*/
+
             }
 
 
@@ -2045,7 +2052,7 @@ export default class InsightFacade implements IInsightFacade {
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
                     //console.time("start object keys")
-                    if(Object.keys(tempReturnInfo).length > 0) {
+                    if(!isNullOrUndefined(tempReturnInfo)) {
                         accumulatedReturn = tempReturnInfo
                     }
                     //console.timeEnd("start object keys")
