@@ -53,8 +53,8 @@ describe("D3QuerySyntaxSpec", function () {
     });
 
 
-    it("testing out simple query provided in deliverable", function () {
-        var queryTest: QueryRequest = {
+    it.only("testing out simple query provided in deliverable", function () {
+        var queryTest: any = {
             "WHERE": {
                 "GT": {
                     "courses_avg": 97
@@ -62,17 +62,16 @@ describe("D3QuerySyntaxSpec", function () {
             },
             "OPTIONS": {
                 "COLUMNS": [
-                    "courses_dept",
-                    "courses_avg"
+
                 ],
-                "ORDER": "courses_dept",
+
                 "FORM": "TABLE"
             }
         }
         var keyTest = Object.keys(queryTest);
         var result = {"true": ["courses"]}
         sanityCheck(queryTest);
-        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(false);
 
 
     });

@@ -2310,9 +2310,13 @@ export default class InsightFacade implements IInsightFacade {
                 if((columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM") ||
                     (columnsEtcKey.length == 2 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "FORM")){
                     columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
+                    if(columnsValidKeyArray.length == 0){
+                        return false
+                    }
                     for(let x in columnsValidKeyArray){
                         var yesOrNo = Object.keys(isOneDataset)[0];
                         var dataSet = isOneDataset[yesOrNo];
+
                         if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
                             || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                             || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
