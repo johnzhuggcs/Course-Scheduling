@@ -55,7 +55,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("checking out NO FILTER complex query provided in deliverable", function () {
+    it.only("checking out NO FILTER complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
             },
@@ -219,7 +219,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 multiple transform", function () {
+    it.only( "200 multiple transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -272,8 +272,8 @@ describe("D3QueryTestSpec", function () {
 
         return insightFacade.performQuery(queryTest).then(function (value: any){
             expect(value.code).to.equal(200);
-            //Log.info("actual: "+JSON.stringify(value.body))
-            //Log.info("expected: "+JSON.stringify(result))
+            Log.info("actual: "+JSON.stringify(value.body))
+            Log.info("expected: "+JSON.stringify(result))
             var resultKey:any = value.body["result"];
             var expectedResult:any = result["result"];
             for(let x in resultKey){
@@ -294,7 +294,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 dataset in apply", function () {
+    it.only( "200 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -344,7 +344,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 simple query deliverable", function () {
+    it.only( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -397,7 +397,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 simple query no ORDER with TRANSFORMATION", function () {
+    it.only( "200 simple query no ORDER with TRANSFORMATION", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -437,7 +437,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: any =  {
             "WHERE": {
@@ -519,7 +519,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 old ORDER with TRANSFORMATION", function () {
+    it.only( "200 old ORDER with TRANSFORMATION", function () {
         var queryTest:any =    {
             "WHERE": {},
             "OPTIONS": {
@@ -550,7 +550,7 @@ describe("D3QueryTestSpec", function () {
     });
 
 
-    it( "200 new ORDER with TRANSFORMATION ROOM courses", function () {
+    it.only( "200 new ORDER with TRANSFORMATION ROOM courses", function () {
         var queryTest:any =     {
             "WHERE": {},
             "OPTIONS": {
@@ -592,7 +592,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("200 Titanium for COURSES", function () {
+    it.skip("200 Titanium for COURSES", function () {
         var queryTest: any = {
             "WHERE": {
                 "OR": [/**{

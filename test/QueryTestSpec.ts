@@ -542,7 +542,7 @@ describe("QueryTestSpec", function () {
     });
 
 
-    it("200 testing out simple query provided in deliverable", function () {
+    it.only("200 testing out simple query provided in deliverable", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "GT":{

@@ -973,7 +973,7 @@ export default class InsightFacade implements IInsightFacade {
                                             returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
                                         }
                                         //Log.info(returnInfo);
-                                        if(isNullOrUndefined(returnInfo)){
+                                        if(isNullOrUndefined(returnInfo) || returnInfo.length == 0){
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
@@ -1099,6 +1099,7 @@ export default class InsightFacade implements IInsightFacade {
                                                 finalReturn.push(cachedReturnInfo);
                                                 if(!isNullOrUndefined(groupedApplyColumns)) {
                                                     groupedApplyArray.push(groupedApplyColumns);
+                                                    groupedApplyColumns = {};
                                                 }
                                             }
                                         }
@@ -1565,7 +1566,7 @@ export default class InsightFacade implements IInsightFacade {
 
 
         for (let x in finalReturnInfo) {
-
+            try {
                 transformReturnInfo = finalReturnInfo[x];
                 newTransformReturnInfo = null;
 
@@ -1590,7 +1591,6 @@ export default class InsightFacade implements IInsightFacade {
                         newTransformGroup.splice(uuidIndex, 1);
 
                     }
-
 
 
                     if (newTransformGroup.length == 0) {
@@ -1669,22 +1669,31 @@ export default class InsightFacade implements IInsightFacade {
                 }*/
 
             }
+            catch(err){
+                Log.info(JSON.stringify(x))
+            }
+        }
 
 
         return groupObjectArray;
     }
 
     groupQueryHelper(returnInfo:any, groupedApplyArray:any, transformationApply:any){
-        var singleApply;
-        var applyKey;
-        var applyToken;
+
         var innerArray = new Array();
+        var tempGroupedArray = new Array()
+        //var resultArray
+
 
         for(let x in groupedApplyArray){
             innerArray = returnInfo[x]
+            tempGroupedArray = groupedApplyArray[x]
             if(typeof innerArray != "undefined"){
-                innerArray = innerArray.concat(groupedApplyArray[x])
-                returnInfo[x] = innerArray;
+
+                returnInfo[x] = innerArray.concat(tempGroupedArray);
+                groupedApplyArray[x] = tempGroupedArray;
+                //returnInfo[x] = innerArray.push.apply(innerArray, groupedApplyArray[x]);
+                //innerArray = [];
             }else{
                 x = x;
             }
