@@ -54,18 +54,33 @@ describe("D3QuerySyntaxSpec", function () {
 
 
     it.only("testing out simple query provided in deliverable", function () {
-        var queryTest: any = {
-            "WHERE": {
-                "GT": {
-                    "courses_avg": 97
-                }
-            },
+        var queryTest: any =  {
+            "WHERE": {},
             "OPTIONS": {
                 "COLUMNS": [
-
+                    "rooms_furniture",
+                    "rooms_shortname",
+                    "stuffytest"
                 ],
-
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_furniture", "rooms_shortname"]
+                },
                 "FORM": "TABLE"
+            }, "TRANSFORMATIONS": {
+                "GROUP": ["rooms_furniture", "rooms_shortname", "rooms_seats"],
+                "APPLY": [{
+                    "maxSeats": {
+                        "MAX": "rooms_seats"
+                    },
+                    "stuffytest": {
+                        "COUNT": "rooms_href"
+                    }
+                },{
+                    "stuffytest": {
+                        "COUNT": "rooms_href"
+                    }
+                }]
             }
         }
         var keyTest = Object.keys(queryTest);
