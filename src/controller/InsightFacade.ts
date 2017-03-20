@@ -2288,6 +2288,13 @@ export default class InsightFacade implements IInsightFacade {
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
+        try{
+            var temp = JSON.stringify(query);
+            JSON.parse(temp);
+        }catch(err){
+            return false
+        }
+
         if(keyArray[0] == "WHERE" && keyArray[1] == "OPTIONS"){ //checks if outermost keys are WHERE and OPTIONS
 
             Where = keyArray[0]; //gets "WHERE"
