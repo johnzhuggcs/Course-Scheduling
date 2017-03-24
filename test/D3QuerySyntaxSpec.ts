@@ -217,7 +217,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("isValid mixed Columns, weird ORDER with TRANSFORMATION", function () {
+    it("isValid mixed Columns, weird ORDER with TRANSFORMATION", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {

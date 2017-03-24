@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
+		</script>
+		<script>
+
+			var $isCourses = false;
+			var $isrooms = false;
+			var $counter = 0;
+
+			//call yarn start the start the server first
+		function toggling() {
+			//$(document).ready(function(){
+				if ($(".dataset").val() == "default") {
+                    $(".ifcoursesFilters").hide();
+                    $(".ifroomsFilters").hide();
+                    $(".ifgroupFilters").hide();
+					$(".ifcourses").hide();
+					$(".ifrooms").hide();
+					$(".ifgroup").hide();
+					$isCourses = false;
+					$isRooms = false;
+                    $(".ifcoursesGroup").hide();
+                    $(".ifroomsGroup").hide();
+                    $(".ifgroupGroup").hide();
+
+                    $(".ifcoursesApply").hide();
+
+				}
+				if ($(".dataset").val() == "courses") {
+                    $(".ifcoursesFilters").show();
+                    $(".ifroomsFilters").hide();
+                    $(".ifgroupFilters").show();
+					$(".ifcourses").show();
+					$(".ifrooms").hide();
+					$(".ifgroup").show();
+                    $isCourses = true;
+                    $isRooms = false;
+                    $(".ifcoursesGroup").show();
+                    $(".ifroomsGroup").hide();
+                    $(".ifgroupGroup").show();
+
+                    $(".ifcoursesApply").show();
+
+
+				}
+				if ($(".dataset").val() == "rooms") {
+				    $(".ifcoursesFilters").hide();
+                    $(".ifroomsFilters").show();
+                    $(".ifgroupFilters").show();
+					$(".ifcourses").hide();
+					$(".ifrooms").show();
+					$(".ifgroup").show();
+                    $isCourses = false;
+                    $isRooms = true;
+                    $(".ifcoursesGroup").hide();
+                    $(".ifroomsGroup").show();
+                    $(".ifgroupGroup").show();
+
+                    $(".ifcoursesApply").hide();
+
+				}
+			//})
+		}
+		function columnLeadsGroupBy(){
+            var coursesColVals = [];
+            var coursesColTexts = [];
+            $('.ifcourses :selected').each(function(k, selected){
+                coursesColVals[k] = $(selected).val();
+                coursesColTexts[k] = $(selected).text();
+            });
+
+            orderDropdownAccordingToCol(coursesColVals,coursesColTexts);
+		}
+
+            function orderDropdownAccordingToCol(listOfCoursesCol,listOfCoursesColText) {
+				$(".ifcoursesGroup").find('option').remove();
+                $(".ifcoursesGroup").append('<option value="default" selected>Please select columns above to show before ordering</option>');
+                for (var i = 0; i < listOfCoursesCol.length; i++) {
+                    if (listOfCoursesColText[i] != "") {
+                        $(".ifcoursesGroup").append('<option class = "orderDrop"></option>');
+                        var newClassName = "order" + i;
+                        $(".orderDrop").addClass(newClassName);
+                        $("." + newClassName).val(listOfCoursesCol[i]);
+                        $("." + newClassName).html(listOfCoursesColText[i]);
+                        $(".orderDrop").removeClass("orderDrop").addClass("orderPassed"); //this order is considered, and will be deleted
+                    }
+				}
+            }
+
+		function clickAddCat() {
+                //e.preventDefault();
+                var $cloned = $(".test").clone().removeClass("test").addClass("clonedTest");
+                $cloned.appendTo(".extra");
+        }
+        function clickAddOrd() {
+            //e.preventDefault();
+            var $cloned = $(".testOrder").clone().removeClass("testOrder").addClass("clonedTestOrder");
+            $cloned.appendTo(".extraOrder");
+        }
+
+        var notBlankAttrCounter = 0;
+
+		function addLeftAsterisk(customClass) {
+		    var randomStr = "";
+
+
+		    if ($("." + customClass + " :selected").val() == "EW"
+			|| $("." + customClass + " :selected").val() == "CT") {// Ends with--> *lish
+                randomStr = randomStr + "*";
+            }
+            return randomStr;
+		}
+
+		function addRightAsterisk(customClass) {
+                var randomStr = "";
+                if ($("." + customClass + " :selected").val() == "SW"
+                    || $("." + customClass + " :selected").val() == "CT") { //starts with--> Eng*
+                    randomStr = randomStr + "*";
+                }
+                return randomStr;
+            }
+
+
+            function comparison() {//Returns LT, EQ or GT
+		    	var ranstr = ""
+                if ($(".compareSize :selected").val() == "LT") {
+                    ranstr = ranstr + "LT";
+                }
+                if ($(".compareSize :selected").val() == "EQ") {
+                    ranstr = ranstr + "EQ";
+                }
+                if ($(".compareSize :selected").val() == "GT") {
+                    ranstr = ranstr + "GT";
+                }
+                return ranstr;
+			}
+
+            function stringObjectOfAttr() {
+		    //Case 1: Just 1 field is being filled
+				//Case 2: AND multifields
+				//Case 3: OR multifields
+                var $jsonstr = "";
+                var attrCounter = 0; //counts the number of attributes that are not blank
+				var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
+                if ($("#colsections_size").val() != "") {
+                    attrCounter++;
+				}
+                if ($("#courses_dept").val() != "") {
+                    attrCounter++;
+				}
+                if ($("#courses_id").val() != "") {
+                    attrCounter++;
+                }
+                if ($("#courses_instructor").val() != "") {
+                    attrCounter++;
+                }
+                if ($("#courses_title").val() != "") {
+                    attrCounter++;
+                }
+                notBlankAttrCounter = attrCounter;
+
+                if (attrCounter > 0) {
+
+                    if ($("#colsections_size").val() != "") {
+                        lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"" + comparison() + "\": {" +
+                                "\"colsections_size\": \"" + $("#colsections_size").val() + "\""
+                                + "}" +
+                                "}";
+
+                        if (lastAttrCounter < attrCounter) {
+                            $jsonstr = $jsonstr + ",";
+						}
+                    }
+                    if ($("#courses_dept").val() != "") {
+                        lastAttrCounter++;
+                        $jsonstr = $jsonstr +
+                            "{" +
+                            "\"IS\": {" +
+                            "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val() + addRightAsterisk("isItDep") + "\""
+                            + "}" +
+                            "}";
+                        if (lastAttrCounter < attrCounter) {
+                            $jsonstr = $jsonstr + ",";
+                        }
+                    }
+                    if ($("#courses_id").val() != "") {
+                        lastAttrCounter++;
+                        $jsonstr = $jsonstr +
+                            "{" +
+                            "\"IS\": {" +
+                            "\"courses_id\": \"" + addLeftAsterisk("isItCn") + $("#courses_id").val() + addRightAsterisk("isItCn") + "\""
+                            + "}" +
+                            "}";
+                        if (lastAttrCounter < attrCounter) {
+                            $jsonstr = $jsonstr + ",";
+                        }
+                    }
+                    if ($("#courses_instructor").val() != "") {
+                        lastAttrCounter++;
+                        $jsonstr = $jsonstr +
+                            "{" +
+                            "\"IS\": {" +
+                            "\"courses_instructor\": \"" + addLeftAsterisk("isItIns") + $("#courses_instructor").val() + addRightAsterisk("isItIns") + "\""
+                            + "}" +
+                            "}";
+                        if (lastAttrCounter < attrCounter) {
+                            $jsonstr = $jsonstr + ",";
+                        }
+                    }
+                    if ($("#courses_title").val() != "") {
+                        $jsonstr = $jsonstr +
+                            "{" +
+                            "\"IS\": {" +
+                            "\"courses_title\": \"" + addLeftAsterisk("isItTit") + $("#courses_title").val() + addRightAsterisk("isItTit") + "\""
+                            + "}" +
+                            "}";
+                    }
+                }
+                return $jsonstr;
+            }
+
+            function stringWrapWithAndOr(attrJsString) {
+				var $jstring = "";
+				if (notBlankAttrCounter > 1) {
+                    if ($(".radioclass :checked").val() == "AND") {
+                        $jstring = "{\"AND\":[" + attrJsString + "]}";
+                    }
+                    if ($(".radioclass :checked").val() == "OR") {
+                        $jstring = "{\"OR\":[" + attrJsString + "]}";
+                    }
+                } else {
+				    $jstring = attrJsString; //it's unnecessary to return and/or if there's only 0/1 attr
+				}
+				return $jstring;
+
+			}
+
+
+			function declareDirection() {
+		    	if ($(".direction :selected").val() == "UP") {
+		    	    return "\"UP\""
+				}
+                if ($(".direction :selected").val() == "DOWN") {
+                    return "\"DOWN\""
+                }
+                if ($(".direction :selected").val() == "choose") {
+                    return ""
+                }
+			}
+
+			function detectDuplicatesSendAlertElseSend(customClass,coursesColVals,alertCat) {
+                var coursesColTexts = [];
+
+                $('.' + customClass + ' :selected').each(function(k, selected){
+                    coursesColVals[k] = $(selected).val();
+                    coursesColTexts[k] = $(selected).text();
+                });
+
+                var sortedCoursesColTexts = coursesColTexts.slice().sort();
+
+                var duplicatedResults = [];
+                for (var i = 0; i < coursesColVals.length - 1; i++) {
+                    if (sortedCoursesColTexts[i+1] == sortedCoursesColTexts[i]
+                        && !duplicatedResults.includes(sortedCoursesColTexts[i])
+                        && sortedCoursesColTexts[i] != ""
+						&& sortedCoursesColTexts[i] != "Please select columns above to show before ordering") { //ignore duplicate white spaces
+                        duplicatedResults.push(sortedCoursesColTexts[i]);
+                    }
+                }
+                if (duplicatedResults.length > 0){
+                    alert(duplicatedResults.toString() + " is/are selected in \'"+ alertCat +"\' multiple times, please just select once.");
+                    return;
+                }
+
+                //^duplicates are eliminated in this stage^
+
+
+                for (var i = 0; i < coursesColVals.length; i++) {
+                    if (coursesColVals[i] == 'default') { //eliminate default
+                        coursesColVals.splice(i,1);//delete 1 element starting from index i
+                        coursesColTexts.splice(i,1);
+                        i = i - 1; //after deleting one index, I should go backwards by one to proceed to the next one, so that it won't skip
+                    } else {
+                        coursesColVals[i] = "\"" + coursesColVals[i] + "\"";//add brackets so it can fit into json format
+                    }
+                }
+                return coursesColVals;
+
+                //^"" like defaults are eliminated in this stage^
+			}
+
+			function transformationMaker() {
+		    	var querystr = "";
+				if ($(".highestavg").is(":checked")
+				    || $(".lowestavg").is(":checked")
+				|| $(".mostsec").is(":checked")
+					|| $(".mostpass").is(":checked")
+                   || $(".mostfail").is(":checked")) {
+		    	    querystr = '"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],"APPLY": [' + applyMaker() + ']}'
+				}
+				return querystr
+			}
+
+			function applyMaker() {
+                var attrCounter = 0; //counts the number of attributes that are checked
+                var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
+				if ($(".highestavg").is(":checked")) {attrCounter++;}
+                if ($(".lowestavg").is(":checked")) {attrCounter++;}
+                if ($(".mostsec").is(":checked")) {attrCounter++;}
+                if ($(".mostpass").is(":checked")) {attrCounter++;}
+                if ($(".mostfail").is(":checked")) {attrCounter++;}
+
+		    	var querystr = "";
+		    	if ($(".highestavg").is(":checked")) {
+                    querystr = querystr + '{"HighestAverage": {"MAX": "courses_avg"}}';
+                    lastAttrCounter++;
+                    if (lastAttrCounter < attrCounter) {
+                        querystr = querystr + ', '
+					}
+				}
+                if ($(".lowestavg").is(":checked")) {
+                    querystr = querystr + '{"LowestAverage": {"MIN": "courses_avg"}}'
+                    lastAttrCounter++;
+                    if (lastAttrCounter < attrCounter) {
+                        querystr = querystr + ', '
+                    }
+                }
+                if ($(".mostsec").is(":checked")) {
+                    querystr = querystr + '{"MostSections": {"COUNT": "courses_id"}}'
+                    lastAttrCounter++;
+                    if (lastAttrCounter < attrCounter) {
+                        querystr = querystr + ', '
+                    }
+                }
+                if ($(".mostpass").is(":checked")) {
+                    querystr = querystr + '{"MostPasses": {"MAX": "courses_pass"}}'
+                    lastAttrCounter++;
+                    if (lastAttrCounter < attrCounter) {
+                        querystr = querystr + ', '
+                    }
+                }
+                if ($(".mostfail").is(":checked")) {
+                    querystr = querystr + '{"MostFails": {"MAX": "courses_fail"}}'
+                }
+                return querystr;
+			}
+
+			function queryMaker(andOr,coursesColVal,direction,coursesOrderVal,transformation) {
+				var query ="{";
+				if (coursesColVal == "") {
+				    alert("Please select the columns to display")
+					return "";
+				}
+				if (andOr != "") {
+                query = query + '"WHERE": ' + andOr + ', '
+				}
+
+				query = query + '"OPTIONS": {"COLUMNS": [' + coursesColVal + ']'
+
+				if (direction == "" && coursesOrderVal.length == 1) {
+                    query = query + ', "ORDER":' +  coursesOrderVal.toString()
+                }
+                if (direction == "" && coursesOrderVal.length > 1) {
+                    alert("Please select the direction for more than one orderings")
+                    return "";
+				}
+				if (direction != "" && coursesOrderVal.length > 0) {
+                    query = query + ', "ORDER": {"dir": ' + direction + ', "keys": [' + coursesOrderVal.toString() + ']}'
+                }
+
+				query = query + ', "FORM": "TABLE"}'
+
+				if (transformation != "") {query = query + ',' + transformation}
+					//close'em up
+				query = query + '}';
+
+				return query;
+
+			}
+
+
+        function generateData() {
+            if ($isCourses) {
+				//for filters
+
+				    //TODO: rename classes for different parts, so that they can be more distinct
+                //for courses column
+
+				var coursesColVals = [];
+				var coursesOrderVals = [];
+                coursesColVals = detectDuplicatesSendAlertElseSend("ifcourses",coursesColVals,"Show column(s)");
+                coursesOrderVals = detectDuplicatesSendAlertElseSend("ifcoursesGroup",coursesOrderVals,"Order by");
+
+
+
+				var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+            $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+
+            //for order
+				var $order = $(".ifcoursesGroup :selected").val();
+
+            var $andor1 = $(".radioclass :checked").val();
+
+            console.log("andOrString: " + $andOrString);
+            console.log("coursesColVals.toString(): " + coursesColVals.toString());
+            console.log("order: " + $order);
+            console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
+            console.log("dir: " + declareDirection());
+            console.log("transformationMaker(): " + transformationMaker());
+
+
+            var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationMaker());
+            console.log("officialQueryString: " + $officialQueryString);
+
+            //if the queryString failed to be made
+            if ($officialQueryString == "") {
+                return;
+			}
+
+			var $queryFormat = JSON.parse($officialQueryString);
+
+
+            console.log("qq" + $queryFormat);
+            console.log("qqq" + JSON.stringify($queryFormat));
+
+            //create the format here, then yarn start and send request to the server
+
+            $.ajax({
+                url: "http://localhost:4321/query",
+                type: 'POST',
+                data: $officialQueryString,
+                dataType: 'json', //data is already in json format
+                contentType: 'application/json'
+            }).done(function(data) {
+                console.log("Response", data);
+                //do something with the data
+			}).fail(function(e) {
+			    console.error("ERROR - Failed to submit query", e);
+			});
+
+                /*$.ajax('/query',
+					{
+                    type: 'POST',
+                    data: $queryFormat,
+						contentType: 'application/json',
+                    dataType: 'json'
+                }).done(function(data) {
+                    console.log("Response", data);
+                }).fail(function(e) {
+                    console.error("ERROR - Failed to submit query", e);
+                });*/
+
+
+            /*$.post("http://localhost:4321/query",$queryFormat,function(data) {
+                alert("here");
+                fulfill(data);
+			},"jsonp");*/
+			}
+
+
+            if ($isRooms) {
+                var roomsColVals = [];
+                $('.ifrooms :selected').each(function(l, selected){
+                    roomsColVals[l] = $(selected).val();
+                });
+
+            }
+		}
+
+		// TODO: group by can only be set if it exists in column
+
+		</script>
+	</head>
+	<body>
+		<h1>Courses and Rooms Explorer</h1>
+		<div class = "fields">
+			<p>
+				<b>Dataset: </b>
+				<select class = "dataset" onchange="toggling()">
+					<option value="default" selected></option>
+					<option value="courses">Courses</option>
+					<option value="rooms">Rooms</option>
+				</select>
+			</p>
+
+			<p>
+				<span class = "ifgroup radioclass" style="display:none"><b>Filters (can leave blank): </b>
+
+					<br>
+					<br>
+
+					You can use AND/OR for below filters:
+					<input type = "radio" name = "AndOr" value = "AND" checked>AND</input>
+					<input type = "radio" name = "AndOr" value = "OR">OR</input>
+
+				</span>
+
+				<div class = "ifcoursesFilters" style="display:none">
+					Section size:
+					<select class = "compareSize">
+						<option value="LT">Less than</option>
+						<option value="EQ">Equal to</option>
+						<option value="GT">Greater than</option>
+					</select>
+					<input type="number" id="colsections_size" value="">
+					<br>
+					Department:
+					<select class = "isItDep">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
+					<input type="text" id="courses_dept" value="">
+					<br>
+					Course number:
+					<select class = "isItCn">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
+					<input type="text" id="courses_id" value="">
+					<br>
+					Instructor:
+					<select class = "isItIns">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+
+					</select>
+					<input type="text" id="courses_instructor" value="">
+					<br>
+					Title:
+					<select class = "isItTit">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
+					<input type="text" id="courses_title" value="">
+					<br>
+				</div>
+
+				<div class = "ifroomsFilters" style="display:none">
+					Building name:
+					<input type="text" id="rooms_fullname" value="">
+					<br>
+					Room number:
+					<input type="text" id="rooms_number" value="">
+					<br>
+					Room size:
+					<select class = "compareSize">
+						<option value="LT">Less than</option>
+						<option value="EQ">Equal to</option>
+						<option value="GT">Greater than</option>
+					</select>
+					<input type="text" id="rooms_seats" value="">
+					<br>
+					Room type:
+					<input type="text" id="rooms_type" value="">
+					<br>
+					Furniture type:
+					<input type="text" id="rooms_furniture" value="">
+					<br>
+					Location (distance from a given building):
+					<input type="text" id="rooms_loc" value="">
+				</div>
+
+			</p>
+
+			<p>
+				<span class = "ifgroup" style="display:none"><b>Show column(s): </b></span>
+				<span class="test">
+				<select class = "ifcourses" style="display:none" onchange="columnLeadsGroupBy()">
+					<option value="default" selected></option>
+					<option value="courses_dept">Department</option>
+					<option value="courses_id">Course number</option>
+					<option value="courses_avg">Course average</option>
+					<option value="courses_instructor">Instructor</option>
+					<option value="courses_title">Title</option>
+					<option value="courses_pass">Number of passed students</option>
+					<option value="courses_fail">Number of failed students</option>
+					<option value="colsections_size">Section size</option>
+					<!-- based on no.of passed + failed-->
+					<option value="courses_audit">Number of students audited</option>
+					<option value="courses_uuid">ID of a course offering</option>
+					<option value="courses_year">year</option>
+				</select>
+				<select class = "ifrooms" style="display:none">
+					<option value="default" selected></option>
+					<option value="rooms_fullname">Building fullname</option>
+					<option value="rooms_shortname">Building shortname</option>
+					<option value="rooms_number">Room number</option>
+					<option value="rooms_name">Room name</option>
+					<option value="rooms_address">Building address</option>
+					<option value="rooms_lat">Building lat</option>
+					<option value="rooms_lon">Building lon</option>
+					<option value="rooms_seats">Room size</option>
+					<option value="rooms_type">Room type</option>
+					<option value="rooms_furniture">Room furniture type</option>
+					<option value="rooms_href">Room href</option>
+				</select>
+					</span>
+			<span class = "extra"></span>
+				<span class = "ifgroup" style="display:none">
+					<button type="button" onclick="clickAddCat()">Add another category</button>
+				</span>
+			</p>
+
+			<p>
+				<span class = "ifgroupGroup" style="display:none"><b>Order by: </b>
+				<select class = "direction">
+					<option value="choose" selected>Please Choose Direction (if applicable):</option>
+					<option value="UP">Ascending</option>
+					<option value="DOWN">Descending</option>
+				</select>
+					<span class = "testOrder">
+				<select class = "ifcoursesGroup" style="display:none">
+					<option value="default" selected>Please select columns above to show before ordering</option>
+				</select>
+				<select class = "ifroomsGroup" style="display:none">
+					<option value="default" selected></option>
+					<option value="rooms_fullname">Building fullname</option>
+					<option value="rooms_shortname">Building shortname</option>
+					<option value="rooms_number">Room number</option>
+					<option value="rooms_name">Room name</option>
+					<option value="rooms_address">Building address</option>
+					<option value="rooms_lat">Building lat</option>
+					<option value="rooms_lon">Building lon</option>
+					<option value="rooms_seats">Room size</option>
+					<option value="rooms_type">Room type</option>
+					<option value="rooms_furniture">Room furniture type</option>
+					<option value="rooms_href">Room href</option>
+				</select>
+						</span>
+					<span class = "extraOrder"></span>
+					<button type="button" onclick="clickAddOrd()">Add another order</button>
+
+				</span>
+			</p>
+
+			<p>
+				<span class = "ifgroup" style="display:none"><b>Extra Info Available: </b>
+				<div class = "ifcoursesApply" style="display:none">
+					<input type="checkbox" class="highestavg">Courses With highest Average<br>
+					<input type="checkbox" class="lowestavg">Courses With Lowest Average<br>
+					<input type="checkbox" class="mostsec">Courses With Most Sections<br>
+					<input type="checkbox" class="mostpass">Courses With Most Passes<br>
+					<input type="checkbox" class="mostfail">Courses With Most Fails<br>
+				</div>
+				</span>
+			</p>
+
+			<p>
+				<span class = "ifgroup" style="display:none">
+					<button type="button" onclick="generateData()">Generate Data Table</button>
+				</span>
+			</p>
+
+		</div>
+	</body>
+</html>

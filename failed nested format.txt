@@ -1,0 +1,91 @@
+				
+
+
+<span class = "ifcoursesFilters" id = "icF0" style="display:none">
+
+				<select class = "ifcoursesFiltersSelection" id = "icFS0">
+					<option value="default" selected></option>
+					<option value="colsections_size">Section size: </option>
+					<option value="courses_dept">Department: </option>
+					<option value="courses_id">Course number: </option>
+					<option value="courses_instructor">Instructor: </option>
+					<option value="courses_title">Title: </option>
+				</select>
+					<select class = "compareSize" style="display:none">
+						<option value="LT">Less than</option>
+						<option value="EQ">Equal to</option>
+						<option value="GT">Greater than</option>
+					</select>
+  					<input type="number" id="colsections_size" value="" style="display:none">
+  					<input type="text" id="courses_dept_id_instructor_title" value="" style="display:none">
+					<select class = "andOr" style="display:none">
+						<option value="AND">AND</option>
+						<option value="OR">OR</option>
+					</select>
+
+					<span class = "extraFilter"></span>
+
+				</span>
+
+
+				<span class = "ifgroup" style="display:none">
+						<button type="button" onclick="clickAddFilter()">Add another filter with AND/OR</button>
+				</span>
+
+		function coursesSelected() {
+            //console.log($(".ifcoursesFiltersSelection").val());
+            $('.ifcoursesFiltersSelection :selected').each(function(k, selected){
+                coursesColVals[k] = $(selected).val();
+                switch ($(selected).val()) {
+                    case "default":
+                        $(".compareSize").hide();
+                        $("#colsections_size").hide();
+                        $("#courses_dept_id_instructor_title").hide();
+                        break;
+                    case "colsections_size":
+                        $(".compareSize").show();
+                        $("#colsections_size").show();
+                        $("#courses_dept_id_instructor_title").hide();
+                        break;
+
+                    case "courses_dept":
+                    case "courses_id":
+                    case "courses_instructor":
+                    case "courses_title":
+                        $(".compareSize").hide();
+                        $("#colsections_size").hide();
+                        $("#courses_dept_id_instructor_title").show();
+                        break;
+                }
+            });
+           /* switch ($(".ifcoursesFiltersSelection").val()) {
+                case "default":
+                    $(".compareSize").hide();
+                    $("#colsections_size").hide();
+                    $("#courses_dept_id_instructor_title").hide();
+                    break;
+                case "colsections_size":
+                    $(".compareSize").show();
+                    $("#colsections_size").show();
+                    $("#courses_dept_id_instructor_title").hide();
+                    break;
+
+                case "courses_dept":
+                case "courses_id":
+                case "courses_instructor":
+                case "courses_title":
+                    $(".compareSize").hide();
+                    $("#colsections_size").hide();
+                    $("#courses_dept_id_instructor_title").show();
+                    break;
+            }*/
+		}
+
+		function clickAddFilter() {
+		    //TODO: create a counter for each newly-created class
+			//TODO: same ID/class results would not work
+            var $cloned = $(".ifcoursesFilters").clone().removeClass("ifcoursesFilters").addClass("someclass");
+            $cloned.appendTo(".extraFilter");
+            $(".andOr").show();
+
+		}

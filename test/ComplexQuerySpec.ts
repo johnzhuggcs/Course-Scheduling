@@ -192,7 +192,7 @@ describe("ComplexQuerySpec", function () {
 
     });
 
-    it.only("200 testing out Excalibur NO ORDER", function () {
+    it("200 testing out Excalibur NO ORDER", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
 

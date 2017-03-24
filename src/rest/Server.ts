@@ -63,11 +63,24 @@ export default class Server {
                     name: 'insightUBC'
                 });
 
-                that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));//added as Holmes said
+                that.rest.use(
+                    restify.bodyParser({mapParams: true, mapFiles: true})
+                );//added as Holmes said
+
+                that.rest.use(
+                    function crossOrigin(req,res,next){
+                        res.header("Access-Control-Allow-Origin", "*");
+                        res.header("Access-Control-Allow-Headers", "X-Requested-With");
+                        return next();
+                    }
+                );
 
                 that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
-                    res.send(200);
+                    //res.send(200);
                     //res.send('hello ' + req.params.name);
+                    var data = fs.readFileSync('uiwebpage.html',{encoding: 'utf8'});
+                    res.write(data);
+                    res.end();
                     return next();
                 });
 
@@ -113,16 +126,21 @@ export default class Server {
                 that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                         that.insightFac.performQuery(req.body).then(function (insightResponsePromise: any) {
                             if (insightResponsePromise.code == 200) {
-                                res.send(200);
+                                var legit = ""
+                                res.json(200,insightResponsePromise.body)
+                                //res.send(200)
                                 return next();
                             }
                         }).catch(function (err) {
                             if (err.code == 400) {
-                                res.send(400);
+                                var notlegit = ""
+                                //res.send(400);
+                                res.json(400,err.body)
                                 return next();
                             }
                             if (err.code == 424) {
-                                res.send(424);
+                                //res.send(424);
+                                res.json(424,err.body)
                                 return next();
                             }
                         });
