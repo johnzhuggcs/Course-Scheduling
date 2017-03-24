@@ -65,11 +65,25 @@ export default class Server {
 
                 that.rest.use(restify.bodyParser({mapParams: true, mapFiles: true}));//added as Holmes said
 
-                that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                that.rest.use(
+                    function crossOrigin(req: restify.Request, res: restify.Response, next:restify.Next){
+                        res.header("Access-Control-Allow-Origin", "*");
+                        res.header("Access-Control-Allow-Headers", "*");
+                        res.header("Access-Control-Allow-Methods", "*");
+                        return next();
+                    }
+                )
+
+                /**that.rest.get('/', function (req: restify.Request, res: restify.Response, next: restify.Next) {
                     res.send(200);
                     //res.send('hello ' + req.params.name);
                     return next();
-                });
+                });*/
+
+                that.rest.get("/:name", restify.serveStatic({
+                    directory: __dirname + '/view',
+                    default: "index.html"
+                }));
 
                 // provides the echo service
                 // curl -is  http://localhost:4321/echo/myMessage
@@ -111,8 +125,10 @@ export default class Server {
                 });
 
                 that.rest.post('/query', function (req: restify.Request, res: restify.Response, next: restify.Next) {
+                        console.log(req.body);
                         that.insightFac.performQuery(req.body).then(function (insightResponsePromise: any) {
                             if (insightResponsePromise.code == 200) {
+                                res.send(insightResponsePromise.body)
                                 res.send(200);
                                 return next();
                             }

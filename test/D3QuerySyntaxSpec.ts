@@ -68,65 +68,66 @@ describe("D3QuerySyntaxSpec", function () {
     it.only("testing out simple query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
+                "NOT": {
+                    "AND": [
+                        {
+                            "IS": {
+                                "rooms_fullname": "something"
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_shortname": "short something"
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_number": "20"
+                            }
+                        },
 
-                "AND": [
-                    {
-                        "IS": {
-                            "rooms_fullname": "something"
+                        {
+                            "IS": {
+                                "rooms_name": "short something 20"
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_address": "address 123%^*()"
+                            }
+                        },
+                        {
+                            "LT": {
+                                "rooms_lat": -123
+                            }
+                        },
+                        {
+                            "GT": {
+                                "rooms_lon": -123.24809
+                            }
+                        },
+                        {
+                            "GT": {
+                                "rooms_seats": 20
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_type": "type something"
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_furniture": "furniture something"
+                            }
+                        },
+                        {
+                            "IS": {
+                                "rooms_href": "something something href"
+                            }
                         }
-                    },
-                    {
-                        "IS": {
-                            "rooms_shortname": "short something"
-                        }
-                    },
-                    {
-                        "IS": {
-                            "rooms_number":"20"
-                        }
-                    },
-
-                    {
-                        "IS": {
-                            "rooms_name": "short something 20"
-                        }
-                    },
-                    {
-                        "IS": {
-                            "rooms_address": "address 123%^*()"
-                        }
-                    },
-                    {
-                        "LT": {
-                            "rooms_lat": -123.2480
-                        }
-                    },
-                    {
-                        "GT": {
-                            "rooms_lon": -123.24809
-                        }
-                    },
-                    {
-                        "GT": {
-                            "rooms_seats": 20
-                        }
-                    },
-                    {
-                        "IS": {
-                            "rooms_type": "type something"
-                        }
-                    },
-                    {
-                        "IS": {
-                            "rooms_furniture": "furniture something"
-                        }
-                    },
-                    {
-                        "IS": {
-                            "rooms_href": "something something href"
-                        }
-                    },
-                ]
+                    ]
+                }
 
             },
             "OPTIONS": {

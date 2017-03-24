@@ -2289,6 +2289,7 @@ export default class InsightFacade implements IInsightFacade {
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
         try{
+            //var tempJSON = JSON.parse(query);
             var temp = JSON.stringify(query);
             JSON.parse(temp);
         }catch(err){
@@ -2344,7 +2345,7 @@ export default class InsightFacade implements IInsightFacade {
 
                             } else continue;
                         } else if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "rooms_fullname" || columnsValidKeyArray[x] == "rooms_shortname"
-                            || columnsValidKeyArray[x] == "rooms_shortname" || columnsValidKeyArray[x] == "rooms_number"
+                            || columnsValidKeyArray[x] == "rooms_number"
                             || columnsValidKeyArray[x] == "rooms_name" || columnsValidKeyArray[x] == "rooms_address"
                             || columnsValidKeyArray[x] == "rooms_lat" || columnsValidKeyArray[x] == "rooms_lon"
                             || columnsValidKeyArray[x] == "rooms_seats" || columnsValidKeyArray[x] == "rooms_type" || columnsValidKeyArray[x] == "rooms_furniture"

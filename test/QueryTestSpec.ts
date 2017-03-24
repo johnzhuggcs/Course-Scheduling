@@ -2167,6 +2167,46 @@ describe("QueryTestSpec", function () {
 
     });
 
+    it.only("D3 200", function () {
+        var queryTest:any =
+            {
+                "WHERE":
+                {
+                    "IS":{"courses_id":"343"}
+                },
+            "OPTIONS":{
+            "COLUMNS":["courses_dept"],
+                "ORDER":{"dir":"UP","keys":["courses_dept"]},
+                "FORM":"TABLE"
+            },
+            "TRANSFORMATIONS":{
+                    "GROUP":["courses_dept","courses_id"],
+                "APPLY":[
+                    {"MostSections":
+                        {"COUNT":"courses_id"}}
+                    ]}}
+
+        /**courses_dept	courses_id	courses_avg	courses_fail
+         chem	121	68.2	287
+         cnps	574	99.19	0
+         math	527	99.78	0
+         math	527	99.78	0*/
+        var result = {"render":"TABLE","result":[{"courses_dept":"arth"},{"courses_dept":"biol"},{"courses_dept":"edcp"},{"courses_dept":"elec"},{"courses_dept":"engl"},{"courses_dept":"fren"},{"courses_dept":"kin"},{"courses_dept":"nurs"}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            //console.time("deep equal time")
+            expect(value.body).to.deep.equal(result);
+            //console.timeEnd("deep equal time")
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
 
 
 
