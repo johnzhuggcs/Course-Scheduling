@@ -793,10 +793,12 @@ export default class InsightFacade implements IInsightFacade {
     //TODO: Go into file and split through \r\n
 
     // if (match with the content within the file-->
-     */    performQuery(query: QueryRequest): Promise <InsightResponse> {
+     */  performQuery(query: QueryRequest): Promise <InsightResponse> {
         //perform query
         var fs = require("fs");
+        //console.time("start query check")
         var queryCheck = this.isValid(query);
+        //console.timeEnd("start query check")
         var newThis = this;
         var yesOrNo = Object.keys(queryCheck)[0];
         var dataSetId = queryCheck[yesOrNo];
@@ -808,6 +810,13 @@ export default class InsightFacade implements IInsightFacade {
                 var columns = query.OPTIONS.COLUMNS;
                 var order:any =  query.OPTIONS.ORDER;
                 var table = query.OPTIONS.FORM;
+                var transformation:TransformationQuery = query.TRANSFORMATIONS;
+                var transformationGroup:any;
+                var singleGroup;
+                var transformationApply:any;
+                var newTransformationApply:any[] = [];
+                var applyExists:boolean = true;
+                var transformationExists:any = false;
                 var keys = Object.keys(filter);
                 var result = filter[keys[0]]; //value of the WHERE Filters
                 var validKey;
@@ -817,107 +826,29 @@ export default class InsightFacade implements IInsightFacade {
                 //var cachedIdArray = cachedId.split("\r\n");
                 //var nonExistIdArray = [];
 
+                if(!isUndefined(transformation)){
+                    transformationExists = true;
+                    transformationApply = query.TRANSFORMATIONS.APPLY
+                    transformationGroup = transformation.GROUP
+                }
 
+                var grabbingIDColumnKey = columns[0];
+                validKey = grabbingIDColumnKey.split("_");
+                var testingResult = validKey[0]
+                try {
+                    //console.time("testing read file filters general")
+                    contentDatasetResult = fs.readFileSync(testingResult, "utf8")
+                    //console.timeEnd("testing read file filters general")
 
-                if(keys[0] == "AND" || keys[0] == "OR" || keys[0] == "NOT"){ //getting the corresponding id of dataset and reading it
-                    var nonLogicFilter;
-                    //console.time("testing get filter");
-                    nonLogicFilter = newThis.getFilterArray(result);
-                    //console.timeEnd("testing get filter")
-                    if(nonLogicFilter instanceof Array) {
-                        var nonLogicFilterVals = nonLogicFilter[0];
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilterVals);
-                        var validTestKeyValue = nonLogicFilterVals[nonLogicFilterKeys[0]];
-                        var validTestKeyArray = Object.keys(validTestKeyValue)
-                        validKey = validTestKeyArray[0].split("_");
+                }
+                catch(err){
+                    if (err.code === 'ENOENT') {
+                        var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
+                        return reject(code424InvalidQuery);
 
-
-                        var testingResult = validKey[0]
-
-
-                        // for future projects
-                        /**for(let x in cachedIdArray){
-                            if(validKey == cachedIdArray[x]){
-                                contentDatasetResult = fs.readFileSync(validKey);
-                            } else nonExistIdArray.push(validKey);
-                        }*/
-
-                        /**try {
-                        contentDatasetResult = fs.readFileSync(validKey);
-                    } catch (err) {
-                        if (err.code === 'ENOENT') {
-                            var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":queryCheck}};
-                            reject(code424InvalidQuery);
-
-                        } else {
-                            throw err;
-                        }
-                        // Here you get the error when the file was not found,
-                        // but you also get any other error
-                    } */
-                        //console.time("testing read file AND OR")
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                return reject(code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-                        //console.timeEnd("testing read file AND OR")
-
-                    } else{ //this is for when keys[0] is NOT;
-                        //var nonLogicFilterVals = result[0];
-
-                        //var notKeys = Object.keys(nonLogicFilter);
-                        //var notResult = nonLogicFilter[notKeys[0]];
-                        //console.time("testing read file NOT")
-                        var nonLogicFilterKeys = Object.keys(nonLogicFilter);
-                        validKey = nonLogicFilterKeys[0].split("_");
-                        var testingResult:string = validKey[0]
-                        try {
-                            contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        }
-                        catch(err){
-                            if (err.code === 'ENOENT') {
-                                var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                                return (code424InvalidQuery);
-
-                            } else {
-                                throw err;
-                            }
-                        }
-
-                        //console.timeEnd("testing read file NOT")
-                    }} /**else if(keys[0] == "NOT"){
-
-                }*/
-                else {
-
-                    //var nonLogicFilterVals = result[0];
-                    var nonLogicFilterKeys = Object.keys(result);
-                    validKey = nonLogicFilterKeys[0].split("_");
-                    var testingResult = validKey[0]
-                    try {
-                        //console.time("testing read file filters general")
-                        contentDatasetResult = fs.readFileSync(testingResult, "utf8")
-                        //console.timeEnd("testing read file filters general")
-
+                    } else {
+                        throw err;
                     }
-                    catch(err){
-                        if (err.code === 'ENOENT') {
-                            var code424InvalidQuery:InsightResponse = {code:424, body:{"missing":dataSetId}};
-                            return reject(code424InvalidQuery);
-
-                        } else {
-                            throw err;
-                        }
-                    }
-
                 }
                 //console.time("parse through extracted content")
                 datasetResultArray = contentDatasetResult.split("\r\n")
@@ -930,7 +861,8 @@ export default class InsightFacade implements IInsightFacade {
 
                 if(datasetResultArray.length > 0) {
                     var lmaoWeDone;
-                    var finalReturn = [];
+                    var finalReturn:any[] = [];
+                    var groupedApplyArray:any[] = [];
                     var returnInfo:any = {};
                     var atomicReturnInfo:any; //building block of query's return based on valid Keys
                     //console.time("go through datasetResultArray overall")
@@ -955,7 +887,7 @@ export default class InsightFacade implements IInsightFacade {
                                     code: 400,
                                     body: {"error": "malformed dataset with no result in array"}
                                 };
-                                 reject(code400InvalidQuery);*/
+                                 return reject(code400InvalidQuery);*/
                             } else {
                                 if (sectionArray instanceof Array && sectionArray.length > 0) { //going into the arrays of sections and organizing them based on the OPTIONS
                                     //console.time("one course")
@@ -1036,37 +968,106 @@ export default class InsightFacade implements IInsightFacade {
                                                     //}
                                                 }
                                             }
-                                        }returnInfo = newThis.filterQueryRequest(returnInfo, result, keys)
+                                        }
+                                        if(!isUndefined(result)) {
+                                            returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
+                                        }
                                         //Log.info(returnInfo);
-                                        if(returnInfo.length == 0){
+                                        if(isNullOrUndefined(returnInfo) || returnInfo.length == 0){
                                             returnInfo = returnInfo
                                         }else {
                                             var cachedReturnInfo;
+                                            var tempApplyKey;
+                                            var groupedApplyColumns
                                             //returnInfo = {}
                                             for (let x in columns) {
+
                                                 singleColumnKey = columns[x].toString()
 
+                                                if (transformationExists == true) {
+                                                    if (transformationApply.length == 0) {
+                                                        applyExists = false;
+                                                    }
 
-                                                //translatedKey = newThis.vocabValidKey(singleColumnKey);
-                                                /**if(translatedKey == false){
+                                                    //checking apply is in columns and vice versa
+                                                    tempApplyKey = newThis.applyHasColumn(transformationApply, singleColumnKey)
+                                                    if (isNullOrUndefined(returnInfo) || returnInfo.length == 0) {
+                                                        cachedReturnInfo = cachedReturnInfo;
+                                                    } else if (applyExists == true && tempApplyKey.length > 0) {
+                                                        //console.time("new transformation")
+                                                        for (let x in transformationGroup) {
+
+                                                            singleGroup = transformationGroup[x].toString()
+
+                                                            if (returnInfo.hasOwnProperty(singleGroup)) {
+
+                                                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleGroup]: returnInfo[singleGroup]});
+
+                                                            }
+
+                                                        }
+
+                                                        if (tempApplyKey.some(isUndefined)) {
+                                                            continue;
+                                                        } else {
+                                                            for (let x in tempApplyKey) {
+                                                                if (isUndefined(tempApplyKey[x])) {
+                                                                    continue;
+                                                                } else {
+                                                                    if (newTransformationApply.includes(tempApplyKey[x])) {
+                                                                        continue;
+                                                                    } else {
+                                                                        newTransformationApply.push(tempApplyKey[x])
+                                                                        //newTransformReturnInfo = null
+
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        groupedApplyColumns = newThis.applyObjects(newTransformationApply, returnInfo)
+
+                                                    } else {
+                                                        for (let x in transformationGroup) {
+
+                                                            singleGroup = transformationGroup[x].toString()
+
+                                                            if (returnInfo.hasOwnProperty(singleGroup)) {
+
+                                                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleGroup]: returnInfo[singleGroup]});
+
+                                                            }
+
+                                                        }
+                                                    }
+
+
+                                                } else {
+
+                                                    //translatedKey = newThis.vocabValidKey(singleColumnKey);
+                                                    /**if(translatedKey == false){
                                                     var code400InvalidQuery:InsightResponse = {code:400, body:{"error":"malformed key"}};
                                                     reject(code400InvalidQuery);
                                                 }   else if(translatedKey == true) {
                                                     continue;
                                                 }else{*/
 
-                                                if(isNullOrUndefined(returnInfo)){
-                                                    cachedReturnInfo = cachedReturnInfo;
-                                                }else if(returnInfo.hasOwnProperty(singleColumnKey)){
-                                                    /**if(Number(x) == 0){
+                                                    if (isNullOrUndefined(returnInfo)) {
+                                                        cachedReturnInfo = cachedReturnInfo;
+                                                    } else if (transformationExists == true) {
+                                                        cachedReturnInfo = Object.assign({}, cachedReturnInfo, returnInfo);
+
+                                                    }
+                                                    else if (returnInfo.hasOwnProperty(singleColumnKey)) {
+                                                        /**if(Number(x) == 0){
                                                             returnInfo = {};
                                                         }*/
 
 
-                                                    cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                                        cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
 
-                                                } else
-                                                /**if (isUndefined(returnInfo[singleColumnKey])) {
+
+                                                    } else
+                                                    /**if (isUndefined(returnInfo[singleColumnKey])) {
                                                         var code400InvalidQuery: InsightResponse = {
                                                             code: 400,
                                                             body: {"error": "malformed dataset with no key in result"}
@@ -1074,25 +1075,32 @@ export default class InsightFacade implements IInsightFacade {
                                                         return reject(code400InvalidQuery);
                                                     } else */{
 
-                                                    //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
-                                                    cachedReturnInfo = null;
-                                                    returnInfo = null;
+                                                        //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                                        cachedReturnInfo = null;
+                                                        returnInfo = null;
 
-                                                    //returnInfo = returnInfo
-                                                    //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
-                                                    //Log.info(returnInfo);
+                                                        //returnInfo = returnInfo
+                                                        //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                                        //Log.info(returnInfo);
 
-                                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
-                                                }
-                                                //}
-                                                /**if(result instanceof Array && result.length == 0){
+                                                        //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                                    }
+                                                    //}
+                                                    /**if(result instanceof Array && result.length == 0){
                                                 result = result[0]
                                             }*/
+
+
+                                                }
                                             }returnInfo = null;
                                             if(isNullOrUndefined(cachedReturnInfo)){
                                                 continue;
                                             }else {
                                                 finalReturn.push(cachedReturnInfo);
+                                                if(!isNullOrUndefined(groupedApplyColumns)) {
+                                                    groupedApplyArray.push(groupedApplyColumns);
+                                                    groupedApplyColumns = {};
+                                                }
                                             }
                                         }
 
@@ -1122,59 +1130,328 @@ export default class InsightFacade implements IInsightFacade {
                         }
                     } //console.timeEnd("go through datasetResultArray overall")
 
+                    if(transformationExists == true) {
+                        var applyString:any;
+
+                        var singleApply;
+                        var tokenPlusKey;
+                        var tempToken;
+                        var applyFinalKey;
+                        /**
+                         for(let x in transformationApply){
+
+                            applyString = Object.keys(transformationApply[x])[0]
+                            singleApply = transformationApply[x];
+                            tokenPlusKey = singleApply[applyString]
+                            tempToken = Object.keys(applyString)[0];
+                            applyFinalKey = tokenPlusKey[tempToken];
+
+                            if(returnInfo.hasOwnPropety(applyFinalKey)){
+                                cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[applyString]:returnInfo[applyFinalKey]})
+                            } else{
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "malformed transformation"}
+                                };
+                                return reject(code400InvalidQuery)
+                            }
+                        }*/
+                        //console.time("start Group")
+
+                        //console.time("hashing")
+                        //var finalHashed:any = new Map()
+                        //console.timeEnd("hashing")
+                        finalReturn = newThis.transformationQueryHelper(finalReturn, transformationGroup, newTransformationApply, applyExists, groupedApplyArray);
+                        //console.timeEnd("start Group")
+                        var singleReturnInfo;
+                        var singleAppliedInfo;
+                        var returnInfoKeys;
+                        var newCache;
+                        var tempFinal = finalReturn;
+                        finalReturn = []
+                        for(let x in tempFinal){
+                            try {
+                                singleReturnInfo = JSON.parse(x);
+                            }catch(err){
+                                Log.info("Return Info invalid JSON parsing")
+                                var code400InvalidQuery: InsightResponse = {
+                                    code: 400,
+                                    body: {"error": "order error"}
+                                };
+                                return reject(code400InvalidQuery);
+                            }
+                            if(groupedApplyArray.length > 0) {
+                                singleAppliedInfo = tempFinal[x]
+                                singleAppliedInfo = newThis.finishApply(singleAppliedInfo)
+                                singleReturnInfo = Object.assign(singleReturnInfo, singleAppliedInfo);
+                            }
+
+                            /**if(isNullOrUndefined(singleReturnInfo)){
+                                Log.info(JSON.stringify(x));
+                            }*/
+                            for (let x in columns) {
+
+                                singleColumnKey = columns[x].toString()
+
+                                if (singleReturnInfo.hasOwnProperty(singleColumnKey)) {
+
+                                    newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturnInfo[singleColumnKey]});
+
+
+
+                                } else {
+
+
+                                    //cachedReturnInfo = Object.assign({}, cachedReturnInfo, {[singleColumnKey]: returnInfo[singleColumnKey]});
+                                    //newCache = null;
+                                    singleReturnInfo = null;
+
+                                    //returnInfo = returnInfo
+                                    //returnInfo = Object.assign({}, returnInfo, atomicReturnInfo);
+                                    //Log.info(returnInfo);
+
+                                    //should look like {"courses_avg":95, "courses_instructor":"bleh"]
+                                }
+
+                            }
+                            finalReturn.push(newCache);
+                        }
+                    }
+
                     //console.time("sort through result")
                     if(!(isUndefined(order))) {
-                        if (columns.includes(order)) {
-                            /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
-                             validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
-                            if (order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
-                                || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
+                        if(finalReturn.length == 0){
+                            order = order;
+                        }else {
+                            //TODO: check for new ORDER
+                            if (typeof order == "string") {
+                                if (columns.includes(order)) {
+                                    /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
+                                     validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
+                                    if (typeof finalReturn[0][order] == "number" || order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
+                                        || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
 
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    return a[order] - b[order];
-                                });
+                                        finalReturn = finalReturn.sort(function (a: any, b: any) {
+                                            return a[order] - b[order];
+                                        });
 
-                            } else if (order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname")
-                                || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")) {
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    var nameA = a[order].toUpperCase(); // ignore upper and lowercase
-                                    var nameB = b[order].toUpperCase(); // ignore upper and lowercase
-                                    if (nameA < nameB) {
-                                        return -1;
-                                    } else if (nameA > nameB) {
-                                        return 1;
-                                    } else
-                                        return 0;
-                                });
+                                    } else if (typeof finalReturn[0][order] == "string" || order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
+                                        || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")
+                                        || order.endsWith("_uuid")) {
+                                        finalReturn = finalReturn.sort(function (a: any, b: any) {
+                                            var nameA = a[order].toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b[order].toUpperCase(); // ignore upper and lowercase
+                                            if (nameA < nameB) {
+                                                return -1;
+                                            } else if (nameA > nameB) {
+                                                return 1;
+                                            } else
+                                                return 0;
+                                        });
 
 
-                            } else if (order.endsWith("_uuid")) {
-                                finalReturn = finalReturn.sort(function (a, b) {
-                                    var numA = Number(a[order]); // ignore upper and lowercase
-                                    var numB = Number(b[order]); // ignore upper and lowercase
-                                    /**if (nameA < nameB) {
+                                    } /**else if (order.endsWith("_uuid")) {
+                                    finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                        var numA = Number(a[order]); // ignore upper and lowercase
+                                        var numB = Number(b[order]); // ignore upper and lowercase
+                                        if (nameA < nameB) {
                                     return -1;
                                 } else if (nameA > nameB) {
                                     return 1;
                                 } else
-                                     return 0;*/
-                                    return numA - numB;
+                                         return 0;
+                                        return numA - numB;
+                                    });
+
+
+                                }*/ else {
+                                        var code400InvalidQuery: InsightResponse = {
+                                            code: 400,
+                                            body: {"error": "order error"}
+                                        };
+                                        return reject(code400InvalidQuery);
+                                    }
+                                } else {
+                                    var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "order not in column"}
+                                    };
+                                    return reject(code400InvalidQuery);
+                                }
+                                //console.timeEnd("sort through result")
+                            } else {
+                                //console.time("sort through new order")
+                                var orderKeys = Object.keys(order);
+                                var dir: any = order[orderKeys[0]];
+                                var keysArray: any = order[orderKeys[1]];
+                                var tempSortResult;
+
+                                for (let x in keysArray) {
+                                    if (columns.includes(keysArray[x])) {
+                                        continue;
+                                    } else {
+                                        var code400InvalidQuery: InsightResponse = {
+                                            code: 400,
+                                            body: {"error": "order not in column"}
+                                        };
+                                        return reject(code400InvalidQuery);
+                                    }
+                                }
+                                /**if (keysArray[0].endsWith("_uuid")) {
+                                var tempKeysArray = keysArray.slice();
+                                finalReturn = finalReturn.sort(function (a:any, b:any) {
+                                    var numA = Number(a[keysArray[0]]); // ignore upper and lowercase
+                                    var numB = Number(b[keysArray[0]]); // ignore upper and lowercase
+
+                                    if(dir == "DOWN") {
+                                        //tempSortResult = numB - numA;
+                                        tempSortResult = numB - numA
+
+                                        while(tempSortResult == 0){
+                                            for(let x in keysArray){
+                                                numA = Number(a[keysArray[x]])
+                                                numB = Number(b[keysArray[x]])
+                                                tempSortResult = numB - numA;
+                                            }
+                                        }
+                                        return tempSortResult
+                                        if(tempSortResult == 0){
+
+                                            tempKeysArray.shift()
+                                            tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
+                                            return tempSortResult
+                                        }else return tempSortResult
+                                    }else if(dir == "UP"){
+                                        tempSortResult = numA - numB;
+
+                                        while(tempSortResult == 0){
+                                            for(let x in keysArray){
+                                                numA = Number(a[keysArray[x]])
+                                                numB = Number(b[keysArray[x]])
+                                                tempSortResult = numA - numB;
+                                            }
+                                        }
+                                        return tempSortResult
+                                        if(tempSortResult == 0){
+                                            tempKeysArray.shift()
+                                            tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
+                                            return tempSortResult
+                                        }else return tempSortResult;
+                                    }
                                 });
 
+                                //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
+                            }*/
+                                if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
+                                    || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats")) {
 
-                            } else {
-                                var code400InvalidQuery: InsightResponse = {code: 400, body: {"error": "order error"}};
-                                reject(code400InvalidQuery);
+                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
+                                        if (dir == "DOWN") {
+                                            tempSortResult = b[keysArray[0]] - a[keysArray[0]];
+
+                                            let x = 0;
+                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                                                tempSortResult = b[keysArray[x]] - a[keysArray[x]];
+                                                x++;
+                                            }
+
+                                            return tempSortResult
+
+                                            /**if(tempSortResult == 0){
+                                        tempKeysArray = keysArray.shift()
+                                        tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
+                                        return tempSortResult
+                                    }else return tempSortResult*/
+                                        } else if (dir == "UP") {
+                                            tempSortResult = a[keysArray[0]] - b[keysArray[0]];
+
+                                            let x = 0;
+                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                                                tempSortResult = a[keysArray[x]] - b[keysArray[x]];
+                                                x++;
+                                            }
+                                            return tempSortResult
+
+                                            /**if(tempSortResult == 0){
+                                        tempKeysArray = keysArray.shift()
+                                        tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
+                                        return tempSortResult
+                                    }else return tempSortResult;*/
+                                        }
+                                    });
+
+                                } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
+                                    || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")
+                                    || keysArray[0].endsWith("_uuid")) {
+                                    // var x = 0;
+                                    var tempKeysArray = keysArray.slice();
+                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
+
+                                        if (dir == "DOWN") {
+
+                                            //Log.info(JSON.stringify(a));
+                                            //Log.info(JSON.stringify(keysArray[0]))
+
+                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            if (nameB < nameA) {
+                                                return -1;
+                                            } else if (nameB > nameA) {
+                                                return 1;
+                                            } else {
+                                                let x = 0;
+                                                while (nameB == nameA && Number(x) < keysArray.length) {
+                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    x++
+                                                }
+                                                if (nameB < nameA) {
+                                                    return -1;
+                                                } else {
+                                                    return 1;
+                                                }
+                                                //return 0
+                                            }
+                                        } else if (dir == "UP") {
+                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                                            if (nameA < nameB) {
+                                                return -1;
+                                            } else if (nameA > nameB) {
+                                                return 1;
+                                            } else {
+                                                let x = 0;
+                                                while (nameB == nameA && Number(x) < keysArray.length) {
+                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                                                    x++
+                                                }
+                                                if (nameB > nameA) {
+                                                    return -1;
+                                                } else {
+                                                    return 1;
+                                                }
+                                                //return 0
+                                            }
+
+
+                                        }
+                                    });
+
+
+                                }
+                                else {
+                                    var code400InvalidQuery: InsightResponse = {
+                                        code: 400,
+                                        body: {"error": "order error"}
+                                    };
+                                    return reject(code400InvalidQuery);
+                                }
+
+                                //console.timeEnd("sort through new order")
                             }
-                        } else {
-                            var code400InvalidQuery: InsightResponse = {
-                                code: 400,
-                                body: {"error": "order not in column"}
-                            };
-                            return reject(code400InvalidQuery);
                         }
-                        //console.timeEnd("sort through result")
-                    }
+                    }//console.timeEnd("sort through result")
 
                     // TODO: then enclose it with {render:"TABLE", result:[{returnInfo}, {data4}]}
 
@@ -1208,8 +1485,11 @@ export default class InsightFacade implements IInsightFacade {
                     catch(err){
                         if (err.code === 'ENOENT') {
                             unloadedDatasets.push(oneDataset);
-                        } else {
-                            throw err;
+                        } else if(err.code === 'EISDIR'){
+                            unloadedDatasets.push(oneDataset)
+
+                        } else{
+                            unloadedDatasets.push(oneDataset)
                         }
                     }
                 }
@@ -1228,6 +1508,411 @@ export default class InsightFacade implements IInsightFacade {
             }
         });
 
+    }
+
+    //perform query
+
+
+    //Helper function in main queryRequest()
+
+    finishApply(returnInfo:any):any{
+        var cachedInfo;
+        var singleInfo:any;
+        var infoKeys;
+        var valueArray;
+        var newReturnInfo:any = {}
+        var sum = returnInfo[0]
+        var size = returnInfo["has AVG"]
+        var average = sum/size
+
+        for(let x in returnInfo){
+            //singleInfo= {[x]:returnInfo[x]}
+            singleInfo = x
+            infoKeys = Object.keys(singleInfo)[0]
+            valueArray = returnInfo[x]
+            if(valueArray instanceof Array){
+                if(x.endsWith("MAX")){
+                    newReturnInfo[x.replace("MAX", "")] = this.returnMax(valueArray)
+                }else if(x.endsWith("MIN")){
+                    newReturnInfo[x.replace("MIN", "")] = this.returnMin(valueArray)
+                }else if(x.endsWith("SUM")){
+                    newReturnInfo[x.replace("SUM", "")] = this.returnSum(valueArray)
+                }else if(x.endsWith("AVG")){
+                    newReturnInfo[x.replace("AVG", "")] = this.returnAVG(valueArray)
+                }else if(x.endsWith("COUNT")){
+                    newReturnInfo[x.replace("COUNT", "")] = this.returnCOUNT(valueArray)
+                }
+            }
+
+        } return newReturnInfo;
+
+    }
+
+    transformationQueryHelper(finalReturnInfo:any, transformationGroup:any, transformationApply:any, applyExists:any, groupedApplyArray:any ):any{
+        var transformReturnInfo:any;
+        var newTransformReturnInfo:any;
+        let groupObjectArray:any = {};
+        var newValue = '';
+        var groupedApplyColumns;
+        var uuidIndex;
+        var matchIndex;
+        var singleGroup;
+        var newTransformGroup = transformationGroup.slice();
+        var concatenatedKey:any;
+        var mapElement:any;
+
+        var applyString;
+        var applyKey;
+
+
+        for (let x in finalReturnInfo) {
+            try {
+                transformReturnInfo = finalReturnInfo[x];
+                newTransformReturnInfo = null;
+
+                //console.timeEnd("new transformation")
+
+                concatenatedKey = JSON.stringify(transformReturnInfo);
+
+                //console.time("new Apply")
+                if (groupedApplyArray.length == 0) {
+                    groupedApplyColumns = ""
+                }
+                groupedApplyColumns = groupedApplyArray[x];
+
+                //console.time("new Apply")
+                if (Number(x) == 0) {
+                    //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+
+                    groupObjectArray = Object.assign({}, groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                } else {
+                    if (transformationGroup.includes("courses_uuid")) {
+                        uuidIndex = transformationGroup.indexOf("courses_uuid")
+                        newTransformGroup.splice(uuidIndex, 1);
+
+                    }
+
+
+                    if (newTransformGroup.length == 0) {
+                        //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                    } else {
+
+
+                        /**
+                         var singleGroupedElement:any;
+                         for(let x in groupObjectArray){
+                            singleGroupedElement = groupObjectArray[x];
+                            if(newTransformGroup.every(function (singleGroup: any) {
+                                newValue = transformReturnInfo[singleGroup];
+                                return newValue == singleGroupedElement[singleGroup]
+
+                            })){
+                                matchIndex = Number(x);
+                            }
+                        }*/
+
+                        /**if(groupObjectArray.length == 15){
+                            Log.info("conticnue")
+                        }*/
+
+                        /**
+                         matchIndex = groupObjectArray.findIndex(function (singleGroupedElement: any) {
+                        return newTransformGroup.every(function (singleGroup: any) {
+                            newValue = transformReturnInfo[singleGroup];
+                            return newValue == singleGroupedElement[singleGroup]
+
+                            })
+                        });*/
+                        //console.time("concat")
+                        /**for(let x in newTransformGroup){
+                            newValue = newValue.concat(JSON.stringify(newTransformGroup[x]));
+                        }*/
+                        //console.timeEnd("concat")
+                        //console.time("group check")
+
+                        if (typeof (groupObjectArray[concatenatedKey]) != "undefined") {
+                            //console.timeEnd("group check")
+                            //console.time("group update")
+                            groupObjectArray[concatenatedKey] = this.groupQueryHelper(groupObjectArray[concatenatedKey], groupedApplyColumns, transformationApply)
+                            //console.timeEnd("group update")
+                        } else {
+                            //console.time("add group")
+                            groupObjectArray = Object.assign(groupObjectArray, {[concatenatedKey]: groupedApplyColumns});
+                            //console.timeEnd("add group")
+                        }
+
+                        /**if(newTransformReturnInfo == newValue){
+                        //transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        console.time("group query")
+                        groupObjectArray[newValue] = this.groupQueryHelper(groupObjectArray[newValue], groupedApplyColumns, transformationApply)
+                        console.timeEnd("group query")
+                        //groupObjectArray.push(transformReturnInfo);
+                    }else{
+                        transformReturnInfo = {[concatenatedKey]:groupedApplyColumns}
+                        groupObjectArray.push(transformReturnInfo);
+                    }*/
+                    }
+                }
+
+
+                /**
+                 if (matchIndex >= 0) {
+                    transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                    groupObjectArray[matchIndex] = this.groupQueryHelper(groupObjectArray[matchIndex], transformReturnInfo, transformationApply)
+
+                } else if(matchIndex == -1){
+                    transformReturnInfo = Object.assign({}, transformReturnInfo, groupedApplyColumns)
+                    groupObjectArray.push(transformReturnInfo);
+                }else{
+                    groupObjectArray = groupObjectArray
+                }*/
+
+            }
+            catch(err){
+                Log.info(JSON.stringify(x))
+            }
+        }
+
+
+        return groupObjectArray;
+    }
+
+    groupQueryHelper(returnInfo:any, groupedApplyArray:any, transformationApply:any){
+
+        var innerArray = new Array();
+        var tempGroupedArray = new Array()
+        //var resultArray
+
+
+        for(let x in groupedApplyArray){
+            innerArray = returnInfo[x]
+            tempGroupedArray = groupedApplyArray[x]
+            if(typeof innerArray != "undefined"){
+
+                returnInfo[x] = innerArray.concat(tempGroupedArray);
+                groupedApplyArray[x] = tempGroupedArray;
+                //returnInfo[x] = innerArray.push.apply(innerArray, groupedApplyArray[x]);
+                //innerArray = [];
+            }else{
+                x = x;
+            }
+        }return returnInfo;
+
+
+        /**
+        for(let x in transformationApply){
+            singleApply = transformationApply[x]
+            applyKey = Object.keys(singleApply)[0]
+            applyToken = Object.keys(singleApply[applyKey])[0]
+            console.time("search group")
+            if(groupedApplyArray[applyKey][0] == returnInfo[applyKey][0]){
+                returnInfo[applyKey].shift()
+            }
+            console.timeEnd("search group")
+
+            console.time("update group")
+            groupedApplyArray[applyKey] = groupedApplyArray[applyKey].concat(returnInfo[applyKey])
+            console.timeEnd("update group") */
+
+            /**if(groupReturnInfo[applyKey][0] == returnInfo[applyKey][0]){
+                returnInfo[applyKey].shift();
+            }
+
+            groupReturnInfo[applyKey] = groupReturnInfo[applyKey].concat(returnInfo[applyKey])*/
+
+            /**if(applyToken == "MAX"){
+                groupReturnInfo[applyKey] = this.returnMax(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "MIN"){
+                groupReturnInfo[applyKey] = this.returnMin(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "SUM"){
+                groupReturnInfo[applyKey] = this.returnSum(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "COUNT"){
+                groupReturnInfo[applyKey] = this.returnCOUNT(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }else if(applyToken == "AVG"){
+                groupReturnInfo = this.returnAVG(groupReturnInfo[applyKey], returnInfo[applyKey])
+            }*/
+
+        //}return groupedApplyArray;
+    }
+
+    returnMax(valueArray:any):any{
+        //valueArray.shift()
+
+        var max = valueArray.reduce(function(a:any, b:any) {
+            return Math.max(a, b);
+        });
+        return max
+    }
+
+    returnMin(valueArray:any):any{
+        //valueArray.shift()
+
+        var min = valueArray.reduce(function(a:any, b:any) {
+            return Math.min(a, b);
+        });
+        return min
+    }
+
+    returnSum(valueArray:any):any{
+        //valueArray.shift()
+        var sum = valueArray.reduce(function (a:any, b:any) {
+            return a + b;
+        });
+        return sum
+    }
+
+    returnAVG(valueArray:any):any{
+
+        //valueArray.shift();
+        var groupedSum = 0;
+        var averageCounter;
+        var oneNumber;
+        for(let x in valueArray){
+            if(Number(x) == 0){
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum = oneNumber;
+            }else {
+                oneNumber = valueArray[x] * 10;
+                oneNumber = Number(oneNumber.toFixed(0));
+                groupedSum += oneNumber;
+            }
+        }
+        groupedSum = groupedSum/(Number(valueArray.length));
+        groupedSum = groupedSum/10;
+        groupedSum = Number(groupedSum.toFixed(2));
+        return groupedSum
+    }
+
+    returnCOUNT(valueArray:any):any{
+        //valueArray.shift();
+        valueArray = valueArray.filter (function (value:any, index:any, array:any) {
+            return array.indexOf (value) == index;
+        });
+        return valueArray.length;
+    }
+
+
+    applyObjects(transformationApply:any, returnInfo:any):any{
+        var applyString;
+        var singleApply;
+        var tokenPlusKey;
+        var tempToken;
+        var applyFinalKey;
+        var returnApply = {};
+        for(let x in transformationApply){
+
+            applyString = Object.keys(transformationApply[x])[0]
+            singleApply = transformationApply[x];
+            tokenPlusKey = singleApply[applyString]
+            tempToken = Object.keys(tokenPlusKey)[0];
+            applyFinalKey = tokenPlusKey[tempToken];
+
+            /**
+             if(tempToken == "AVG"){
+                returnApply = Object.assign({}, returnApply, {[applyString]:[returnInfo[applyFinalKey], 1]})
+            }*/
+
+            //returnApply.set(applyString.concat(tempToken), [returnInfo[applyFinalKey]]);
+            returnApply = Object.assign({}, returnApply, {[applyString.concat(tempToken)]:[returnInfo[applyFinalKey]]})
+        } return returnApply; /**else{
+                var code400InvalidQuery: InsightResponse = {
+                    code: 400,
+                    body: {"error": "malformed transformation"}
+                };
+                return reject(code400InvalidQuery)
+            }*/
+    }
+
+
+
+
+    applyHasColumn(Apply:any, columnsKey:any):any{
+        return Apply.filter(function(applyKey:any){
+            var tempApplyString = Object.keys(applyKey)[0]
+            if(columnsKey == tempApplyString){
+                return applyKey;
+            }
+        })
+    }
+
+    breakingTies(a:any, b:any, sortArray:any, direction:string):any{
+        var tempSortResult;
+
+        for(let x in sortArray){
+            var tempsortArray;
+            if (sortArray[x].endsWith("_avg") || sortArray[x].endsWith("_pass") || sortArray[x].endsWith("_fail") || sortArray[x].endsWith("_audit") || sortArray[x].endsWith("_year")
+                || sortArray[x].endsWith("_lat") || sortArray[x].endsWith("_lon") || sortArray[x].endsWith("_seats")) {
+                if (direction == "UP") {
+                    tempSortResult = a[sortArray[x]] - b[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
+                else if (direction == "DOWN") {
+                    tempSortResult = b[sortArray[x]] - a[sortArray[x]];
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction)
+                    } else return tempSortResult
+                }
+            }
+            else if (sortArray[x].endsWith("_dept") || sortArray[x].endsWith("_id") || sortArray[x].endsWith("_instructor") || sortArray[x].endsWith("_fullname")
+                || sortArray[x].endsWith("_shortname") || sortArray[x].endsWith("_number") || sortArray[x].endsWith("_name") || sortArray[x].endsWith("_address")
+                || sortArray[x].endsWith("_type") || sortArray[x].endsWith("_href")) {
+                if(direction == "UP") {
+                    var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    if (nameA < nameB) {
+                        return -1;
+                    } else if (nameA > nameB) {
+                        return 1;
+                    } else {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a[sortArray[x]], b[sortArray[x]], tempsortArray, direction);
+                    }
+                }else if(direction == "DOWN"){
+                    var nameA = a[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    var nameB = b[sortArray[x]].toUpperCase(); // ignore upper and lowercase
+                    if (nameA > nameB) {
+                        return -1;
+                    } else if (nameA < nameB) {
+                        return 1;
+                    } else {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b[sortArray[x]], a[sortArray[x]], tempsortArray, direction);
+                    }
+                }
+
+
+
+            } else if (sortArray[x].endsWith("_uuid")) {
+                if(direction == "UP") {
+                    var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                    var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                    tempSortResult = numA - numB;
+
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(a, b, tempsortArray, direction)
+                    } else return tempSortResult;
+                }else if(direction == "DOWN"){
+                    var numA = Number(a[sortArray[x]]); // ignore upper and lowercase
+                    var numB = Number(b[sortArray[x]]); // ignore upper and lowercase
+                    tempSortResult = numB - numA;
+
+                    if (tempSortResult == 0) {
+                        tempsortArray = sortArray.shift()
+                        return this.breakingTies(b, a, tempsortArray, direction)
+                    } else return tempSortResult;
+                }
+
+
+
+            }
+        }
     }
 
     //perform query
@@ -1364,6 +2049,9 @@ export default class InsightFacade implements IInsightFacade {
             var newResult;
             var tempReturnInfo;
             var tempReturnInfo2;
+            var accumulatedReturn = {};
+            var returnInfoKeys:any[] = []
+            var returnInfo2Keys:any[] = []
 
             for(let x in resultOfWhere){
 
@@ -1372,25 +2060,45 @@ export default class InsightFacade implements IInsightFacade {
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
-                    if(resultOfWhere.length == 1){
+                    //console.time("start object keys")
+                    if(!isNullOrUndefined(tempReturnInfo)) {
+                        accumulatedReturn = tempReturnInfo
+                    }
+                    //console.timeEnd("start object keys")
+
+                    /**if(resultOfWhere.length == 1){
                         returnInfo = tempReturnInfo
-                    }else{tempReturnInfo = tempReturnInfo}
+                    }else{
+                        tempReturnInfo = tempReturnInfo
+                    }*/
                 }else {
                     tempReturnInfo = this.filterQueryRequest(returnInfo, newResult, newKeys);
                     newFilter = resultOfWhere[x];
                     newKeys = Object.keys(newFilter);
                     newResult = newFilter[newKeys[0]];
                     tempReturnInfo2 = this.filterQueryRequest(returnInfo, newResult, newKeys);
-                    if(tempReturnInfo2.length == 0){
-                        returnInfo = tempReturnInfo;
-                    }else if(tempReturnInfo.length == 0){
-                        returnInfo = tempReturnInfo2;
+                    returnInfoKeys = Object.keys(tempReturnInfo);
+                    returnInfo2Keys = Object.keys(tempReturnInfo2);
+                    if(tempReturnInfo2.length == 0 && returnInfoKeys.length > 0){
+                        accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo);
+                    }else if(tempReturnInfo.length == 0 && returnInfo2Keys.length > 0){
+
+                        accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2);
+                    }else if(tempReturnInfo.length == 0 && tempReturnInfo2.length == 0){
+                        continue;
                     }else {
-                        returnInfo = this.mergeDeDuplicate(tempReturnInfo2, tempReturnInfo);
+                        if(Object.keys(accumulatedReturn).length == 0){
+                            accumulatedReturn = tempReturnInfo
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2)
+                        }else {
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo);
+                            accumulatedReturn = this.mergeDeDuplicate(accumulatedReturn, tempReturnInfo2)
+                        }
                     }
 
                 }
             }//console.timeEnd("Go through OR")
+            returnInfo = accumulatedReturn
             return returnInfo
 
         }else if(keys[0] == "NOT"){
@@ -1436,13 +2144,22 @@ export default class InsightFacade implements IInsightFacade {
 
     mergeDeDuplicate(theWaitingKeyValue:any, theIteratedKeyValue:any):any{
         var theIteratedKeyArray = Object.keys(theIteratedKeyValue)
+        if(Object.keys(theWaitingKeyValue).length == 0){
+            theWaitingKeyValue = theIteratedKeyValue
+            return theWaitingKeyValue;
+        }
         for(let x in theIteratedKeyArray){
             var theIteratedKey = theIteratedKeyArray[x];
             var theIteratedValue = theIteratedKeyValue[theIteratedKey];
             if(theWaitingKeyValue.hasOwnProperty(theIteratedKey) && theWaitingKeyValue[theIteratedKey] == theIteratedValue){
                 //Log.info("merging duplicates"+theWaitingKeyValue.toString()+theIteratedKeyValue.toString())
             } else {
-                theWaitingKeyValue.assign({}, {[theIteratedKey]:theIteratedValue});
+                try {
+                    theWaitingKeyValue.assign(theWaitingKeyValue, {[theIteratedKey]: theIteratedValue});
+                }catch(err){
+
+                    Log.info(JSON.stringify(theWaitingKeyValue));
+                }
             }
 
         } return theWaitingKeyValue
@@ -1571,6 +2288,13 @@ export default class InsightFacade implements IInsightFacade {
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
+        try{
+            var temp = JSON.stringify(query);
+            JSON.parse(temp);
+        }catch(err){
+            return false
+        }
+
         if(keyArray[0] == "WHERE" && keyArray[1] == "OPTIONS"){ //checks if outermost keys are WHERE and OPTIONS
 
             Where = keyArray[0]; //gets "WHERE"
@@ -1593,9 +2317,13 @@ export default class InsightFacade implements IInsightFacade {
                 if((columnsEtcKey.length == 3 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "ORDER" && columnsEtcKey[2] == "FORM") ||
                     (columnsEtcKey.length == 2 && columnsEtcKey[0] == "COLUMNS" && columnsEtcKey[1] == "FORM")){
                     columnsValidKeyArray = optionsValue[columnsEtcKey[0]] //returns an a possible array of valid keys in COLUMNS
+                    if(columnsValidKeyArray.length == 0){
+                        return false
+                    }
                     for(let x in columnsValidKeyArray){
                         var yesOrNo = Object.keys(isOneDataset)[0];
                         var dataSet = isOneDataset[yesOrNo];
+
                         if(typeof columnsValidKeyArray[x] == "string" && (columnsValidKeyArray[x] == "courses_dept" || columnsValidKeyArray[x] == "courses_id"
                             || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                             || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
@@ -1685,27 +2413,33 @@ export default class InsightFacade implements IInsightFacade {
                         dataSet = isOneDataset[yesOrNo];
                         orderValidKey = optionsValue[columnsEtcKey[1]];//gets ORDER key
                         if(orderValidKey !== null && typeof orderValidKey === "object"){
-
-                            if(orderValidKey.hasOwnProperty("dir") && (orderValidKey.hasOwnProperty("keys")) && (typeof orderValidKey["dir"] == "string")
+                            var d3OrderObject = Object.keys(orderValidKey);
+                            if(d3OrderObject.length == 2 && d3OrderObject[0] == "dir" && d3OrderObject[1] == "keys" && (typeof orderValidKey["dir"] == "string")
                             && orderValidKey["keys"] instanceof Array){
                                 direction = orderValidKey["dir"]
                                 keyArray = orderValidKey["keys"]
-                                if(direction == "UP" || direction == "DOWN"){
-
-                                   if(keyArray.every(function (key:any):any {
-                                        return columnsValidKeyArray.includes(key);
+                                if(keyArray.length == 0 || !keyArray.every(function (singleKey) {
+                                        return columnsValidKeyArray.includes(singleKey);
                                     })){
-                                       if(transformationExists == true){
-                                           isOneDataset = isOneDataset;
-                                       }else {
-                                           Table = optionsValue[columnsEtcKey[2]];
-                                           if (Table == "TABLE") { //if value of FORM is TABLE
-                                               return isOneDataset
-                                           } else return false;
-                                       }
-                                   }else return false;
+                                    return false
+                                }else {
+                                    if (direction == "UP" || direction == "DOWN") {
 
-                                }else return false;
+                                        if (keyArray.every(function (key: any): any {
+                                                return columnsValidKeyArray.includes(key);
+                                            })) {
+                                            if (transformationExists == true) {
+                                                isOneDataset = isOneDataset;
+                                            } else {
+                                                Table = optionsValue[columnsEtcKey[2]];
+                                                if (Table == "TABLE") { //if value of FORM is TABLE
+                                                    return isOneDataset
+                                                } else return false;
+                                            }
+                                        } else return false;
+
+                                    } else return false;
+                                }
                             }else return false;
                         }else
                         if (columnsValidKeyArray.includes(orderValidKey)) {
@@ -1824,7 +2558,7 @@ export default class InsightFacade implements IInsightFacade {
                                 }else return isOneDataset;
 
                             } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && transformationExists == true){
-                                orderValidKey = orderValidKey;
+                                orderValidKey = orderValidKey
                             }else return false
                         } else return false
                     }else if(transformationExists == true){
@@ -1880,9 +2614,27 @@ export default class InsightFacade implements IInsightFacade {
                                     var tokenPlusKey;
                                     var applyToken;
                                     var applylittleKey;
+                                    var applyStringKeyArray;
+
+                                    let duplicate = new Set();
+
+                                    var hasDuplicates = apply.some(function(currentObject:any) {
+                                        return duplicate.size === duplicate.add(Object.keys(currentObject)[0]).size;
+                                    });
+
+                                    if(hasDuplicates){
+                                        return false;
+                                    }
+
                                    if(apply.every(function (applyKey:any) {
-                                      applyString = Object.keys(applyKey)[0]
+                                      applyStringKeyArray = Object.keys(applyKey);
+                                      applyString = applyStringKeyArray[0]
                                       tokenPlusKey = applyKey[applyString];
+
+
+                                      if(applyStringKeyArray.length > 1){
+                                          return false;
+                                      }
                                       applyToken = Object.keys(tokenPlusKey)[0];
                                       applylittleKey = tokenPlusKey[applyToken];
 

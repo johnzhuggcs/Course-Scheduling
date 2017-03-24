@@ -267,7 +267,50 @@ describe("D3TimeAnalysis", function () {
             expect(err.body).to.deep.equal({"error":"malformed transformation"})
         })
 
+    });
 
+    it( "200 BIG RESULT new ORDER with TRANSFORMATION", function () {
+        var queryTest:any =     {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_avg",
+                    "courses_id",
+                    "courses_instructor",
+                    "courses_audit",
+                    "stuffytest"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["courses_avg", "courses_id", "courses_instructor", "courses_audit", "stuffytest"]
+                },
+                "FORM": "TABLE"
+            }, "TRANSFORMATIONS": {
+                "GROUP": ["courses_avg", "courses_id", "courses_instructor", "courses_audit", "courses_pass", "courses_fail"],
+                "APPLY": [{
+                    "maxSeats": {
+                        "MAX": "courses_avg"
+                    }
+                },{
+                    "stuffytest": {
+                        "COUNT": "courses_uuid"
+                    }
+                }]
+            }
+        }
+
+        var result = fs.readFileSync("OverloadSortingTest", "utf8")
+        //console.time("start Test")
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            //Log.info(JSON.parse(result)["result"].length)
+            expect(value.code).to.equal(200);
+            //console.timeEnd("start Test")
+            //expect(JSON.stringify(value.body)).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["test","other"]})
+        })
 
     });
 

@@ -55,7 +55,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("checking out NO FILTER complex query provided in deliverable", function () {
+    it.only("checking out NO FILTER complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
             },
@@ -169,39 +169,39 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it( "200 transform", function () {
-        var queryTest:any =    {
-            "WHERE": {
-                "AND": [{
-                    "IS": {
-                        "rooms_furniture": "*Tables*"
-                    }
-                }, {
-                    "GT": {
-                        "rooms_seats": 300
-                    }
-                }]
-            },
-            "OPTIONS": {
-                "COLUMNS": [
-                    "rooms_shortname",
-                    "anything"
-                ],
-                "ORDER": {
-                    "dir": "DOWN",
-                    "keys": ["anything"]
+    it.only( "200 transform", function () {
+            var queryTest:any =    {
+                "WHERE": {
+                    "AND": [{
+                        "IS": {
+                            "rooms_furniture": "*Tables*"
+                        }
+                    }, {
+                        "GT": {
+                            "rooms_seats": 300
+                        }
+                    }]
                 },
-                "FORM": "TABLE"
-            },
-            "TRANSFORMATIONS": {
-                "GROUP": ["rooms_shortname"],
-                "APPLY": [{
-                    "anything": {
-                        "MAX": "rooms_seats"
-                    }
-                }]
+                "OPTIONS": {
+                    "COLUMNS": [
+                        "rooms_shortname",
+                        "anything"
+                    ],
+                    "ORDER": {
+                        "dir": "DOWN",
+                        "keys": ["anything"]
+                    },
+                    "FORM": "TABLE"
+                },
+                "TRANSFORMATIONS": {
+                    "GROUP": ["rooms_shortname"],
+                    "APPLY": [{
+                        "anything": {
+                            "MAX": "rooms_seats"
+                        }
+                    }]
+                }
             }
-        }
         sanityCheck(queryTest);
 
         var result = {"render":"TABLE","result":[{"rooms_shortname":"OSBO","anything":442},{"rooms_shortname":"HEBB","anything":375},{"rooms_shortname":"LSC","anything":350}]}
@@ -219,7 +219,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 multiple transform", function () {
+    it.only( "200 multiple transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -270,11 +270,20 @@ describe("D3QueryTestSpec", function () {
         var result =
             {"render":"TABLE","result":[{"rooms_shortname":"OSBO","anything":442,"something":1,"many things":442},{"rooms_shortname":"HEBB","anything":375,"something":1,"many things":375},{"rooms_shortname":"LSC","anything":350,"something":2,"many things":825},{"rooms_shortname":"SRC","anything":299,"something":1,"many things":897},{"rooms_shortname":"ANGU","anything":260,"something":1,"many things":260},{"rooms_shortname":"PHRM","anything":236,"something":2,"many things":403},{"rooms_shortname":"LSK","anything":205,"something":2,"many things":388},{"rooms_shortname":"CHBE","anything":200,"something":1,"many things":200},{"rooms_shortname":"SWNG","anything":190,"something":3,"many things":755},{"rooms_shortname":"DMP","anything":160,"something":2,"many things":280},{"rooms_shortname":"FRDM","anything":160,"something":1,"many things":160},{"rooms_shortname":"IBLC","anything":154,"something":2,"many things":266},{"rooms_shortname":"MCLD","anything":136,"something":2,"many things":259},{"rooms_shortname":"WOOD","anything":120,"something":1,"many things":360},{"rooms_shortname":"BUCH","anything":108,"something":1,"many things":216}]}
 
-        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+        return insightFacade.performQuery(queryTest).then(function (value: any){
             expect(value.code).to.equal(200);
             Log.info("actual: "+JSON.stringify(value.body))
             Log.info("expected: "+JSON.stringify(result))
-            expect(value.body).to.deep.equal(result)
+            var resultKey:any = value.body["result"];
+            var expectedResult:any = result["result"];
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).includes(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
         }).catch(function (err) {
             Log.test('Error: ' + err);
             expect(err.code).to.equal(400);
@@ -285,7 +294,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 dataset in apply", function () {
+    it.only( "200 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -335,7 +344,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 simple query deliverable", function () {
+    it.only( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -388,7 +397,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it( "200 simple query no ORDER with TRANSFORMATION", function () {
+    it.only( "200 simple query no ORDER with TRANSFORMATION", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -428,7 +437,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: any =  {
             "WHERE": {
@@ -510,6 +519,178 @@ describe("D3QueryTestSpec", function () {
 
     });
 
+    it.only( "200 old ORDER with TRANSFORMATION", function () {
+        var queryTest:any =    {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_furniture"
+                ],
+                "ORDER": "rooms_furniture",
+                "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP": ["rooms_furniture"],
+                "APPLY": []
+            }
+        }
+
+        var result =
+            {"render":"TABLE","result":[{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs"},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs"},{"rooms_furniture":"Classroom-Fixed Tables/Moveable Chairs"},{"rooms_furniture":"Classroom-Fixed Tablets"},{"rooms_furniture":"Classroom-Hybrid Furniture"},{"rooms_furniture":"Classroom-Learn Lab"},{"rooms_furniture":"Classroom-Movable Tables & Chairs"},{"rooms_furniture":"Classroom-Movable Tablets"},{"rooms_furniture":"Classroom-Moveable Tables & Chairs"},{"rooms_furniture":"Classroom-Moveable Tablets"}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["test","other"]})
+        })
+
+    });
+
+
+    it.only( "200 new ORDER with TRANSFORMATION ROOM courses", function () {
+        var queryTest:any =     {
+            "WHERE": {},
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_furniture",
+                    "rooms_shortname",
+                    "stuffytest"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_furniture", "rooms_shortname"]
+                },
+                "FORM": "TABLE"
+            }, "TRANSFORMATIONS": {
+                "GROUP": ["rooms_furniture", "rooms_shortname", "rooms_seats", "rooms_href"],
+                "APPLY": [{
+                    "maxSeats": {
+                        "MAX": "rooms_seats"
+                    }
+                },{
+                    "stuffytest": {
+                        "COUNT": "rooms_seats"
+                    }
+                }]
+            }
+        }
+
+        var result =
+            {"render":"TABLE","result":[{"rooms_furniture":"Classroom-Moveable Tablets","rooms_shortname":"ANSO","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"ANSO","stuffytest":1},{"rooms_furniture":"Classroom-Moveable Tables & Chairs","rooms_shortname":"ANSO","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"OSBO","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MGYM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MGYM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"UCLL","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"UCLL","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SRC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SRC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SRC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SOWK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"OSBO","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"OSBO","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"LSK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"LSK","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IONA","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HEBB","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HEBB","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"HEBB","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FORW","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FORW","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"EOSM","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"DMP","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"DMP","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"CHBE","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BRKX","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BIOL","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"BIOL","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"AUDX","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"AUDX","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANSO","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ALRD","stuffytest":1},{"rooms_furniture":"Classroom-Movable Tables & Chairs","rooms_shortname":"ALRD","stuffytest":1},{"rooms_furniture":"Classroom-Learn Lab","rooms_shortname":"UCLL","stuffytest":1},{"rooms_furniture":"Classroom-Learn Lab","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Learn Lab","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Hybrid Furniture","rooms_shortname":"ESB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"WESB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"WESB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"SCRF","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"MATX","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"MATH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"HENN","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"FNH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"ESB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CIRS","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"CHEM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"BIOL","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tablets","rooms_shortname":"AERL","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Moveable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Moveable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Moveable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"WOOD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"UCLL","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SWNG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"SPPH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"PHRM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"PCOH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ORCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"MCML","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"LSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"LSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"LSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"IONA","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"GEOG","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"FSC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"FRDM","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"FORW","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ESB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"DMP","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"DMP","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"DMP","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"CHBE","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"CHBE","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BRKX","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"BIOL","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ANGU","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ALRD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ALRD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Movable Chairs","rooms_shortname":"ALRD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"MCLD","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"LSK","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"LSK","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"LASR","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"IBLC","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"HEBB","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"CEME","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"BUCH","stuffytest":1},{"rooms_furniture":"Classroom-Fixed Tables/Fixed Chairs","rooms_shortname":"BUCH","stuffytest":1}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["test","other"]})
+        })
+
+    });
+
+    it.skip("200 Titanium for COURSES", function () {
+        var queryTest: any = {
+            "WHERE": {
+                "OR": [/**{
+                    "IS": {
+                        "courses_uuid": "31379"
+                    }
+                },*/{
+                    "IS": {
+                        "courses_uuid": "10235"
+                    }
+                },
+                    {
+                        "IS": {
+                            "courses_uuid": "10236"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10237"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10238"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10239"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10240"
+                        }
+                    },
+                    {
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10235"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "10250"
+                        }
+                    },{
+                        "IS": {
+                            "courses_uuid": "20135"
+                        }
+                    }
+                ]
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "courses_dept",
+                    "maxGrade",
+                    "courses_uuid"
+                ],
+                    "ORDER": "courses_uuid",
+                    "FORM": "TABLE"
+            },
+            "TRANSFORMATIONS": {
+                "GROUP":["courses_uuid", "courses_dept"],
+                    "APPLY": [
+                    {
+                        "minGrade": {
+                            "MIN": "courses_avg"
+                        }
+                    },
+                    {
+                        "maxGrade": {
+                            "MAX": "courses_avg"
+                        }
+                    }
+                ]
+            }
+        }
+
+        var result = {"render":"TABLE","result":[{"courses_uuid":"10235","courses_dept":"eece","maxGrade":98.75},{"courses_uuid":"10236","courses_dept":"eece","maxGrade":98.75},{"courses_uuid":"10237","courses_dept":"eece","maxGrade":87.53},{"courses_uuid":"10238","courses_dept":"eece","maxGrade":87.53},{"courses_uuid":"10239","courses_dept":"eece","maxGrade":90.27},{"courses_uuid":"10240","courses_dept":"eece","maxGrade":90.27},{"courses_uuid":"10250","courses_dept":"eece","maxGrade":79.79}/**,{"courses_uuid":"31379","courses_dept":"aanb","maxGrade":94.44}*/]}
+
+
+        //sanityCheck(queryTest);
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            expect(value.body).to.deep.equal(result)
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"missing":["test","other"]})
+        })
+    });
 
 
 });

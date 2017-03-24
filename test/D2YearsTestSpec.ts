@@ -185,7 +185,7 @@ describe("D2YearsTestSpec", function () {
 
     });
 
-    it("200 testing out edge LT 1900 simple query YEARS", function () {
+    it.only("200 testing out edge LT 1900 simple query YEARS", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "AND": [{

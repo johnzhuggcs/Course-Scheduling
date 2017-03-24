@@ -823,5 +823,50 @@ describe("D2QueryTestSpec", function () {
 
     });
 
+    it.only("200 dmp_* deliverable", function () {
+
+        var queryTest: any = {
+            "WHERE": {
+                "IS": {
+                    "rooms_name": "DMP_*"
+                }
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_name"
+                ],
+                "ORDER": "rooms_name",
+                "FORM": "TABLE"
+            }
+        }
+
+        var result:any = {"render":"TABLE","result":[{"rooms_name":"DMP_101"},{"rooms_name":"DMP_110"},{"rooms_name":"DMP_201"},{"rooms_name":"DMP_301"},{"rooms_name":"DMP_310"}]}
+
+        return insightFacade.performQuery(queryTest).then(function (value: any) {
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"]
+            var expectedResult:any = result["result"];
+            //expect(value.body).to.deep.equal(result);
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).include(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+
+            Log.test("passed here")
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
+
+
+    });
+
 
 });
