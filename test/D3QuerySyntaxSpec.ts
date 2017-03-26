@@ -144,7 +144,7 @@ describe("D3QuerySyntaxSpec", function () {
         var keyTest = Object.keys(queryTest);
         var result = {"true": ["courses"]}
         sanityCheck(queryTest);
-        expect(insightFacade.isValid(queryTest)).to.deep.equal(false);
+        expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 
 
     });

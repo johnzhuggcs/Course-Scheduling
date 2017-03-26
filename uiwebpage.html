@@ -7,10 +7,13 @@
 
 			var $isCourses = false;
 			var $isrooms = false;
+			var $isScheduling = false;
+			var $isExplorer = false;
 			var $counter = 0;
 
 			//call yarn start the start the server first
-		function toggling() {
+
+			function toggling() {
 			//$(document).ready(function(){
 				if ($(".dataset").val() == "default") {
                     $(".ifcoursesFilters").hide();
@@ -474,13 +477,76 @@
 
 		// TODO: group by can only be set if it exists in column
 
+			//JON's Code
+
+            function explorerOrScheduler(){
+                //var dataset = document.getElementsByClassName("dataset")[0];
+                if($(".explorerOrScheduler").val() == "default"){
+					//console.log(dataset.toString());
+					$(".explorerBanner").hide()
+                    //dataset.style.visibility = "hidden";
+                    //$(".dataset").hide();
+                    $isScheduling = false;
+                    $isExplorer = false;
+
+                    $(".ifcoursesFilters").hide();
+                    $(".ifroomsFilters").hide();
+                    $(".ifgroupFilters").hide();
+                    $(".ifcourses").hide();
+                    $(".ifrooms").hide();
+                    $(".ifgroup").hide();
+                    $isCourses = false;
+                    $isRooms = false;
+                    $(".ifcoursesGroup").hide();
+                    $(".ifroomsGroup").hide();
+                    $(".ifgroupGroup").hide();
+
+                    $(".ifcoursesApply").hide();
+                }
+                if($(".explorerOrScheduler").val() == "explorer"){
+                    //console.log(dataset.toString());
+                    $(".explorerBanner").show()
+                    //dataset.style.visibility = "visible";
+                    $isScheduling = false;
+                    $isExplorer = true;
+                }
+                if($(".explorerOrScheduler").val() == "scheduler"){
+                    //console.log(dataset.toString());
+                    $(".explorerBanner").hide()
+                    //dataset.style.visibility = "hidden";
+                    $isScheduling = true;
+                    $isExplorer = false;
+                    $(".ifcoursesFilters").hide();
+                    $(".ifroomsFilters").hide();
+                    $(".ifgroupFilters").hide();
+                    $(".ifcourses").hide();
+                    $(".ifrooms").hide();
+                    $(".ifgroup").hide();
+                    $isCourses = false;
+                    $isRooms = false;
+                    $(".ifcoursesGroup").hide();
+                    $(".ifroomsGroup").hide();
+                    $(".ifgroupGroup").hide();
+
+                    $(".ifcoursesApply").hide();
+                }
+            }
+
 		</script>
 	</head>
 	<body>
-		<h1>Courses and Rooms Explorer</h1>
+		<h1>UBC Insight Tool</h1>
 		<div class = "fields">
-			<p>
-				<b>Dataset: </b>
+			<p><!-- Jon's code -->
+				<b>Tool Mode:</b>
+				<select class = "explorerOrScheduler" onchange="explorerOrScheduler()">
+					<option value = "default" selected></option>
+					<option value = "explorer">Courses and Rooms Explorer</option>
+					<option value = "scheduler">Scheduler</option>
+				</select>
+			</p><!-- Jon's code -->
+			<p class = "explorerBanner" style="display:none">
+				<b>Courses or Rooms: </b>
 				<select class = "dataset" onchange="toggling()">
 					<option value="default" selected></option>
 					<option value="courses">Courses</option>
