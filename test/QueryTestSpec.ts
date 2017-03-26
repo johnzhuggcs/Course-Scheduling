@@ -542,7 +542,7 @@ describe("QueryTestSpec", function () {
     });
 
 
-    it.only("200 testing out simple query provided in deliverable", function () {
+    it("200 testing out simple query provided in deliverable", function () {
         var queryTest:QueryRequest = {
             "WHERE":{
                 "GT":{
@@ -2167,7 +2167,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it.only("D3 200", function () {
+    it("D3 200", function () {
         var queryTest:any =
             {
                 "WHERE":
@@ -2206,6 +2206,57 @@ describe("QueryTestSpec", function () {
 
 
     });
+
+    it.only("D3 section size", function () {
+        var queryTest:any =
+            {
+                "WHERE":{
+                    "AND":[
+                        {
+                            "IS":{
+                                "courses_id":"343"
+                            }
+                        },
+                        {
+                            "GT":{
+                                "courses_sectionsize":50
+                            }
+                        }
+                    ]
+                }
+                ,
+                "OPTIONS":{
+                    "COLUMNS":["courses_dept", "MostSections"],
+                    "ORDER":{"dir":"UP","keys":["courses_dept"]},
+                    "FORM":"TABLE"
+                },
+                "TRANSFORMATIONS":{
+                    "GROUP":["courses_dept","courses_id"],
+                    "APPLY":[
+                        {"MostSections":
+                            {"MAX":"courses_sectionsize"}}
+                    ]}}
+
+        /**courses_dept	courses_id	courses_avg	courses_fail
+         chem	121	68.2	287
+         cnps	574	99.19	0
+         math	527	99.78	0
+         math	527	99.78	0*/
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse){
+            expect(value.code).to.equal(200);
+            //console.time("deep equal time")
+            Log.info(JSON.stringify(value.body))
+            //console.timeEnd("deep equal time")
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error":"invalid query"})
+        })
+
+
+    });
+
 
 
 

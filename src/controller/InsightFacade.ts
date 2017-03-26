@@ -1193,6 +1193,8 @@ export default class InsightFacade implements IInsightFacade {
 
                                 singleColumnKey = columns[x].toString()
 
+
+
                                 if (singleReturnInfo.hasOwnProperty(singleColumnKey)) {
 
                                     newCache = Object.assign({}, newCache, {[singleColumnKey]: singleReturnInfo[singleColumnKey]});
@@ -1229,7 +1231,7 @@ export default class InsightFacade implements IInsightFacade {
                                     /** (validProjectKey[0].endsWith("_fullname") || validProjectKey[0].endsWith("_shortname") ||
                                      validProjectKey[0].endsWith("_number") || validProjectKey[0].endsWith("_name")|| validProjectKey[0].endsWith("_address")) */
                                     if (typeof finalReturn[0][order] == "number" || order.endsWith("_avg") || order.endsWith("_pass") || order.endsWith("_fail") || order.endsWith("_audit") || order.endsWith("_year")
-                                        || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats")) {
+                                        || order.endsWith("_lat") || order.endsWith("_lon") || order.endsWith("_seats") || order.endsWith("_sectionsize")) {
 
                                         finalReturn = finalReturn.sort(function (a: any, b: any) {
                                             return a[order] - b[order];
@@ -1343,7 +1345,7 @@ export default class InsightFacade implements IInsightFacade {
                                 //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
                             }*/
                                 if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
-                                    || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats")) {
+                                    || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats") || keysArray[0].endsWith("_sectionsize")) {
 
                                     finalReturn = finalReturn.sort(function (a: any, b: any) {
                                         if (dir == "DOWN") {
@@ -1837,7 +1839,7 @@ export default class InsightFacade implements IInsightFacade {
         })
     }
 
-    breakingTies(a:any, b:any, sortArray:any, direction:string):any{
+    breakingTies(a:any, b:any, sortArray:any, direction:string):any{ //did not implement sectionsize
         var tempSortResult;
 
         for(let x in sortArray){
@@ -1966,7 +1968,7 @@ export default class InsightFacade implements IInsightFacade {
     vocabDataBase(databaseKey:string):string|boolean{
         if(databaseKey == "Subject"){
             return "courses_dept"
-        } else if(databaseKey == "Course"){
+        }else if(databaseKey == "Course"){
             return "courses_id"
         } else if(databaseKey == "Avg"){
             return "courses_avg"
@@ -2173,6 +2175,24 @@ export default class InsightFacade implements IInsightFacade {
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(sortKey == "courses_sectionsize"){
+                tempAtomicValue = Number(returnInfo["courses_pass"]) + Number(returnInfo["courses_fail"])
+                if(isNullOrUndefined(returnInfo[sortKey])) { //first time
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal) {
+                        returnInfo[sortKey] = tempAtomicValue
+                    } else {
+                        returnInfo = []
+                    }
+                }else{
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal) {
+                        returnInfo = returnInfo
+                    } else {
+                        returnInfo = []
+                    }
+                }
+            }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
@@ -2192,6 +2212,24 @@ export default class InsightFacade implements IInsightFacade {
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(sortKey == "courses_sectionsize"){
+                tempAtomicValue = Number(returnInfo["courses_pass"]) + Number(returnInfo["courses_fail"])
+                if(isNullOrUndefined(returnInfo[sortKey])) { //first time
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal) {
+                        returnInfo[sortKey] = tempAtomicValue
+                    } else {
+                        returnInfo = []
+                    }
+                }else{
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal) {
+                        returnInfo = returnInfo
+                    } else {
+                        returnInfo = []
+                    }
+                }
+            }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
@@ -2208,6 +2246,24 @@ export default class InsightFacade implements IInsightFacade {
         for (let x in returnInfoKeyArray) {
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
+            if(sortKey == "courses_sectionsize"){
+                tempAtomicValue = Number(returnInfo["courses_pass"]) + Number(returnInfo["courses_fail"])
+                if(isNullOrUndefined(returnInfo[sortKey])) { //first time
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal) {
+                        returnInfo[sortKey] = tempAtomicValue
+                    } else {
+                        returnInfo = []
+                    }
+                }else{
+
+                    if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal) {
+                        returnInfo = returnInfo
+                    } else {
+                        returnInfo = []
+                    }
+                }
+            }else
             if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal && sortKey == tempAtomicKey) {
                 returnInfo = returnInfo
             } else if(isNumber(sortVal) && isNumber(tempAtomicValue) && sortKey == tempAtomicKey){
@@ -2329,7 +2385,7 @@ export default class InsightFacade implements IInsightFacade {
                             || columnsValidKeyArray[x] == "courses_avg" || columnsValidKeyArray[x] == "courses_instructor"
                             || columnsValidKeyArray[x] == "courses_title" || columnsValidKeyArray[x] == "courses_pass"
                             || columnsValidKeyArray[x] == "courses_fail" || columnsValidKeyArray[x] == "courses_audit"
-                            || columnsValidKeyArray[x] == "courses_uuid" || columnsValidKeyArray[x] == "courses_year")){ //checks for valid keys
+                            || columnsValidKeyArray[x] == "courses_uuid" || columnsValidKeyArray[x] == "courses_year" || columnsValidKeyArray[x] == "courses_sectionsize")){ //checks for valid keys
                             if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
                                 isOneDataset = {"true":["courses"]} //dummy line of code so further check would be done outside of for-loop
                             } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
@@ -2368,7 +2424,7 @@ export default class InsightFacade implements IInsightFacade {
                             (columnsValidKeyArray[x].endsWith("_dept") || columnsValidKeyArray[x].endsWith("_id") || columnsValidKeyArray[x].endsWith("_avg") ||
                             columnsValidKeyArray[x].endsWith("_instructor") || columnsValidKeyArray[x].endsWith("_title") || columnsValidKeyArray[x].endsWith("_pass") ||
                             columnsValidKeyArray[x].endsWith("_fail") || columnsValidKeyArray[x].endsWith("_audit") || columnsValidKeyArray[x].endsWith("_uuid")
-                            || columnsValidKeyArray[x].endsWith("_years"))){
+                            || columnsValidKeyArray[x].endsWith("_years") || columnsValidKeyArray[x].endsWith("courses_sectionsize"))){
 
                             invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -2448,7 +2504,7 @@ export default class InsightFacade implements IInsightFacade {
                                 || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
                                 || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
                                 || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                || orderValidKey == "courses_uuid" || orderValidKey == "courses_year")) { //checks for valid key
+                                || orderValidKey == "courses_uuid" || orderValidKey == "courses_year" || orderValidKey == "courses_sectionsize")) { //checks for valid key
                                 if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
                                     if(transformationExists == true){
                                         isOneDataset = {"true":["courses"]}
@@ -2512,7 +2568,7 @@ export default class InsightFacade implements IInsightFacade {
                             } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
                                 (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
                                 orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year"))) {
+                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year") || orderValidKey.endsWith("courses_sectionsize"))) {
 
                                 invalidIdLists = orderValidKey.split("_");
 
@@ -2648,7 +2704,7 @@ export default class InsightFacade implements IInsightFacade {
                                             || applylittleKey == "courses_year" || applylittleKey == "courses_dept" || applylittleKey == "courses_id"
                                             || applylittleKey == "courses_avg" || applylittleKey == "courses_instructor" || applylittleKey == "courses_title"
                                             || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
-                                            || applylittleKey == "courses_uuid")) {
+                                            || applylittleKey == "courses_uuid" || applylittleKey == "courses_sectionsize")) {
 
                                                return true;
 
@@ -2656,7 +2712,7 @@ export default class InsightFacade implements IInsightFacade {
                                               && (applylittleKey == "rooms_lat" || applylittleKey == "rooms_lon" || applylittleKey == "rooms_seats"
                                               || applylittleKey == "courses_year"
                                               || applylittleKey == "courses_avg" || applylittleKey == "courses_title"
-                                              || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
+                                              || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit" || applylittleKey == "courses_sectionsize"
                                             )) {
                                                return true
                                             } else return false;
@@ -2721,7 +2777,7 @@ export default class InsightFacade implements IInsightFacade {
                 var yesOrNo = Object.keys(isOneDataset)[0];
                 var dataSet = isOneDataset[yesOrNo];
                 if( validProjectKey.length == 1 && typeof validProjectKey[0] == "string" && (validProjectKey[0] == "courses_avg" || validProjectKey[0] == "courses_pass" ||
-                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit" || validProjectKey[0] == "courses_year")){ //make sure only a valid key exists
+                    validProjectKey[0] == "courses_fail" || validProjectKey[0] == "courses_audit" || validProjectKey[0] == "courses_year" || validProjectKey[0] == "courses_sectionsize")){ //make sure only a valid key exists
                     if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
                             isOneDataset = {"true": ["courses"]};
@@ -2765,7 +2821,7 @@ export default class InsightFacade implements IInsightFacade {
                 }
                 else if(typeof validProjectKey[0] == "string" && !(validProjectKey[0].startsWith("courses")) && (this.occurrences(validProjectKey[0], "_", true)) == 1 &&
                     (validProjectKey[0].endsWith("_avg") || validProjectKey[0].endsWith("_pass") ||
-                    validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit") || validProjectKey[0].endsWith("_year"))){
+                    validProjectKey[0].endsWith("_fail") || validProjectKey[0].endsWith("_audit") || validProjectKey[0].endsWith("_year") || validProjectKey[0].endsWith("courses_sectionsize"))){
 
                     var invalidIdLists = validProjectKey[0].split("_");
 

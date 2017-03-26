@@ -1,0 +1,91 @@
+            var $showCoursesDept = false;
+                var $showCoursesId = false;
+                var $showCoursesAvg = false;
+                var $showCoursesInstructor = false;
+                var $showCoursesTitle = false;
+                var $showCoursesPass = false;
+                var $showCoursesFail = false;
+                var $showCoursesSize = false;
+                var $showCoursesAudit = false;
+                var $showCoursesUuid = false;
+                var $showCoursesYear = false;
+
+				//make col = {col1:val, col2:val}
+				//var $coursesCols
+
+            for (var i = 0; i < coursesColVals.length; i++) {
+                switch(coursesColVals[i]) {
+					case "courses_dept":
+                        $showCoursesDept = true;
+					    break;
+                    case "courses_id":
+						$showCoursesId = true;
+                        break;
+                    case "courses_avg":
+                        $showCoursesAvg = true;
+                        break;
+                    case "courses_instructor":
+                        $showCoursesInstructor = true;
+                        break;
+					case "courses_title":
+                        $showCoursesTitle = true;
+					    break;
+                    case "courses_pass":
+                        $showCoursesPass = true;
+                        break;
+                    case "courses_fail":
+                        $showCoursesFail = true;
+                        break;
+                    case "colsections_size":
+                        $showCoursesSize = true;
+                        break;
+                    case "courses_audit":
+                        $showCoursesAudit = true;
+                        break;
+                    case "courses_uuid":
+                        $showCoursesUuid = true;
+                        break;
+                    case "courses_year":
+                        $showCoursesYear = true;
+                        break;
+					}
+				}
+
+                for (var j = 0; j < roomsColVals.length; j++) {
+                    switch(roomsColVals[j]) {
+                        case "rooms_fullname":
+                            console.log("rooms_fullname");
+                            break;
+                        case "rooms_shortname":
+                            console.log("rooms_shortname");
+                            break;
+                        case "rooms_number":
+                            console.log("rooms_number");
+                            break;
+                        case "rooms_name":
+                            console.log("rooms_name");
+                            break;
+                        case "rooms_address":
+                            console.log("rooms_address");
+                            break;
+                        case "rooms_lat":
+                            console.log("rooms_lat");
+                            break;
+                        case "rooms_lon":
+                            console.log("rooms_lon");
+                            break;
+                        case "rooms_seats":
+                            console.log("rooms_seats");
+                            break;
+                        case "rooms_type":
+                            console.log("rooms_type");
+                            break;
+                        case "rooms_furniture":
+                            console.log("rooms_furniture");
+                            break;
+                        case "rooms_href":
+                            console.log("rooms_href");
+                            break;
+
+                    }
+                }
