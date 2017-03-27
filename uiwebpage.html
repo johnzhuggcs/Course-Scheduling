@@ -16,6 +16,8 @@
 			function toggling() {
 			//$(document).ready(function(){
 				if ($(".dataset").val() == "default") {
+
+                    $(".coursesAndOrClass").hide()
                     $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
@@ -33,7 +35,8 @@
 				}
 				if ($(".dataset").val() == "courses") {
 
-
+                    $(".coursesAndOrClass").show()
+                    $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").show();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").show();
@@ -51,6 +54,9 @@
 
 				}
 				if ($(".dataset").val() == "rooms") {
+
+                    $(".coursesAndOrClass").hide()
+                    $(".roomsFilterSchedule").show();
 				    $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").show();
                     $(".ifgroupFilters").show();
@@ -493,7 +499,8 @@
                     $isScheduling = false;
                     $isExplorer = false;
 
-
+                    $(".coursesAndOrClass").hide();
+                    $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
@@ -512,8 +519,23 @@
                     //console.log(dataset.toString());
                     $(".explorerBanner").show()
                     //dataset.style.visibility = "visible";
+                    $(".coursesAndOrClass").hide();
+                    $(".roomsFilterSchedule").hide();
+                    $(".ifcoursesFilters").hide();
+                    $(".ifroomsFilters").hide();
+                    $(".ifgroupFilters").hide();
+                    $(".ifcourses").hide();
+                    $(".ifrooms").hide();
+                    $(".ifgroup").hide();
                     $isScheduling = false;
                     $isExplorer = true;
+                    $isCourses = false;
+                    $isRooms = false;
+                    $(".ifcoursesGroup").hide();
+                    $(".ifroomsGroup").hide();
+                    $(".ifgroupGroup").hide();
+
+                    $(".ifcoursesApply").hide();
                 }
                 if($(".explorerOrScheduler").val() == "scheduler"){
                     //console.log(dataset.toString());
@@ -521,13 +543,16 @@
                     //dataset.style.visibility = "hidden";
                     $isScheduling = true;
                     $isExplorer = false;
-                    $(".ifcoursesFilters").hide();
-                    $(".ifroomsFilters").hide();
+                    $(".coursesAndOrClass").show();
+                    $(".roomsFilterSchedule").show();
+                    $(".ifcoursesFilters").show();
+                    $(".ifroomsFilters").show();
                     $(".ifgroupFilters").hide();
+                    $(".roomsFilterSchedule").show()
                     $(".ifcourses").hide();
                     $(".ifrooms").hide();
                     $(".ifgroup").show();
-                    $(".coursesFilterBanner").show();
+
                     $isCourses = false;
                     $isRooms = false;
                     $(".ifcoursesGroup").hide();
@@ -566,18 +591,10 @@
 			</p>
 
 			<p>
-				<span class = "coursesFilterBanner" style="display:none">
-					<b>Courses Filters</b>
-				</span>
-			</p>
+				<span class = "coursesAndOrClass radioclass" style="display:none"><b>Courses Filter (can leave blank)</b>
 
-
-			<p>
-				<span class = "ifgroup radioclass" style="display:none"><b>Filters (can leave blank): </b>
-
-					<br>
-					<br>
-
+                    <br>
+                    <br>
 					You can use AND/OR for below filters (AND/OR will not be applied if only one filter is filled):
 					<input type = "radio" name = "AndOr" value = "AND" checked>AND</input>
 					<input type = "radio" name = "AndOr" value = "OR">OR</input>
@@ -630,9 +647,23 @@
 					</select>
 					<input type="text" id="courses_title" value="">
 					<br>
+                    <br>
 				</div>
 
+                <span class = "roomsFilterSchedule radioclass" style="display:none"><b>Room Filters (can leave blank): </b>
+
+					<br>
+					<br>
+
+					You can use AND/OR for below filters (AND/OR will not be applied if only one filter is filled):
+					<input type = "radio" name = "roomsAndOr" value = "AND" checked>AND</input>
+                    <input type = "radio" name = "roomsAndOr" value = "OR">OR</input>
+                    <br>
+
+				</span>
+
 				<div class = "ifroomsFilters" style="display:none">
+                    <br>
 					Building name:
 					<input type="text" id="rooms_fullname" value="">
 					<br>
