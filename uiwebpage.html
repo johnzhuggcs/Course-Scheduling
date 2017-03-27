@@ -36,13 +36,13 @@
 				if ($(".dataset").val() == "courses") {
 
                     $(".coursesAndOrClass").show()
-                    $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").show();
+                    $(".roomsFilterSchedule").hide(); //this is the new AndOr banner
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").show();
 					$(".ifcourses").show();
 					$(".ifrooms").hide();
-					$(".ifgroup").show();
+					$(".ifgroup").show(); //this is no longer keyed to the AndOr banner
                     $isCourses = true;
                     $isRooms = false;
                     $(".ifcoursesGroup").show();
@@ -592,6 +592,7 @@
 
 			<p>
 				<span class = "coursesAndOrClass radioclass" style="display:none"><b>Courses Filter (can leave blank)</b>
+                    <!-- modified name to be separate from rooms and group -->
 
                     <br>
                     <br>
@@ -651,7 +652,7 @@
 				</div>
 
                 <span class = "roomsFilterSchedule radioclass" style="display:none"><b>Room Filters (can leave blank): </b>
-
+                    <!-- Added new banner to represent Room filters banner -->
 					<br>
 					<br>
 
@@ -692,6 +693,7 @@
 
 			<p>
 				<span class = "ifgroup" style="display:none"><b>Show column(s): </b></span>
+                <!-- should separate this into different classes for ifcourses and ifrooms -->
 				<span class="test">
 				<select class = "ifcourses" style="display:none" onchange="columnLeadsGroupBy()">
 					<option value="default" selected></option>
