@@ -32,6 +32,8 @@
 
 				}
 				if ($(".dataset").val() == "courses") {
+
+
                     $(".ifcoursesFilters").show();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").show();
@@ -489,6 +491,7 @@
                     $isScheduling = false;
                     $isExplorer = false;
 
+
                     $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
@@ -516,12 +519,13 @@
                     //dataset.style.visibility = "hidden";
                     $isScheduling = true;
                     $isExplorer = false;
-                    $(".ifcoursesFilters").hide();
+                    $(".ifcoursesFilters").show();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
-                    $(".ifcourses").hide();
+                    $(".ifcourses").show();
                     $(".ifrooms").hide();
-                    $(".ifgroup").hide();
+                    $(".ifgroup").show();
+                    $(".coursesFilterBanner").show();
                     $isCourses = false;
                     $isRooms = false;
                     $(".ifcoursesGroup").hide();
@@ -535,7 +539,12 @@
 		</script>
 	</head>
 	<body>
-		<h1>UBC Insight Tool</h1>
+	<style type="text/css">
+		.heading{
+			color:midnightblue;
+		}
+	</style>
+		<h1 class = "heading" >InsightUBC Tool</h1>
 		<div class = "fields">
 			<p><!-- Jon's code -->
 				<b>Tool Mode:</b>
@@ -555,12 +564,19 @@
 			</p>
 
 			<p>
+				<span class = "coursesFilterBanner" style="display:none">
+					<b>Courses Filters</b>
+				</span>
+			</p>
+
+
+			<p>
 				<span class = "ifgroup radioclass" style="display:none"><b>Filters (can leave blank): </b>
 
 					<br>
 					<br>
 
-					You can use AND/OR for below filters:
+					You can use AND/OR for below filters (AND/OR will not be applied if only one filter is filled):
 					<input type = "radio" name = "AndOr" value = "AND" checked>AND</input>
 					<input type = "radio" name = "AndOr" value = "OR">OR</input>
 

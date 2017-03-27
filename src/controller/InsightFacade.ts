@@ -2276,6 +2276,7 @@ export default class InsightFacade implements IInsightFacade {
     }
 
 
+
     isIsLOL(returnInfo:any, resultKeyArray:any, keys:string[], sortVal:string){
         //resultKeyArray[0] is basically "courses_avg"
         //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
