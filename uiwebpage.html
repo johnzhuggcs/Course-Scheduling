@@ -6,7 +6,7 @@
 		<script>
 
 			var $isCourses = false;
-			var $isrooms = false;
+			var $isRooms = false;
 			var $isScheduling = false;
 			var $isExplorer = false;
 			var $counter = 0;
@@ -32,6 +32,8 @@
 
                     $(".ifcoursesApply").hide();
 
+                    $(".ifcoursesExtraInfo").hide();
+
 				}
 				if ($(".dataset").val() == "courses") {
 
@@ -50,6 +52,8 @@
                     $(".ifgroupGroup").show();
 
                     $(".ifcoursesApply").show();
+
+                    $(".ifcoursesExtraInfo").show();
 
 
 				}
@@ -71,26 +75,33 @@
 
                     $(".ifcoursesApply").hide();
 
+                    $(".ifcoursesExtraInfo").hide();
 				}
 			//})
 		}
-		function columnLeadsGroupBy(){
+		function columnLeadsGroupBy(coursesOrRooms){
             var coursesColVals = [];
             var coursesColTexts = [];
-            $('.ifcourses :selected').each(function(k, selected){
+            $('.'+coursesOrRooms+' :selected').each(function(k, selected){
                 coursesColVals[k] = $(selected).val();
                 coursesColTexts[k] = $(selected).text();
             });
 
-            orderDropdownAccordingToCol(coursesColVals,coursesColTexts);
-		}
+            //ifcourses ifrooms
+			if (coursesOrRooms = "ifcourses") {
+            	orderDropdownAccordingToCol(".ifcoursesGroup",coursesColVals,coursesColTexts);
+			}
+            if (coursesOrRooms = "ifrooms") {
+                orderDropdownAccordingToCol(".ifroomsGroup",coursesColVals,coursesColTexts);
+            }
+        }
 
-            function orderDropdownAccordingToCol(listOfCoursesCol,listOfCoursesColText) {
-				$(".ifcoursesGroup").find('option').remove();
-                $(".ifcoursesGroup").append('<option value="default" selected>Please select columns above to show before ordering</option>');
+            function orderDropdownAccordingToCol(ifcoursesOrroomsGroup,listOfCoursesCol,listOfCoursesColText) {
+				$(ifcoursesOrroomsGroup).find('option').remove();
+                $(ifcoursesOrroomsGroup).append('<option value="default" selected>Please select columns above to show before ordering</option>');
                 for (var i = 0; i < listOfCoursesCol.length; i++) {
                     if (listOfCoursesColText[i] != "") {
-                        $(".ifcoursesGroup").append('<option class = "orderDrop"></option>');
+                        $(ifcoursesOrroomsGroup).append('<option class = "orderDrop"></option>');
                         var newClassName = "order" + i;
                         $(".orderDrop").addClass(newClassName);
                         $("." + newClassName).val(listOfCoursesCol[i]);
@@ -134,15 +145,16 @@
             }
 
 
-            function comparison() {//Returns LT, EQ or GT
+            function comparison(compareSizeAttr) {//Returns LT, EQ or GT
+				//compareSizeAttr
 		    	var ranstr = ""
-                if ($(".compareSize :selected").val() == "LT") {
+                if ($("." +compareSizeAttr+ " :selected").val() == "LT") {
                     ranstr = ranstr + "LT";
                 }
-                if ($(".compareSize :selected").val() == "EQ") {
+                if ($("." +compareSizeAttr+ " :selected").val() == "EQ") {
                     ranstr = ranstr + "EQ";
                 }
-                if ($(".compareSize :selected").val() == "GT") {
+                if ($("." +compareSizeAttr+ " :selected").val() == "GT") {
                     ranstr = ranstr + "GT";
                 }
                 return ranstr;
@@ -153,83 +165,183 @@
 				//Case 2: AND multifields
 				//Case 3: OR multifields
                 var $jsonstr = "";
-                var attrCounter = 0; //counts the number of attributes that are not blank
-				var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
-                if ($("#colsections_size").val() != "") {
-                    attrCounter++;
-				}
-                if ($("#courses_dept").val() != "") {
-                    attrCounter++;
-				}
-                if ($("#courses_id").val() != "") {
-                    attrCounter++;
-                }
-                if ($("#courses_instructor").val() != "") {
-                    attrCounter++;
-                }
-                if ($("#courses_title").val() != "") {
-                    attrCounter++;
-                }
-                notBlankAttrCounter = attrCounter;
+				if ($isCourses) {
+                    var attrCounter = 0; //counts the number of attributes that are not blank
+                    var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
+                    if ($("#courses_sectionsize").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#courses_dept").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#courses_id").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#courses_instructor").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#courses_title").val() != "") {
+                        attrCounter++;
+                    }
+                    notBlankAttrCounter = attrCounter;
 
-                if (attrCounter > 0) {
+                    if (attrCounter > 0) {
 
-                    if ($("#colsections_size").val() != "") {
-                        lastAttrCounter++;
+                        if ($("#courses_sectionsize").val() != "") {
+                            lastAttrCounter++;
                             $jsonstr = $jsonstr +
                                 "{" +
-                                "\"" + comparison() + "\": {" +
-                                "\"colsections_size\": \"" + $("#colsections_size").val() + "\""
+                                "\"" + comparison("compareSizeSection") + "\": {" +
+                                "\"courses_sectionsize\": " + $("#courses_sectionsize").val()
                                 + "}" +
                                 "}";
 
-                        if (lastAttrCounter < attrCounter) {
-                            $jsonstr = $jsonstr + ",";
-						}
-                    }
-                    if ($("#courses_dept").val() != "") {
-                        lastAttrCounter++;
-                        $jsonstr = $jsonstr +
-                            "{" +
-                            "\"IS\": {" +
-                            "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val() + addRightAsterisk("isItDep") + "\""
-                            + "}" +
-                            "}";
-                        if (lastAttrCounter < attrCounter) {
-                            $jsonstr = $jsonstr + ",";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#courses_dept").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val() + addRightAsterisk("isItDep") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#courses_id").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"courses_id\": \"" + addLeftAsterisk("isItCn") + $("#courses_id").val() + addRightAsterisk("isItCn") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#courses_instructor").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"courses_instructor\": \"" + addLeftAsterisk("isItIns") + $("#courses_instructor").val() + addRightAsterisk("isItIns") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#courses_title").val() != "") {
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"courses_title\": \"" + addLeftAsterisk("isItTit") + $("#courses_title").val() + addRightAsterisk("isItTit") + "\""
+                                + "}" +
+                                "}";
                         }
                     }
-                    if ($("#courses_id").val() != "") {
-                        lastAttrCounter++;
-                        $jsonstr = $jsonstr +
-                            "{" +
-                            "\"IS\": {" +
-                            "\"courses_id\": \"" + addLeftAsterisk("isItCn") + $("#courses_id").val() + addRightAsterisk("isItCn") + "\""
-                            + "}" +
-                            "}";
-                        if (lastAttrCounter < attrCounter) {
-                            $jsonstr = $jsonstr + ",";
-                        }
+                }
+                console.log($isCourses);
+                console.log($isRooms);
+                if ($isRooms) {
+                    var attrCounter = 0; //counts the number of attributes that are not blank
+                    var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
+                    if ($("#rooms_fullname").val() != "") {
+                        attrCounter++;
                     }
-                    if ($("#courses_instructor").val() != "") {
-                        lastAttrCounter++;
-                        $jsonstr = $jsonstr +
-                            "{" +
-                            "\"IS\": {" +
-                            "\"courses_instructor\": \"" + addLeftAsterisk("isItIns") + $("#courses_instructor").val() + addRightAsterisk("isItIns") + "\""
-                            + "}" +
-                            "}";
-                        if (lastAttrCounter < attrCounter) {
-                            $jsonstr = $jsonstr + ",";
-                        }
+                    if ($("#rooms_furniture").val() != "") {
+                        attrCounter++;
                     }
-                    if ($("#courses_title").val() != "") {
-                        $jsonstr = $jsonstr +
-                            "{" +
-                            "\"IS\": {" +
-                            "\"courses_title\": \"" + addLeftAsterisk("isItTit") + $("#courses_title").val() + addRightAsterisk("isItTit") + "\""
-                            + "}" +
-                            "}";
+                    if ($("#rooms_loc").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#rooms_number").val() != "") {
+                        attrCounter++;
+                    }
+                    if ($("#rooms_seats").val() != "") {
+                        attrCounter++;
+                    }
+					if ($("#rooms_type").val() != "") {
+						attrCounter++;
+					}
+                    notBlankAttrCounter = attrCounter;
+
+                    if (attrCounter > 0) {
+
+                        if ($("#rooms_fullname").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"rooms_fullname\": \"" + addLeftAsterisk("isItFullname") + $("#rooms_fullname").val() + addRightAsterisk("isItFullname") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#rooms_number").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"rooms_number\": \"" + addLeftAsterisk("isItNumber") + $("#rooms_number").val() + addRightAsterisk("isItNumber") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#rooms_seats").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"" + comparison("compareSizeSize") + "\": {" +
+                                "\"rooms_seats\": " + $("#rooms_seats").val()
+                                + "}" +
+                                "}";
+
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#rooms_type").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"rooms_type\": \"" + addLeftAsterisk("isItType") + $("#rooms_type").val() + addRightAsterisk("isItType") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#rooms_furniture").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr = $jsonstr +
+                                "{" +
+                                "\"IS\": {" +
+                                "\"rooms_furniture\": \"" + addLeftAsterisk("isItFurniture") + $("#rooms_furniture").val() + addRightAsterisk("isItFurniture") + "\""
+                                + "}" +
+                                "}";
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
+                        if ($("#rooms_loc").val() != "") {
+                            lastAttrCounter++;
+                            $jsonstr //unsure what's rooms_loc
+
+                            if (lastAttrCounter < attrCounter) {
+                                $jsonstr = $jsonstr + ",";
+                            }
+                        }
                     }
                 }
                 return $jsonstr;
@@ -305,6 +417,7 @@
                 //^"" like defaults are eliminated in this stage^
 			}
 
+			//JUST FOR COURSES
 			function transformationMaker() {
 		    	var querystr = "";
 				if ($(".highestavg").is(":checked")
@@ -317,6 +430,7 @@
 				return querystr
 			}
 
+            //JUST FOR COURSES
 			function applyMaker() {
                 var attrCounter = 0; //counts the number of attributes that are checked
                 var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
@@ -417,18 +531,36 @@
 
             var $andor1 = $(".radioclass :checked").val();
 
-            console.log("andOrString: " + $andOrString);
-            console.log("coursesColVals.toString(): " + coursesColVals.toString());
-            console.log("order: " + $order);
-            console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
-            console.log("dir: " + declareDirection());
-            console.log("transformationMaker(): " + transformationMaker());
+            //console.log("andOrString: " + $andOrString);
+            //console.log("coursesColVals.toString(): " + coursesColVals.toString());
+            //console.log("order: " + $order);
+            //console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
+            //console.log("dir: " + declareDirection());
+            //console.log("transformationMaker(): " + transformationMaker());
 
 
             var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationMaker());
-            console.log("officialQueryString: " + $officialQueryString);
+            console.log("officialQueryString (courses): " + $officialQueryString);
+            //if there is no filter
+				var coursesFiltersInputCounter = 0;
+				$(".ifcoursesFilters input").each(function() {
+				    coursesFiltersInputCounter++;
+				});
 
-            //if the queryString failed to be made
+				var emptyCoursesFilterCounter = 0;
+                $(".ifcoursesFilters input").each(function() {
+                    if ($(this).val() == "") {
+                        emptyCoursesFilterCounter++;
+					}
+                });
+
+                if (coursesFiltersInputCounter == emptyCoursesFilterCounter) {
+                    alert("Please insert some Courses Filter(s) before creating the table");
+                    return;
+				}
+
+
+                //if the queryString failed to be made
             if ($officialQueryString == "") {
                 return;
 			}
@@ -436,8 +568,8 @@
 			var $queryFormat = JSON.parse($officialQueryString);
 
 
-            console.log("qq" + $queryFormat);
-            console.log("qqq" + JSON.stringify($queryFormat));
+            //console.log("qq" + $queryFormat);
+            //console.log("qqq" + JSON.stringify($queryFormat));
 
             //create the format here, then yarn start and send request to the server
 
@@ -480,6 +612,58 @@
                 var roomsColVals = [];
                 $('.ifrooms :selected').each(function(l, selected){
                     roomsColVals[l] = $(selected).val();
+                });
+
+                var roomsColVals = [];
+                var roomsOrderVals = [];
+                roomsColVals = detectDuplicatesSendAlertElseSend("ifrooms",roomsColVals,"Show column(s)");
+                roomsOrderVals = detectDuplicatesSendAlertElseSend("ifroomsGroup",roomsOrderVals,"Order by");
+
+                var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+                $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+
+				console.log($andOrString);
+
+                var $officialQueryString = queryMaker($andOrString,roomsColVals.toString(),declareDirection(),roomsOrderVals,"");
+
+                console.log("officialQueryString (rooms): " + $officialQueryString);
+                //if there is no filter
+                var roomsFiltersInputCounter = 0;
+                $(".ifroomsFilters input").each(function() {
+                    roomsFiltersInputCounter++;
+                });
+
+                var emptyRoomsFilterCounter = 0;
+                $(".ifroomsFilters input").each(function() {
+                    if ($(this).val() == "") {
+                        emptyRoomsFilterCounter++;
+                    }
+                });
+
+                if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
+                    alert("Please insert some Rooms Filter(s) before creating the table");
+                    return;
+                }
+
+
+                //if the queryString failed to be made
+                if ($officialQueryString == "") {
+                    return;
+                }
+
+                $.ajax({
+                    url: "http://localhost:4321/query",
+                    type: 'POST',
+                    data: $officialQueryString,
+                    dataType: 'json', //data is already in json format
+                    contentType: 'application/json'
+                }).done(function(data) {
+                    console.log("Response", data);
+                    //generateTable(data.result);
+                }).fail(function(e) {
+                    console.error("ERROR - Failed to submit query", e);
+
+                    //window.print("ERROR - Failed to submit query", e)
                 });
 
             }
@@ -694,12 +878,12 @@
 
 				<div class = "ifcoursesFilters" style="display:none">
 					Section size:
-					<select class = "compareSize">
+					<select class = "compareSizeSection">
 						<option value="LT">Less than</option>
 						<option value="EQ">Equal to</option>
 						<option value="GT">Greater than</option>
 					</select>
-					<input type="number" id="colsections_size" value="">
+					<input type="number" id="courses_sectionsize" value="">
 					<br>
 					Department:
 					<select class = "isItDep">
@@ -757,23 +941,47 @@
 				<div class = "ifroomsFilters" style="display:none">
                     <br>
 					Building name:
+					<select class = "isItFullname">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
 					<input type="text" id="rooms_fullname" value="">
 					<br>
 					Room number:
+					<select class = "isItNumber">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
 					<input type="text" id="rooms_number" value="">
 					<br>
 					Room size:
-					<select class = "compareSize">
+					<select class = "compareSizeSize">
 						<option value="LT">Less than</option>
 						<option value="EQ">Equal to</option>
 						<option value="GT">Greater than</option>
 					</select>
-					<input type="text" id="rooms_seats" value="">
+					<input type="number" id="rooms_seats" value="">
 					<br>
 					Room type:
+					<select class = "isItType">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
 					<input type="text" id="rooms_type" value="">
 					<br>
 					Furniture type:
+					<select class = "isItFurniture">
+						<option value="IS" selected>IS</option>
+						<option value="SW">Starts With</option>
+						<option value="EW">Ends With</option>
+						<option value="CT">Contains</option>
+					</select>
 					<input type="text" id="rooms_furniture" value="">
 					<br>
 					Location (distance from a given building):
@@ -786,7 +994,7 @@
 				<span class = "ifgroup" style="display:none"><b>Show column(s): </b></span>
                 <!-- should separate this into different classes for ifcourses and ifrooms -->
 				<span class="test">
-				<select class = "ifcourses" style="display:none" onchange="columnLeadsGroupBy()">
+				<select class = "ifcourses" style="display:none" onchange="columnLeadsGroupBy('ifcourses')">
 					<option value="default" selected></option>
 					<option value="courses_dept">Department</option>
 					<option value="courses_id">Course number</option>
@@ -795,13 +1003,13 @@
 					<option value="courses_title">Title</option>
 					<option value="courses_pass">Number of passed students</option>
 					<option value="courses_fail">Number of failed students</option>
-					<option value="colsections_size">Section size</option>
+					<option value="coourses_sectionsize">Section size</option>
 					<!-- based on no.of passed + failed-->
 					<option value="courses_audit">Number of students audited</option>
 					<option value="courses_uuid">ID of a course offering</option>
 					<option value="courses_year">year</option>
 				</select>
-				<select class = "ifrooms" style="display:none">
+				<select class = "ifrooms" style="display:none" onchange="columnLeadsGroupBy('ifrooms')">
 					<option value="default" selected></option>
 					<option value="rooms_fullname">Building fullname</option>
 					<option value="rooms_shortname">Building shortname</option>
@@ -834,18 +1042,7 @@
 					<option value="default" selected>Please select columns above to show before ordering</option>
 				</select>
 				<select class = "ifroomsGroup" style="display:none">
-					<option value="default" selected></option>
-					<option value="rooms_fullname">Building fullname</option>
-					<option value="rooms_shortname">Building shortname</option>
-					<option value="rooms_number">Room number</option>
-					<option value="rooms_name">Room name</option>
-					<option value="rooms_address">Building address</option>
-					<option value="rooms_lat">Building lat</option>
-					<option value="rooms_lon">Building lon</option>
-					<option value="rooms_seats">Room size</option>
-					<option value="rooms_type">Room type</option>
-					<option value="rooms_furniture">Room furniture type</option>
-					<option value="rooms_href">Room href</option>
+					<option value="default" selected>Please select columns above to show before ordering</option>
 				</select>
 						</span>
 					<span class = "extraOrder"></span>
@@ -855,7 +1052,7 @@
 			</p>
 
 			<p>
-				<span class = "ifgroup" style="display:none"><b>Extra Info Available: </b>
+				<span class = "ifcoursesExtraInfo" style="display:none"><b>Extra Info Available: </b>
 				<div class = "ifcoursesApply" style="display:none">
 					<input type="checkbox" class="highestavg">Courses With highest Average<br>
 					<input type="checkbox" class="lowestavg">Courses With Lowest Average<br>
