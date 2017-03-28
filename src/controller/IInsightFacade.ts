@@ -389,4 +389,21 @@ export interface IInsightFacade {
      */
 
     deg2rad(deg:number):number
+
+    /**
+     * new order function essentially
+     * @param dir
+     * @param keysArray
+     * @param finalReturn
+     */
+    newD3Order(dir:string, keysArray:any[], finalReturn:any):any
+
+    /**
+     * sorting within order itself
+     * @param dir
+     * @param keysArray
+     * @param a
+     * @param b
+     */
+    innerOrderTwoElements(dir:string, keysArray:any[], a:any, b:any):any
 }

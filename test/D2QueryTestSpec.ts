@@ -889,9 +889,12 @@ describe("D2QueryTestSpec", function () {
 
         return insightFacade.performQuery(queryTest).then(function (value: any) {
             expect(value.code).to.equal(200);
-            var resultKey:any = value.body["result"]
+            var resultKey:any = value.body["result"];
             var expectedResult:any = result["result"];
+            //Log.info(JSON.stringify(value.body));
+            //Log.info(JSON.stringify(result));
             //expect(value.body).to.deep.equal(result);
+
             for(let x in resultKey){
                 expect(expectedResult).to.include(resultKey[x])
             }
@@ -913,7 +916,7 @@ describe("D2QueryTestSpec", function () {
 
     });
 
-    it("D3 rooms distance", function () {
+    it.only("D3 rooms distance", function () {
         var queryTest: any =
             {
                 "WHERE": {

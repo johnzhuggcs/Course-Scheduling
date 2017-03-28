@@ -1239,7 +1239,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                     } else if (typeof finalReturn[0][order] == "string" || order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
                                         || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")
-                                        || order.endsWith("_uuid")) {
+                                        || order.endsWith("_uuid") || order.endsWith("_distance")) {
                                         finalReturn = finalReturn.sort(function (a: any, b: any) {
                                             var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                             var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1344,105 +1344,11 @@ export default class InsightFacade implements IInsightFacade {
 
                                 //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
                             }*/
-                                if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
-                                    || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats") || keysArray[0].endsWith("_sectionsize")) {
-
-                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
-                                        if (dir == "DOWN") {
-                                            tempSortResult = b[keysArray[0]] - a[keysArray[0]];
-
-                                            let x = 0;
-                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
-                                                tempSortResult = b[keysArray[x]] - a[keysArray[x]];
-                                                x++;
-                                            }
-
-                                            return tempSortResult
-
-                                            /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult*/
-                                        } else if (dir == "UP") {
-                                            tempSortResult = a[keysArray[0]] - b[keysArray[0]];
-
-                                            let x = 0;
-                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
-                                                tempSortResult = a[keysArray[x]] - b[keysArray[x]];
-                                                x++;
-                                            }
-                                            return tempSortResult
-
-                                            /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult;*/
-                                        }
-                                    });
-
-                                } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
-                                    || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")
-                                    || keysArray[0].endsWith("_uuid")) {
-                                    // var x = 0;
-                                    var tempKeysArray = keysArray.slice();
-                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
-
-                                        if (dir == "DOWN") {
-
-                                            //Log.info(JSON.stringify(a));
-                                            //Log.info(JSON.stringify(keysArray[0]))
-
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameB < nameA) {
-                                                return -1;
-                                            } else if (nameB > nameA) {
-                                                return 1;
-                                            } else {
-                                                let x = 0;
-                                                while (nameB == nameA && Number(x) < keysArray.length) {
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if (nameB < nameA) {
-                                                    return -1;
-                                                } else {
-                                                    return 1;
-                                                }
-                                                //return 0
-                                            }
-                                        } else if (dir == "UP") {
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameA < nameB) {
-                                                return -1;
-                                            } else if (nameA > nameB) {
-                                                return 1;
-                                            } else {
-                                                let x = 0;
-                                                while (nameB == nameA && Number(x) < keysArray.length) {
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if (nameB > nameA) {
-                                                    return -1;
-                                                } else {
-                                                    return 1;
-                                                }
-                                                //return 0
-                                            }
-
-
-                                        }
-                                    });
-
-
+                                if (typeof (typeof finalReturn[0][keysArray[0]]) == "string" || typeof finalReturn[0][keysArray[0]] == "number"){
+                                    finalReturn = newThis.newD3Order(dir, keysArray, finalReturn)
                                 }
                                 else {
+
                                     var code400InvalidQuery: InsightResponse = {
                                         code: 400,
                                         body: {"error": "order error"}
@@ -1516,6 +1422,117 @@ export default class InsightFacade implements IInsightFacade {
 
 
     //Helper function in main queryRequest()
+
+    newD3Order(dir:string, keysArray:any[], finalReturn:any):any{
+        var newThis = this;
+        var tempSortResult;
+
+
+            finalReturn = finalReturn.sort(function (a: any, b: any) {
+                return newThis.innerOrderTwoElements(dir, keysArray, a, b)
+            });
+            return finalReturn;
+
+        }
+
+    innerOrderTwoElements(dir:string, keysArray:any[], a:any, b:any):any{
+        var tempSortResult;
+        if (typeof a[keysArray[0]] == "number" && typeof a[keysArray[0]] == "number") {
+            if (dir == "DOWN") {
+                tempSortResult = b[keysArray[0]] - a[keysArray[0]];
+
+                let x = 0;
+                while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                    if(typeof a[keysArray[x]] == "string" && typeof a[keysArray[x]] == "string"){
+                        var newKeysArray = keysArray.slice(x);
+                        return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                    }else {
+                        tempSortResult = b[keysArray[x]] - a[keysArray[x]];
+                        x++;
+                    }
+                }
+
+                return tempSortResult;
+            } else if (dir == "UP") {
+                tempSortResult = a[keysArray[0]] - b[keysArray[0]];
+
+                let x = 0;
+                while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                    if(typeof a[keysArray[x]] == "string" && typeof a[keysArray[x]] == "string"){
+                        var newKeysArray = keysArray.slice(x);
+                        return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                    }else {
+                        tempSortResult = a[keysArray[x]] - b[keysArray[x]];
+                        x++;
+                    }
+                }
+                return tempSortResult;
+            }
+        }
+        else if (typeof a[keysArray[0]] == "string" && typeof a[keysArray[0]] == "string") {
+            // var x = 0;
+
+            if (dir == "DOWN") {
+
+                //Log.info(JSON.stringify(a));
+                //Log.info(JSON.stringify(keysArray[0]))
+
+                var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                if (nameB < nameA) {
+                    return -1;
+                } else if (nameB > nameA) {
+                    return 1;
+                } else {
+                    let x = 0;
+                    while (nameB == nameA && Number(x) < keysArray.length) {
+                        if(typeof a[keysArray[x]] == "number" && typeof a[keysArray[x]] == "number"){
+                            var newKeysArray = keysArray.slice(x);
+                            return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                        }else {
+                            nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            x++
+                        }
+                    }
+                    if (nameB < nameA) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                    //return 0
+                }
+            } else if (dir == "UP") {
+                var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                } else if (nameA > nameB) {
+                    return 1;
+                } else {
+                    let x = 0;
+                    while (nameB == nameA && Number(x) < keysArray.length) {
+                        if(typeof a[keysArray[x]] == "number" && typeof a[keysArray[x]] == "number"){
+                            var newKeysArray = keysArray.slice(x);
+                            return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                        }else {
+                            nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            x++
+                        }
+                    }
+                    if (nameB > nameA) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                    //return 0
+                }
+
+
+            }
+        }
+    }
 
     getDistanceFromLatLonInKm(lat1:number,lon1:number,lat2:number,lon2:number):number {
         var R = 6371; // Radius of the earth in km

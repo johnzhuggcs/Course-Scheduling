@@ -2167,7 +2167,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it("D3 200", function () {
+    it.only("D3 200", function () {
         var queryTest:any =
             {
                 "WHERE":
