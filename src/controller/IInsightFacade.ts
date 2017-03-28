@@ -406,4 +406,15 @@ export interface IInsightFacade {
      * @param b
      */
     innerOrderTwoElements(dir:string, keysArray:any[], a:any, b:any):any
+
+    /**
+     * checks within order to see if it contains valid keys
+     * @param orderKey
+     * @param yesOrNo
+     * @param dataSet
+     * @param invalidIdArray
+     */
+
+    queryCheckingOrder(orderKey:any, yesOrNo:string, dataSet:any, invalidIdArray:any, applyExists:any):any
+
 }

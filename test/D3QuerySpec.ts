@@ -55,7 +55,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only("checking out NO FILTER complex query provided in deliverable", function () {
+    it("checking out NO FILTER complex query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
             },
@@ -169,7 +169,7 @@ describe("D3QueryTestSpec", function () {
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
     });
 
-    it.only( "200 transform", function () {
+    it( "200 transform", function () {
             var queryTest:any =    {
                 "WHERE": {
                     "AND": [{
@@ -219,7 +219,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 multiple transform", function () {
+    it( "200 multiple transform", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -294,7 +294,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 dataset in apply", function () {
+    it( "200 dataset in apply", function () {
         var queryTest:any =    {
             "WHERE": {
                 "AND": [{
@@ -344,7 +344,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 simple query deliverable", function () {
+    it( "200 simple query deliverable", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -397,7 +397,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 simple query no ORDER with TRANSFORMATION", function () {
+    it( "200 simple query no ORDER with TRANSFORMATION", function () {
         var queryTest:any =   {
             "WHERE": {},
             "OPTIONS": {
@@ -437,7 +437,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only("200 testing out new ORDER with no TRANSFORMATION", function () {
+    it("200 testing out new ORDER with no TRANSFORMATION", function () {
 
         var queryTest: any =  {
             "WHERE": {
@@ -519,7 +519,7 @@ describe("D3QueryTestSpec", function () {
 
     });
 
-    it.only( "200 old ORDER with TRANSFORMATION", function () {
+    it( "200 old ORDER with TRANSFORMATION", function () {
         var queryTest:any =    {
             "WHERE": {},
             "OPTIONS": {

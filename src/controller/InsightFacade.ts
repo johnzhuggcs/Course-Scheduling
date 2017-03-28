@@ -2399,6 +2399,7 @@ export default class InsightFacade implements IInsightFacade {
         var Table; //returns TABLE from VIEW
         var Transformation:any;
         var transformationExists;
+        var applyExists;
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
@@ -2419,6 +2420,12 @@ export default class InsightFacade implements IInsightFacade {
 
             if(!isUndefined(Transformation)){
                 transformationExists = true;
+                if(!isNullOrUndefined(Transformation["APPLY"])) {
+                    if (Transformation["APPLY"].length > 0) {
+                        applyExists = true;
+                    }
+                }
+
             }
 
             if(Object.keys(filter).length != 0){ //check if FILTER is empty
@@ -2519,7 +2526,7 @@ export default class InsightFacade implements IInsightFacade {
                                 invalidIdArray.push(invalidIdLists[0]);
                             }isOneDataset = {"false":invalidIdArray}
 
-                        }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_")) && transformationExists == true){
+                        }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_")) && applyExists == true){
                             continue;
                         }else
                             return false
@@ -2545,6 +2552,22 @@ export default class InsightFacade implements IInsightFacade {
                                             })) {
                                             if (transformationExists == true) {
                                                 isOneDataset = isOneDataset;
+                                                if(applyExists != true){
+                                                    for(let x in keyArray) {
+                                                        isOneDataset = this.queryCheckingOrder(keyArray[x], yesOrNo, dataSet, invalidIdArray, applyExists);
+                                                        if (isOneDataset == false) {
+                                                            return false;
+                                                        } else {
+                                                            yesOrNo = Object.keys(isOneDataset)[0];
+                                                            dataSet = isOneDataset[yesOrNo];
+
+                                                            Table = optionsValue[columnsEtcKey[2]];
+                                                            if (Table == "TABLE") { //if value of FORM is TABLE
+                                                                return isOneDataset
+                                                            } else return false;
+                                                        }
+                                                    }
+                                                }
                                             } else {
                                                 Table = optionsValue[columnsEtcKey[2]];
                                                 if (Table == "TABLE") { //if value of FORM is TABLE
@@ -2558,124 +2581,25 @@ export default class InsightFacade implements IInsightFacade {
                             }else return false;
                         }else
                         if (columnsValidKeyArray.includes(orderValidKey)) {
-                            if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
-                                || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
-                                || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
-                                || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                || orderValidKey == "courses_uuid" || orderValidKey == "courses_year" || orderValidKey == "courses_sectionsize")) { //checks for valid key
-                                if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
-                                    if(transformationExists == true){
-                                        isOneDataset = {"true":["courses"]}
-                                    }else {
-                                        Table = optionsValue[columnsEtcKey[2]];
-                                        if (Table == "TABLE") { //if value of FORM is TABLE
-                                            isOneDataset = {"true": ["courses"]}
-                                            return isOneDataset
-                                        } else return false;
-                                    }
+                            isOneDataset = this.queryCheckingOrder(orderValidKey, yesOrNo, dataSet, invalidIdArray, applyExists);
+                            if(isOneDataset == false){
+                                return false;
+                            }else {
+                                yesOrNo = Object.keys(isOneDataset)[0];
+                                dataSet = isOneDataset[yesOrNo];
 
-                                } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
-                                    var invalidIdLists:any = orderValidKey.split("_");
-
-                                    if(invalidIdArray.includes(invalidIdLists[0])){
-                                        invalidIdLists = [];
-                                    } else {
-                                        invalidIdArray.push(invalidIdLists[0]);
-                                    }
-                                    isOneDataset = {"false":invalidIdArray}
-                                    if(transformationExists == true){
-                                        isOneDataset = isOneDataset
-                                    }else return isOneDataset;
-
-                                } return isOneDataset;
-                            } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
-                                || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
-                                || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
-                                || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
-                                || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture" || orderValidKey == "rooms_distance")) { //checks for valid key
-                                if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
-
-
+                                if(transformationExists == true){
+                                   isOneDataset = isOneDataset;
+                                }else {
                                     Table = optionsValue[columnsEtcKey[2]];
-                                    if(transformationExists == true){
-                                        isOneDataset = {"true":["rooms"]}
-                                    }else {
-                                        Table = optionsValue[columnsEtcKey[2]];
-                                        if (Table == "TABLE") { //if value of FORM is TABLE
-                                            isOneDataset = {"true": ["rooms"]}
-                                            return isOneDataset
-                                        } else return false;
-                                    }
-
-                                } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
-                                    var invalidIdLists:any = orderValidKey.split("_");
-
-                                    if(invalidIdArray.includes(invalidIdLists[0])){
-                                        invalidIdLists = [];
-                                    } else {
-                                        invalidIdArray.push(invalidIdLists[0]);
-                                    }
-                                    isOneDataset = {"false":invalidIdArray}
-                                    if(transformationExists == true){
-                                        isOneDataset = isOneDataset
-                                    }else return isOneDataset;
-
-
-                                } return isOneDataset;
-
-                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
-                                (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
-                                orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year") || orderValidKey.endsWith("courses_sectionsize"))) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
+                                    if (Table == "TABLE") { //if value of FORM is TABLE
+                                        return isOneDataset
+                                    } else return false;
                                 }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
 
-                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
-                                (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
-                                orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
-                                orderValidKey.endsWith("_lon") || orderValidKey.endsWith("_seats") || orderValidKey.endsWith("_type") || orderValidKey.endsWith("_furniture")
-                                || orderValidKey.endsWith("_href") || orderValidKey.endsWith("_distance"))) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
-
-                            } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
-
-                            } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && transformationExists == true){
-                                orderValidKey = orderValidKey
-                            }else return false
+                            }
                         } else return false
+
                     }else if(transformationExists == true){
                         isOneDataset = isOneDataset
                     } else {
@@ -2812,6 +2736,136 @@ export default class InsightFacade implements IInsightFacade {
 
 
         }else return false;
+    }
+
+    queryCheckingOrder(orderValidKey:any, yesOrNo:any, dataSet:any, invalidIdArray:any, applyExists:boolean):any{
+        var isOneDataset:any = {[yesOrNo]:dataSet}
+        if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+            || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
+            || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
+            || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
+            || orderValidKey == "courses_uuid" || orderValidKey == "courses_year" || orderValidKey == "courses_sectionsize")) { //checks for valid key
+            if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
+                /**if(transformationExists == true){
+                    isOneDataset = {"true":["courses"]}
+                }else {
+                    Table = optionsValue[columnsEtcKey[2]];
+                    if (Table == "TABLE") { //if value of FORM is TABLE
+                        isOneDataset = {"true": ["courses"]}
+                        return isOneDataset
+                    } else return false;
+                }*/
+                isOneDataset = {"true":["courses"]}
+                return isOneDataset;
+
+            } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
+                var invalidIdLists:any = orderValidKey.split("_");
+
+                if(invalidIdArray.includes(invalidIdLists[0])){
+                    invalidIdLists = [];
+                } else {
+                    invalidIdArray.push(invalidIdLists[0]);
+                }
+                isOneDataset = {"false":invalidIdArray}
+                /**if(transformationExists == true){
+                    isOneDataset = isOneDataset
+                }else return isOneDataset;*/
+                return isOneDataset;
+
+            } return isOneDataset;
+        } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
+            || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
+            || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
+            || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
+            || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture" || orderValidKey == "rooms_distance")) { //checks for valid key
+            if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+
+                /**
+                Table = optionsValue[columnsEtcKey[2]];
+                if(transformationExists == true){
+                    isOneDataset = {"true":["rooms"]}
+                }else {
+                    Table = optionsValue[columnsEtcKey[2]];
+                    if (Table == "TABLE") { //if value of FORM is TABLE
+                        isOneDataset = {"true": ["rooms"]}
+                        return isOneDataset
+                    } else return false;
+                }*/
+                isOneDataset = {"true":["rooms"]};
+                return isOneDataset;
+
+            } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
+                var invalidIdLists:any = orderValidKey.split("_");
+
+                if(invalidIdArray.includes(invalidIdLists[0])){
+                    invalidIdLists = [];
+                } else {
+                    invalidIdArray.push(invalidIdLists[0]);
+                }
+                isOneDataset = {"false":invalidIdArray}
+                /**if(transformationExists == true){
+                    isOneDataset = isOneDataset
+                }else return isOneDataset;*/
+                return isOneDataset;
+
+
+            } return isOneDataset;
+
+        } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
+            (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
+            orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
+            orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year") || orderValidKey.endsWith("courses_sectionsize"))) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset;
+
+        } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
+            (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
+            orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
+            orderValidKey.endsWith("_lon") || orderValidKey.endsWith("_seats") || orderValidKey.endsWith("_type") || orderValidKey.endsWith("_furniture")
+            || orderValidKey.endsWith("_href") || orderValidKey.endsWith("_distance"))) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset
+
+        } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset;
+
+        } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && applyExists == true){
+            return isOneDataset;
+        }else return false
     }
 
     hasFilter(filter:FilterQuery, invalidIdArray:any, isOneDataset:any):any{ //
