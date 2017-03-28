@@ -1517,6 +1517,24 @@ export default class InsightFacade implements IInsightFacade {
 
     //Helper function in main queryRequest()
 
+    getDistanceFromLatLonInKm(lat1:number,lon1:number,lat2:number,lon2:number):number {
+        var R = 6371; // Radius of the earth in km
+        var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+        var dLon = this.deg2rad(lon2-lon1);
+        var a =
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+            ;
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c; // Distance in km
+        return d;
+    }
+
+    deg2rad(deg:number):number {
+        return deg * (Math.PI/180)
+    }
+
     finishApply(returnInfo:any):any{
         var cachedInfo;
         var singleInfo:any;
@@ -2172,6 +2190,7 @@ export default class InsightFacade implements IInsightFacade {
         //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
         var sortKey = resultKeyArray[0]
         var returnInfoKeyArray = Object.keys(returnInfo);
+        var distance:number;
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
@@ -2191,6 +2210,13 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         returnInfo = []
                     }
+                }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue < sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
                 }
             }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal && sortKey == tempAtomicKey){
@@ -2229,6 +2255,13 @@ export default class InsightFacade implements IInsightFacade {
                         returnInfo = []
                     }
                 }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue > sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
+                }
             }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
@@ -2262,6 +2295,13 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         returnInfo = []
                     }
+                }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue == sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
                 }
             }else
             if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal && sortKey == tempAtomicKey) {
@@ -2406,7 +2446,7 @@ export default class InsightFacade implements IInsightFacade {
                             || columnsValidKeyArray[x] == "rooms_name" || columnsValidKeyArray[x] == "rooms_address"
                             || columnsValidKeyArray[x] == "rooms_lat" || columnsValidKeyArray[x] == "rooms_lon"
                             || columnsValidKeyArray[x] == "rooms_seats" || columnsValidKeyArray[x] == "rooms_type" || columnsValidKeyArray[x] == "rooms_furniture"
-                            || columnsValidKeyArray[x] == "rooms_href")){ //checks for valid keys
+                            || columnsValidKeyArray[x] == "rooms_href" || columnsValidKeyArray[x] == "rooms_distance")){ //checks for valid keys
                             if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
                                 isOneDataset = {"true":["rooms"]} //dummy line of code so further check would be done outside of for-loop
                             } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
@@ -2440,7 +2480,7 @@ export default class InsightFacade implements IInsightFacade {
                             (columnsValidKeyArray[x].endsWith("_fullname") || columnsValidKeyArray[x].endsWith("_shortname") || columnsValidKeyArray[x].endsWith("_number") ||
                             columnsValidKeyArray[x].endsWith("_name") || columnsValidKeyArray[x].endsWith("_address") || columnsValidKeyArray[x].endsWith("_lat") ||
                             columnsValidKeyArray[x].endsWith("_lon") || columnsValidKeyArray[x].endsWith("_seats") || columnsValidKeyArray[x].endsWith("_type")
-                            || columnsValidKeyArray[x].endsWith("_furniture") || columnsValidKeyArray[x].endsWith("_href"))){
+                            || columnsValidKeyArray[x].endsWith("_furniture") || columnsValidKeyArray[x].endsWith("_href") || columnsValidKeyArray[x].endsWith("_distance"))){
 
                             invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -2535,7 +2575,7 @@ export default class InsightFacade implements IInsightFacade {
                                 || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
                                 || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
                                 || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
-                                || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture")) { //checks for valid key
+                                || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture" || orderValidKey == "rooms_distance")) { //checks for valid key
                                 if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
 
 
@@ -2587,7 +2627,7 @@ export default class InsightFacade implements IInsightFacade {
                                 (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
                                 orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
                                 orderValidKey.endsWith("_lon") || orderValidKey.endsWith("_seats") || orderValidKey.endsWith("_type") || orderValidKey.endsWith("_furniture")
-                                || orderValidKey.endsWith("_href"))) {
+                                || orderValidKey.endsWith("_href") || orderValidKey.endsWith("_distance"))) {
 
                                 invalidIdLists = orderValidKey.split("_");
 
@@ -2701,7 +2741,7 @@ export default class InsightFacade implements IInsightFacade {
                                          if (applyToken == "COUNT" && (applylittleKey == "rooms_fullname" || applylittleKey == "rooms_shortname"
                                             || applylittleKey == "rooms_number" || applylittleKey == "rooms_name" || applylittleKey == "rooms_address"
                                             || applylittleKey == "rooms_lat" || applylittleKey == "rooms_lon" || applylittleKey == "rooms_seats"
-                                            || applylittleKey == "rooms_type" || applylittleKey == "rooms_furniture" || applylittleKey == "rooms_href"
+                                            || applylittleKey == "rooms_type" || applylittleKey == "rooms_furniture"
                                             || applylittleKey == "courses_year" || applylittleKey == "courses_dept" || applylittleKey == "courses_id"
                                             || applylittleKey == "courses_avg" || applylittleKey == "courses_instructor" || applylittleKey == "courses_title"
                                             || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
@@ -2799,9 +2839,16 @@ export default class InsightFacade implements IInsightFacade {
                     } else return isOneDataset
                 }
                 else if(validProjectKey.length == 1 && typeof validProjectKey[0] == "string" && (validProjectKey[0] == "rooms_lat" || validProjectKey[0] == "rooms_lon" ||
-                    validProjectKey[0] == "rooms_seats")){ //make sure only a valid key exists
+                    validProjectKey[0] == "rooms_seats" || validProjectKey[0] == "rooms_distance")){ //make sure only a valid key exists
 
                     if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+                        if(validProjectKey[0] == "rooms_distance"){
+                            if(mComparisonNumber instanceof Array && typeof mComparisonNumber[0] == "string" && isNumber(mComparisonNumber[1])
+                                && isNumber(mComparisonNumber[2]) && isNumber(mComparisonNumber[3])){
+                                isOneDataset = {"true":["rooms"]};
+                                return isOneDataset;
+                            }
+                        }else
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
                             isOneDataset = {"true": ["rooms"]};
                             return isOneDataset;

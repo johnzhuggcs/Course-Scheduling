@@ -868,5 +868,48 @@ describe("D2QueryTestSpec", function () {
 
     });
 
+    it.only("D3 rooms distance", function () {
+        var queryTest: any =
+            {
+                "WHERE": {
+                    "AND": [
+                        {
+                            "IS": {
+                                "rooms_type": "Tiered Large Group"
+                            }
+                        },
+                        {
+                            "LT": {
+                                "rooms_distance": ["DMP", 49.26125, -123.24807, 0.5]
+                            }
+                        }
+                    ]
+                }
+                ,
+                "OPTIONS": {
+                    "COLUMNS": ["rooms_shortname", "rooms_distance", "rooms_lat", "rooms_lon"],
+                    "ORDER": {"dir": "UP", "keys": ["rooms_distance"]},
+                    "FORM": "TABLE"
+                }
+            }
+
+        /**courses_dept    courses_id    courses_avg    courses_fail
+         chem    121    68.2    287
+         cnps    574    99.19    0
+         math    527    99.78    0
+         math    527    99.78    0*/
+
+        return insightFacade.performQuery(queryTest).then(function (value: InsightResponse) {
+            expect(value.code).to.equal(200);
+            //console.time("deep equal time")
+            Log.info(JSON.stringify(value.body))
+            //console.timeEnd("deep equal time")
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+            expect(err.code).to.equal(400);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+        })
+    });
+
 
 });

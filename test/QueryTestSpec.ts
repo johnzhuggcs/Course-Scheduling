@@ -2207,7 +2207,7 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it.only("D3 section size", function () {
+    it("D3 section size", function () {
         var queryTest:any =
             {
                 "WHERE":{

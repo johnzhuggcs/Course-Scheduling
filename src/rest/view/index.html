@@ -32,6 +32,7 @@
 	</div>
 
 	<script>
+	
 	$("#btnUpload").click(function(){
 		var fileToLoad = document.getElementById("fileUpload").files[0];
 		var fileReader = new FileReader();
@@ -43,6 +44,7 @@
 			formData.append("body", new Blob([content])); //blob is for keeping it in base 64
 
 			$.ajax({ //ajax makes a run-time call to the server
+				async:false,
 				url: "http://localhost:4321/dataset/" + id,
 				type: "put",								//REST endpointsz
 				data: formData,
@@ -62,6 +64,7 @@
 		console.log("query", query);
 
 		$.ajax({
+			async:false,
 			url: "http://localhost:4321/query",
 			type: "post",
 			data: query,

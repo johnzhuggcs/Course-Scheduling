@@ -372,4 +372,21 @@ export interface IInsightFacade {
      */
 
     finishApply(returnInfo:any):any
+
+    /**
+     * calculates distances from two sets of latlon
+     * @param lat1
+     * @param lat2
+     * @param lat3
+     * @param lat4 DATA CLUMP
+     */
+
+    getDistanceFromLatLonInKm(lat1:number, lon1:number, lat2:number, lon2:number):number;
+
+    /**
+     * converts degrees to radians
+     * @param degrees
+     */
+
+    deg2rad(deg:number):number
 }
