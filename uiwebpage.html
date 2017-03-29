@@ -524,6 +524,14 @@
                    || $(".mostfail").is(":checked")) {
 		    	    querystr = '"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],"APPLY": [' + applyMaker() + ']}'
 				}
+				if ($(".groupBy").is(":checked")
+                    && !$(".highestavg").is(":checked")
+                    && !$(".lowestavg").is(":checked")
+                    && !$(".mostsec").is(":checked")
+                    && !$(".mostpass").is(":checked")
+                    && !$(".mostfail").is(":checked")){
+				    querystr = '"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],"APPLY": []}'
+				}
 				return querystr
 			}
 
@@ -553,7 +561,7 @@
                     }
                 }
                 if ($(".mostsec").is(":checked")) {
-                    querystr = querystr + '{"MostSections": {"COUNT": "courses_id"}}'
+                    querystr = querystr + '{"MostSections": {"COUNT": "courses_uuid"}}'
                     lastAttrCounter++;
                     if (lastAttrCounter < attrCounter) {
                         querystr = querystr + ', '
@@ -632,23 +640,21 @@
                     var tbl_row = tbl_body.insertRow();
                     tbl_row.className = odd_even ? "odd" : "even";
                     $.each(this, function(k , v) {
-                        //key: 0, 1, 2, ...., n
-						//v: {k:v, k2:v2}
-                       /* for (var key in v) {
-                            //console.log(key, v[key]);
-                            var cell = tbl_row.insertCell();
-                            cell.appendChild(document.createTextNode(v[key]));
-						}*/
-                       //console.log(v);
                        var cell = tbl_row.insertCell();
                        cell.appendChild(document.createTextNode(v));
                     });
                     odd_even = !odd_even;
                 })
                 document.getElementById("tblResults").appendChild(tbl_body);
-                // $("#tblResults").appendChild(tbl_body);
             }
 
+            var isGroupChecked = false;
+            function groupByActivated() {
+                if ($(".groupBy ").is(":checked")) {
+					isGroupChecked = true;
+					$(".ifcourses").hide();
+				}
+			}
 
         function generateData() {
             if ($isCourses) {
@@ -730,23 +736,6 @@
                 //window.print("ERROR - Failed to submit query", e)
 			});
 
-                /*$.ajax('/query',
-					{
-                    type: 'POST',
-                    data: $queryFormat,
-						contentType: 'application/json',
-                    dataType: 'json'
-                }).done(function(data) {
-                    console.log("Response", data);
-                }).fail(function(e) {
-                    console.error("ERROR - Failed to submit query", e);
-                });*/
-
-
-            /*$.post("http://localhost:4321/query",$queryFormat,function(data) {
-                alert("here");
-                fulfill(data);
-			},"jsonp");*/
 			}
 
 
@@ -1200,6 +1189,13 @@
 
 				</span>
 			</p>
+
+			<p>
+
+			</p>
+				<span class = "ifcoursesExtraInfo" style="display:none"><b>Group by department and course number? </b>
+					<input type="checkbox" class="groupBy" onchange="groupByActivated()">Yes<br>
+				</span>
 
 			<p>
 				<span class = "ifcoursesExtraInfo" style="display:none"><b>Extra Info Available: </b>
