@@ -702,10 +702,12 @@
                 if($(".explorerOrScheduler").val() == "explorer"){
                     //console.log(dataset.toString());
                     $(".explorerBanner").show()
+					$(".dataset").val("default")
                     //dataset.style.visibility = "visible";
                     $(".coursesAndOrClass").hide();
                     $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").hide();
+                    $(".ifcoursesExtraInfo").hide();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
                     $(".ifcourses").hide();
@@ -730,6 +732,7 @@
                     $(".coursesAndOrClass").show();
                     $(".roomsFilterSchedule").show();
                     $(".ifcoursesFilters").show();
+                    $("#nonScheduleCourseFilters").hide();
                     $(".ifroomsFilters").show();
                     $(".ifgroupFilters").hide();
                     $(".roomsFilterSchedule").show()
@@ -739,6 +742,7 @@
 
                     $isCourses = false;
                     $isRooms = false;
+                    $(".compareSizeSection").hide();
                     $(".ifcoursesGroup").hide();
                     $(".ifroomsGroup").hide();
                     $(".ifgroupGroup").hide();
@@ -877,14 +881,6 @@
 				</span>
 
 				<div class = "ifcoursesFilters" style="display:none">
-					Section size:
-					<select class = "compareSizeSection">
-						<option value="LT">Less than</option>
-						<option value="EQ">Equal to</option>
-						<option value="GT">Greater than</option>
-					</select>
-					<input type="number" id="courses_sectionsize" value="">
-					<br>
 					Department:
 					<select class = "isItDep">
 						<option value="IS" selected>IS</option>
@@ -903,27 +899,38 @@
 					</select>
 					<input type="text" id="courses_id" value="">
 					<br>
-					Instructor:
-					<select class = "isItIns">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
+					<br>
+					<div id = "nonScheduleCourseFilters">Section size:
+						<select class = "compareSizeSection">
+							<option value="LT">Less than</option>
+							<option value="EQ">Equal to</option>
+							<option value="GT">Greater than</option>
+						</select>
+						<input type="number" id="courses_sectionsize" value="">
+						<br>
+						Instructor:
+						<select class = "isItIns">
+							<option value="IS" selected>IS</option>
+							<option value="SW">Starts With</option>
+							<option value="EW">Ends With</option>
+							<option value="CT">Contains</option>
+							</select>
+				<input type="text" id="courses_instructor" value="">
+				<br>
+				Title:
+				<select class = "isItTit">
+					<option value="IS" selected>IS</option>
+					<option value="SW">Starts With</option>
+					<option value="EW">Ends With</option>
+					<option value="CT">Contains</option>
+				</select>
+				<input type="text" id="courses_title" value="">
+				<br>
+				<br>
+			</div>
 
-					</select>
-					<input type="text" id="courses_instructor" value="">
-					<br>
-					Title:
-					<select class = "isItTit">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
-					</select>
-					<input type="text" id="courses_title" value="">
-					<br>
-                    <br>
-				</div>
+		</div>
+
 
                 <span class = "roomsFilterSchedule radioclass" style="display:none"><b>Room Filters (can leave blank): </b>
                     <!-- Added new banner to represent Room filters banner -->
@@ -1003,7 +1010,7 @@
 					<option value="courses_title">Title</option>
 					<option value="courses_pass">Number of passed students</option>
 					<option value="courses_fail">Number of failed students</option>
-					<option value="coourses_sectionsize">Section size</option>
+					<option value="courses_sectionsize">Section size</option>
 					<!-- based on no.of passed + failed-->
 					<option value="courses_audit">Number of students audited</option>
 					<option value="courses_uuid">ID of a course offering</option>
