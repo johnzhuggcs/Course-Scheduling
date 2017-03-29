@@ -2207,35 +2207,9 @@ describe("QueryTestSpec", function () {
 
     });
 
-    it("D3 section size", function () {
+    it.only("D3 section size", function () {
         var queryTest:any =
-            {
-                "WHERE":{
-                    "AND":[
-                        {
-                            "IS":{
-                                "courses_id":"343"
-                            }
-                        },
-                        {
-                            "GT":{
-                                "courses_sectionsize":50
-                            }
-                        }
-                    ]
-                }
-                ,
-                "OPTIONS":{
-                    "COLUMNS":["courses_dept", "MostSections"],
-                    "ORDER":{"dir":"UP","keys":["courses_dept"]},
-                    "FORM":"TABLE"
-                },
-                "TRANSFORMATIONS":{
-                    "GROUP":["courses_dept","courses_id"],
-                    "APPLY":[
-                        {"MostSections":
-                            {"MAX":"courses_sectionsize"}}
-                    ]}}
+            {"WHERE": {"AND":[{"IS": {"courses_dept": "cpsc"}},{"IS": {"courses_id": "310"}}]}, "OPTIONS": {"COLUMNS": ["courses_dept","courses_id","maxCourseSize","uniqueSection"], "ORDER":"maxCourseSize", "FORM": "TABLE"},"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],"APPLY": [{"maxCourseSize":{"MAX":"courses_sectionsize"}}, {"uniqueSection":{"COUNT":"courses_uuid"}}]}}
 
         /**courses_dept	courses_id	courses_avg	courses_fail
          chem	121	68.2	287
