@@ -372,4 +372,49 @@ export interface IInsightFacade {
      */
 
     finishApply(returnInfo:any):any
+
+    /**
+     * calculates distances from two sets of latlon
+     * @param lat1
+     * @param lat2
+     * @param lat3
+     * @param lat4 DATA CLUMP
+     */
+
+    getDistanceFromLatLonInKm(lat1:number, lon1:number, lat2:number, lon2:number):number;
+
+    /**
+     * converts degrees to radians
+     * @param degrees
+     */
+
+    deg2rad(deg:number):number
+
+    /**
+     * new order function essentially
+     * @param dir
+     * @param keysArray
+     * @param finalReturn
+     */
+    newD3Order(dir:string, keysArray:any[], finalReturn:any):any
+
+    /**
+     * sorting within order itself
+     * @param dir
+     * @param keysArray
+     * @param a
+     * @param b
+     */
+    innerOrderTwoElements(dir:string, keysArray:any[], a:any, b:any):any
+
+    /**
+     * checks within order to see if it contains valid keys
+     * @param orderKey
+     * @param yesOrNo
+     * @param dataSet
+     * @param invalidIdArray
+     */
+
+    queryCheckingOrder(orderKey:any, yesOrNo:string, dataSet:any, invalidIdArray:any, applyExists:any):any
+
 }

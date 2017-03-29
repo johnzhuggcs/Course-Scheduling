@@ -1239,7 +1239,7 @@ export default class InsightFacade implements IInsightFacade {
 
                                     } else if (typeof finalReturn[0][order] == "string" || order.endsWith("_dept") || order.endsWith("_id") || order.endsWith("_instructor") || order.endsWith("_fullname") || order.endsWith("furniture")
                                         || order.endsWith("_shortname") || order.endsWith("_number") || order.endsWith("_name") || order.endsWith("_address") || order.endsWith("_type") || order.endsWith("_href")
-                                        || order.endsWith("_uuid")) {
+                                        || order.endsWith("_uuid") || order.endsWith("_distance")) {
                                         finalReturn = finalReturn.sort(function (a: any, b: any) {
                                             var nameA = a[order].toUpperCase(); // ignore upper and lowercase
                                             var nameB = b[order].toUpperCase(); // ignore upper and lowercase
@@ -1344,105 +1344,11 @@ export default class InsightFacade implements IInsightFacade {
 
                                 //TODO: sort using apply key now, check that it exists in APPLY and COLUMNS first
                             }*/
-                                if (typeof (finalReturn[0][keysArray[0]]) == "number" || keysArray[0].endsWith("_avg") || keysArray[0].endsWith("_pass") || keysArray[0].endsWith("_fail") || keysArray[0].endsWith("_audit") || keysArray[0].endsWith("_year")
-                                    || keysArray[0].endsWith("_lat") || keysArray[0].endsWith("_lon") || keysArray[0].endsWith("_seats") || keysArray[0].endsWith("_sectionsize")) {
-
-                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
-                                        if (dir == "DOWN") {
-                                            tempSortResult = b[keysArray[0]] - a[keysArray[0]];
-
-                                            let x = 0;
-                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
-                                                tempSortResult = b[keysArray[x]] - a[keysArray[x]];
-                                                x++;
-                                            }
-
-                                            return tempSortResult
-
-                                            /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(b, a, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult*/
-                                        } else if (dir == "UP") {
-                                            tempSortResult = a[keysArray[0]] - b[keysArray[0]];
-
-                                            let x = 0;
-                                            while (tempSortResult == 0 && Number(x) < keysArray.length) {
-                                                tempSortResult = a[keysArray[x]] - b[keysArray[x]];
-                                                x++;
-                                            }
-                                            return tempSortResult
-
-                                            /**if(tempSortResult == 0){
-                                        tempKeysArray = keysArray.shift()
-                                        tempSortResult = newThis.breakingTies(a, b, tempKeysArray, dir)
-                                        return tempSortResult
-                                    }else return tempSortResult;*/
-                                        }
-                                    });
-
-                                } else if (typeof (finalReturn[0][keysArray[0]]) == "string" || keysArray[0].endsWith("_dept") || keysArray[0].endsWith("_id") || keysArray[0].endsWith("_instructor") || keysArray[0].endsWith("_fullname")
-                                    || keysArray[0].endsWith("_shortname") || keysArray[0].endsWith("_number") || keysArray[0].endsWith("_name") || keysArray[0].endsWith("_address") || keysArray[0].endsWith("_type") || keysArray[0].endsWith("_href")
-                                    || keysArray[0].endsWith("_uuid")) {
-                                    // var x = 0;
-                                    var tempKeysArray = keysArray.slice();
-                                    finalReturn = finalReturn.sort(function (a: any, b: any) {
-
-                                        if (dir == "DOWN") {
-
-                                            //Log.info(JSON.stringify(a));
-                                            //Log.info(JSON.stringify(keysArray[0]))
-
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameB < nameA) {
-                                                return -1;
-                                            } else if (nameB > nameA) {
-                                                return 1;
-                                            } else {
-                                                let x = 0;
-                                                while (nameB == nameA && Number(x) < keysArray.length) {
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if (nameB < nameA) {
-                                                    return -1;
-                                                } else {
-                                                    return 1;
-                                                }
-                                                //return 0
-                                            }
-                                        } else if (dir == "UP") {
-                                            var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
-                                            if (nameA < nameB) {
-                                                return -1;
-                                            } else if (nameA > nameB) {
-                                                return 1;
-                                            } else {
-                                                let x = 0;
-                                                while (nameB == nameA && Number(x) < keysArray.length) {
-                                                    nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
-                                                    x++
-                                                }
-                                                if (nameB > nameA) {
-                                                    return -1;
-                                                } else {
-                                                    return 1;
-                                                }
-                                                //return 0
-                                            }
-
-
-                                        }
-                                    });
-
-
+                                if (typeof (typeof finalReturn[0][keysArray[0]]) == "string" || typeof finalReturn[0][keysArray[0]] == "number"){
+                                    finalReturn = newThis.newD3Order(dir, keysArray, finalReturn)
                                 }
                                 else {
+
                                     var code400InvalidQuery: InsightResponse = {
                                         code: 400,
                                         body: {"error": "order error"}
@@ -1516,6 +1422,135 @@ export default class InsightFacade implements IInsightFacade {
 
 
     //Helper function in main queryRequest()
+
+    newD3Order(dir:string, keysArray:any[], finalReturn:any):any{
+        var newThis = this;
+        var tempSortResult;
+
+
+            finalReturn = finalReturn.sort(function (a: any, b: any) {
+                return newThis.innerOrderTwoElements(dir, keysArray, a, b)
+            });
+            return finalReturn;
+
+        }
+
+    innerOrderTwoElements(dir:string, keysArray:any[], a:any, b:any):any{
+        var tempSortResult;
+        if (typeof a[keysArray[0]] == "number" && typeof a[keysArray[0]] == "number") {
+            if (dir == "DOWN") {
+                tempSortResult = b[keysArray[0]] - a[keysArray[0]];
+
+                let x = 0;
+                while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                    if(typeof a[keysArray[x]] == "string" && typeof a[keysArray[x]] == "string"){
+                        var newKeysArray = keysArray.slice(x);
+                        return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                    }else {
+                        tempSortResult = b[keysArray[x]] - a[keysArray[x]];
+                        x++;
+                    }
+                }
+
+                return tempSortResult;
+            } else if (dir == "UP") {
+                tempSortResult = a[keysArray[0]] - b[keysArray[0]];
+
+                let x = 0;
+                while (tempSortResult == 0 && Number(x) < keysArray.length) {
+                    if(typeof a[keysArray[x]] == "string" && typeof a[keysArray[x]] == "string"){
+                        var newKeysArray = keysArray.slice(x);
+                        return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                    }else {
+                        tempSortResult = a[keysArray[x]] - b[keysArray[x]];
+                        x++;
+                    }
+                }
+                return tempSortResult;
+            }
+        }
+        else if (typeof a[keysArray[0]] == "string" && typeof a[keysArray[0]] == "string") {
+            // var x = 0;
+
+            if (dir == "DOWN") {
+
+                //Log.info(JSON.stringify(a));
+                //Log.info(JSON.stringify(keysArray[0]))
+
+                var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                if (nameB < nameA) {
+                    return -1;
+                } else if (nameB > nameA) {
+                    return 1;
+                } else {
+                    let x = 0;
+                    while (nameB == nameA && Number(x) < keysArray.length) {
+                        if(typeof a[keysArray[x]] == "number" && typeof a[keysArray[x]] == "number"){
+                            var newKeysArray = keysArray.slice(x);
+                            return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                        }else {
+                            nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            x++
+                        }
+                    }
+                    if (nameB < nameA) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                    //return 0
+                }
+            } else if (dir == "UP") {
+                var nameA = a[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                var nameB = b[keysArray[0]].toUpperCase(); // ignore upper and lowercase
+                if (nameA < nameB) {
+                    return -1;
+                } else if (nameA > nameB) {
+                    return 1;
+                } else {
+                    let x = 0;
+                    while (nameB == nameA && Number(x) < keysArray.length) {
+                        if(typeof a[keysArray[x]] == "number" && typeof a[keysArray[x]] == "number"){
+                            var newKeysArray = keysArray.slice(x);
+                            return this.innerOrderTwoElements(dir, newKeysArray, a, b)
+                        }else {
+                            nameA = a[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            nameB = b[keysArray[x]].toUpperCase(); // ignore upper and lowercase
+                            x++
+                        }
+                    }
+                    if (nameB > nameA) {
+                        return -1;
+                    } else {
+                        return 1;
+                    }
+                    //return 0
+                }
+
+
+            }
+        }
+    }
+
+    getDistanceFromLatLonInKm(lat1:number,lon1:number,lat2:number,lon2:number):number {
+        var R = 6371; // Radius of the earth in km
+        var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+        var dLon = this.deg2rad(lon2-lon1);
+        var a =
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+            ;
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c; // Distance in km
+        return d;
+    }
+
+    deg2rad(deg:number):number {
+        return deg * (Math.PI/180)
+    }
 
     finishApply(returnInfo:any):any{
         var cachedInfo;
@@ -2172,6 +2207,7 @@ export default class InsightFacade implements IInsightFacade {
         //returnInfo is now {atomicReturnInfo, atomicReturnInfo}
         var sortKey = resultKeyArray[0]
         var returnInfoKeyArray = Object.keys(returnInfo);
+        var distance:number;
         for(let x in returnInfoKeyArray){
             var tempAtomicKey = returnInfoKeyArray[x]
             var tempAtomicValue = returnInfo[tempAtomicKey];
@@ -2191,6 +2227,13 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         returnInfo = []
                     }
+                }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue < sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
                 }
             }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue < sortVal && sortKey == tempAtomicKey){
@@ -2229,6 +2272,13 @@ export default class InsightFacade implements IInsightFacade {
                         returnInfo = []
                     }
                 }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue > sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
+                }
             }else
             if(isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue > sortVal && sortKey == tempAtomicKey){
                 returnInfo = returnInfo
@@ -2262,6 +2312,13 @@ export default class InsightFacade implements IInsightFacade {
                     } else {
                         returnInfo = []
                     }
+                }
+            }if(sortKey == "rooms_distance"){
+                tempAtomicValue = this.getDistanceFromLatLonInKm(sortVal[1], sortVal[2], Number(returnInfo["rooms_lat"]), Number(returnInfo["rooms_lon"]))
+                if(isNumber(sortVal[3])  && isNumber(tempAtomicValue) && tempAtomicValue == sortVal[3]){
+                    if(isNullOrUndefined(returnInfo[sortKey])){
+                        returnInfo[sortKey] = tempAtomicValue;
+                    }else returnInfo = returnInfo;
                 }
             }else
             if (isNumber(sortVal) && isNumber(tempAtomicValue) && tempAtomicValue == sortVal && sortKey == tempAtomicKey) {
@@ -2342,6 +2399,7 @@ export default class InsightFacade implements IInsightFacade {
         var Table; //returns TABLE from VIEW
         var Transformation:any;
         var transformationExists;
+        var applyExists;
         var invalidIdArray = new Array; //returns an array of id in query that do not exist
         var invalidIdLists;
         var isOneDataset:any = {"true":invalidIdArray}; //{boolean:invalidDataset[]}
@@ -2362,6 +2420,12 @@ export default class InsightFacade implements IInsightFacade {
 
             if(!isUndefined(Transformation)){
                 transformationExists = true;
+                if(!isNullOrUndefined(Transformation["APPLY"])) {
+                    if (Transformation["APPLY"].length > 0) {
+                        applyExists = true;
+                    }
+                }
+
             }
 
             if(Object.keys(filter).length != 0){ //check if FILTER is empty
@@ -2406,7 +2470,7 @@ export default class InsightFacade implements IInsightFacade {
                             || columnsValidKeyArray[x] == "rooms_name" || columnsValidKeyArray[x] == "rooms_address"
                             || columnsValidKeyArray[x] == "rooms_lat" || columnsValidKeyArray[x] == "rooms_lon"
                             || columnsValidKeyArray[x] == "rooms_seats" || columnsValidKeyArray[x] == "rooms_type" || columnsValidKeyArray[x] == "rooms_furniture"
-                            || columnsValidKeyArray[x] == "rooms_href")){ //checks for valid keys
+                            || columnsValidKeyArray[x] == "rooms_href" || columnsValidKeyArray[x] == "rooms_distance")){ //checks for valid keys
                             if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
                                 isOneDataset = {"true":["rooms"]} //dummy line of code so further check would be done outside of for-loop
                             } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
@@ -2440,7 +2504,7 @@ export default class InsightFacade implements IInsightFacade {
                             (columnsValidKeyArray[x].endsWith("_fullname") || columnsValidKeyArray[x].endsWith("_shortname") || columnsValidKeyArray[x].endsWith("_number") ||
                             columnsValidKeyArray[x].endsWith("_name") || columnsValidKeyArray[x].endsWith("_address") || columnsValidKeyArray[x].endsWith("_lat") ||
                             columnsValidKeyArray[x].endsWith("_lon") || columnsValidKeyArray[x].endsWith("_seats") || columnsValidKeyArray[x].endsWith("_type")
-                            || columnsValidKeyArray[x].endsWith("_furniture") || columnsValidKeyArray[x].endsWith("_href"))){
+                            || columnsValidKeyArray[x].endsWith("_furniture") || columnsValidKeyArray[x].endsWith("_href") || columnsValidKeyArray[x].endsWith("_distance"))){
 
                             invalidIdLists = columnsValidKeyArray[x].split("_");
 
@@ -2462,7 +2526,7 @@ export default class InsightFacade implements IInsightFacade {
                                 invalidIdArray.push(invalidIdLists[0]);
                             }isOneDataset = {"false":invalidIdArray}
 
-                        }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_")) && transformationExists == true){
+                        }else if(typeof columnsValidKeyArray[x] == "string" && !(columnsValidKeyArray[x].includes("_")) && applyExists == true){
                             continue;
                         }else
                             return false
@@ -2488,6 +2552,22 @@ export default class InsightFacade implements IInsightFacade {
                                             })) {
                                             if (transformationExists == true) {
                                                 isOneDataset = isOneDataset;
+                                                if(applyExists != true){
+                                                    for(let x in keyArray) {
+                                                        isOneDataset = this.queryCheckingOrder(keyArray[x], yesOrNo, dataSet, invalidIdArray, applyExists);
+                                                        if (isOneDataset == false) {
+                                                            return false;
+                                                        } else {
+                                                            yesOrNo = Object.keys(isOneDataset)[0];
+                                                            dataSet = isOneDataset[yesOrNo];
+
+                                                            Table = optionsValue[columnsEtcKey[2]];
+                                                            if (Table == "TABLE") { //if value of FORM is TABLE
+                                                                return isOneDataset
+                                                            } else return false;
+                                                        }
+                                                    }
+                                                }
                                             } else {
                                                 Table = optionsValue[columnsEtcKey[2]];
                                                 if (Table == "TABLE") { //if value of FORM is TABLE
@@ -2501,124 +2581,25 @@ export default class InsightFacade implements IInsightFacade {
                             }else return false;
                         }else
                         if (columnsValidKeyArray.includes(orderValidKey)) {
-                            if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
-                                || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
-                                || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
-                                || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
-                                || orderValidKey == "courses_uuid" || orderValidKey == "courses_year" || orderValidKey == "courses_sectionsize")) { //checks for valid key
-                                if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
-                                    if(transformationExists == true){
-                                        isOneDataset = {"true":["courses"]}
-                                    }else {
-                                        Table = optionsValue[columnsEtcKey[2]];
-                                        if (Table == "TABLE") { //if value of FORM is TABLE
-                                            isOneDataset = {"true": ["courses"]}
-                                            return isOneDataset
-                                        } else return false;
-                                    }
+                            isOneDataset = this.queryCheckingOrder(orderValidKey, yesOrNo, dataSet, invalidIdArray, applyExists);
+                            if(isOneDataset == false){
+                                return false;
+                            }else {
+                                yesOrNo = Object.keys(isOneDataset)[0];
+                                dataSet = isOneDataset[yesOrNo];
 
-                                } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
-                                    var invalidIdLists:any = orderValidKey.split("_");
-
-                                    if(invalidIdArray.includes(invalidIdLists[0])){
-                                        invalidIdLists = [];
-                                    } else {
-                                        invalidIdArray.push(invalidIdLists[0]);
-                                    }
-                                    isOneDataset = {"false":invalidIdArray}
-                                    if(transformationExists == true){
-                                        isOneDataset = isOneDataset
-                                    }else return isOneDataset;
-
-                                } return isOneDataset;
-                            } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
-                                || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
-                                || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
-                                || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
-                                || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture")) { //checks for valid key
-                                if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
-
-
+                                if(transformationExists == true){
+                                   isOneDataset = isOneDataset;
+                                }else {
                                     Table = optionsValue[columnsEtcKey[2]];
-                                    if(transformationExists == true){
-                                        isOneDataset = {"true":["rooms"]}
-                                    }else {
-                                        Table = optionsValue[columnsEtcKey[2]];
-                                        if (Table == "TABLE") { //if value of FORM is TABLE
-                                            isOneDataset = {"true": ["rooms"]}
-                                            return isOneDataset
-                                        } else return false;
-                                    }
-
-                                } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
-                                    var invalidIdLists:any = orderValidKey.split("_");
-
-                                    if(invalidIdArray.includes(invalidIdLists[0])){
-                                        invalidIdLists = [];
-                                    } else {
-                                        invalidIdArray.push(invalidIdLists[0]);
-                                    }
-                                    isOneDataset = {"false":invalidIdArray}
-                                    if(transformationExists == true){
-                                        isOneDataset = isOneDataset
-                                    }else return isOneDataset;
-
-
-                                } return isOneDataset;
-
-                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
-                                (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
-                                orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
-                                orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year") || orderValidKey.endsWith("courses_sectionsize"))) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
+                                    if (Table == "TABLE") { //if value of FORM is TABLE
+                                        return isOneDataset
+                                    } else return false;
                                 }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
 
-                            } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
-                                (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
-                                orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
-                                orderValidKey.endsWith("_lon") || orderValidKey.endsWith("_seats") || orderValidKey.endsWith("_type") || orderValidKey.endsWith("_furniture")
-                                || orderValidKey.endsWith("_href"))) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
-
-                            } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
-
-                                invalidIdLists = orderValidKey.split("_");
-
-                                if (invalidIdArray.includes(invalidIdLists[0])) {
-                                    invalidIdLists = [];
-                                } else {
-                                    invalidIdArray.push(invalidIdLists[0]);
-                                }
-                                isOneDataset = {"false":invalidIdArray}
-                                if(transformationExists == true){
-                                    isOneDataset = isOneDataset
-                                }else return isOneDataset;
-
-                            } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && transformationExists == true){
-                                orderValidKey = orderValidKey
-                            }else return false
+                            }
                         } else return false
+
                     }else if(transformationExists == true){
                         isOneDataset = isOneDataset
                     } else {
@@ -2701,7 +2682,7 @@ export default class InsightFacade implements IInsightFacade {
                                          if (applyToken == "COUNT" && (applylittleKey == "rooms_fullname" || applylittleKey == "rooms_shortname"
                                             || applylittleKey == "rooms_number" || applylittleKey == "rooms_name" || applylittleKey == "rooms_address"
                                             || applylittleKey == "rooms_lat" || applylittleKey == "rooms_lon" || applylittleKey == "rooms_seats"
-                                            || applylittleKey == "rooms_type" || applylittleKey == "rooms_furniture" || applylittleKey == "rooms_href"
+                                            || applylittleKey == "rooms_type" || applylittleKey == "rooms_furniture"
                                             || applylittleKey == "courses_year" || applylittleKey == "courses_dept" || applylittleKey == "courses_id"
                                             || applylittleKey == "courses_avg" || applylittleKey == "courses_instructor" || applylittleKey == "courses_title"
                                             || applylittleKey == "courses_pass" || applylittleKey == "courses_fail" || applylittleKey == "courses_audit"
@@ -2757,6 +2738,136 @@ export default class InsightFacade implements IInsightFacade {
         }else return false;
     }
 
+    queryCheckingOrder(orderValidKey:any, yesOrNo:any, dataSet:any, invalidIdArray:any, applyExists:boolean):any{
+        var isOneDataset:any = {[yesOrNo]:dataSet}
+        if (typeof orderValidKey == "string" && (orderValidKey == "courses_dept" || orderValidKey == "courses_id"
+            || orderValidKey == "courses_avg" || orderValidKey == "courses_instructor"
+            || orderValidKey == "courses_title" || orderValidKey == "courses_pass"
+            || orderValidKey == "courses_fail" || orderValidKey == "courses_audit"
+            || orderValidKey == "courses_uuid" || orderValidKey == "courses_year" || orderValidKey == "courses_sectionsize")) { //checks for valid key
+            if(yesOrNo == "true" && (dataSet[0] == "courses" || dataSet.length == 0)) {
+                /**if(transformationExists == true){
+                    isOneDataset = {"true":["courses"]}
+                }else {
+                    Table = optionsValue[columnsEtcKey[2]];
+                    if (Table == "TABLE") { //if value of FORM is TABLE
+                        isOneDataset = {"true": ["courses"]}
+                        return isOneDataset
+                    } else return false;
+                }*/
+                isOneDataset = {"true":["courses"]}
+                return isOneDataset;
+
+            } else if(yesOrNo == "true" && (dataSet[0] != "courses")){
+                var invalidIdLists:any = orderValidKey.split("_");
+
+                if(invalidIdArray.includes(invalidIdLists[0])){
+                    invalidIdLists = [];
+                } else {
+                    invalidIdArray.push(invalidIdLists[0]);
+                }
+                isOneDataset = {"false":invalidIdArray}
+                /**if(transformationExists == true){
+                    isOneDataset = isOneDataset
+                }else return isOneDataset;*/
+                return isOneDataset;
+
+            } return isOneDataset;
+        } else if (typeof orderValidKey == "string" && (orderValidKey == "rooms_fullname" || orderValidKey == "rooms_shortname"
+            || orderValidKey == "rooms_number" || orderValidKey == "rooms_name"
+            || orderValidKey == "rooms_address" || orderValidKey == "rooms_lat"
+            || orderValidKey == "rooms_lon" || orderValidKey == "rooms_seats"
+            || orderValidKey == "rooms_type" || orderValidKey == "rooms_href" || orderValidKey == "rooms_furniture" || orderValidKey == "rooms_distance")) { //checks for valid key
+            if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+
+                /**
+                Table = optionsValue[columnsEtcKey[2]];
+                if(transformationExists == true){
+                    isOneDataset = {"true":["rooms"]}
+                }else {
+                    Table = optionsValue[columnsEtcKey[2]];
+                    if (Table == "TABLE") { //if value of FORM is TABLE
+                        isOneDataset = {"true": ["rooms"]}
+                        return isOneDataset
+                    } else return false;
+                }*/
+                isOneDataset = {"true":["rooms"]};
+                return isOneDataset;
+
+            } else if(yesOrNo == "true" && (dataSet[0] != "rooms")){
+                var invalidIdLists:any = orderValidKey.split("_");
+
+                if(invalidIdArray.includes(invalidIdLists[0])){
+                    invalidIdLists = [];
+                } else {
+                    invalidIdArray.push(invalidIdLists[0]);
+                }
+                isOneDataset = {"false":invalidIdArray}
+                /**if(transformationExists == true){
+                    isOneDataset = isOneDataset
+                }else return isOneDataset;*/
+                return isOneDataset;
+
+
+            } return isOneDataset;
+
+        } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("courses")) &&
+            (orderValidKey.endsWith("_dept") || orderValidKey.endsWith("_id") || orderValidKey.endsWith("_avg") ||
+            orderValidKey.endsWith("_instructor") || orderValidKey.endsWith("_title") || orderValidKey.endsWith("_pass") ||
+            orderValidKey.endsWith("_fail") || orderValidKey.endsWith("_audit") || orderValidKey.endsWith("_uuid") || orderValidKey.endsWith("_year") || orderValidKey.endsWith("courses_sectionsize"))) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset;
+
+        } else if (typeof orderValidKey == "string" && (this.occurrences(orderValidKey, "_", true)) == 1 && !(orderValidKey.startsWith("rooms")) &&
+            (orderValidKey.endsWith("_fullname") || orderValidKey.endsWith("_shortname") || orderValidKey.endsWith("_number") ||
+            orderValidKey.endsWith("_name") || orderValidKey.endsWith("_address") || orderValidKey.endsWith("_lat") ||
+            orderValidKey.endsWith("_lon") || orderValidKey.endsWith("_seats") || orderValidKey.endsWith("_type") || orderValidKey.endsWith("_furniture")
+            || orderValidKey.endsWith("_href") || orderValidKey.endsWith("_distance"))) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset
+
+        } else if (typeof orderValidKey == "string" && (!(orderValidKey.startsWith("courses")) || !(orderValidKey.startsWith("rooms"))) && orderValidKey.includes("_")) {
+
+            invalidIdLists = orderValidKey.split("_");
+
+            if (invalidIdArray.includes(invalidIdLists[0])) {
+                invalidIdLists = [];
+            } else {
+                invalidIdArray.push(invalidIdLists[0]);
+            }
+            isOneDataset = {"false":invalidIdArray}
+            /**if(transformationExists == true){
+                isOneDataset = isOneDataset
+            }else return isOneDataset;*/
+            return isOneDataset;
+
+        } else if(typeof orderValidKey == "string" && !(orderValidKey.includes("_")) && applyExists == true){
+            return isOneDataset;
+        }else return false
+    }
+
     hasFilter(filter:FilterQuery, invalidIdArray:any, isOneDataset:any):any{ //
         var comparisonKey = Object.keys(filter); //gets first comparator from FILTER
         var comparisonValue = filter[comparisonKey[0]] //gets value from each FILTER
@@ -2799,9 +2910,16 @@ export default class InsightFacade implements IInsightFacade {
                     } else return isOneDataset
                 }
                 else if(validProjectKey.length == 1 && typeof validProjectKey[0] == "string" && (validProjectKey[0] == "rooms_lat" || validProjectKey[0] == "rooms_lon" ||
-                    validProjectKey[0] == "rooms_seats")){ //make sure only a valid key exists
+                    validProjectKey[0] == "rooms_seats" || validProjectKey[0] == "rooms_distance")){ //make sure only a valid key exists
 
                     if(yesOrNo == "true" && (dataSet[0] == "rooms" || dataSet.length == 0)) {
+                        if(validProjectKey[0] == "rooms_distance"){
+                            if(mComparisonNumber instanceof Array && typeof mComparisonNumber[0] == "string" && isNumber(mComparisonNumber[1])
+                                && isNumber(mComparisonNumber[2]) && isNumber(mComparisonNumber[3])){
+                                isOneDataset = {"true":["rooms"]};
+                                return isOneDataset;
+                            }
+                        }else
                         if (isNumber(mComparisonNumber)) { //makes sure the valid keys are mapped to a number
                             isOneDataset = {"true": ["rooms"]};
                             return isOneDataset;

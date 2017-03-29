@@ -889,6 +889,96 @@
                 }
             }
 
+            function generateDataScheduling() {
+            if ($isCourses) {
+                //for filters
+
+                    //TODO: rename classes for different parts, so that they can be more distinct
+                //for courses column
+
+                var coursesColVals = [];
+                var coursesOrderVals = [];
+                coursesColVals = detectDuplicatesSendAlertElseSend("ifcourses",coursesColVals,"Show column(s)");
+                coursesOrderVals = detectDuplicatesSendAlertElseSend("ifcoursesGroup",coursesOrderVals,"Order by");
+
+
+
+                var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+            $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+
+            //for order
+                var $order = $(".ifcoursesGroup :selected").val();
+
+            var $andor1 = $(".radioclass :checked").val();
+
+            console.log("andOrString: " + $andOrString);
+            console.log("coursesColVals.toString(): " + coursesColVals.toString());
+            console.log("order: " + $order);
+            console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
+            console.log("dir: " + declareDirection());
+            console.log("transformationMaker(): " + transformationMaker());
+
+
+            var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationMaker());
+            console.log("officialQueryString: " + $officialQueryString);
+
+            //if the queryString failed to be made
+            if ($officialQueryString == "") {
+                return;
+            }
+
+            var $queryFormat = JSON.parse($officialQueryString);
+
+
+            console.log("qq" + $queryFormat);
+            console.log("qqq" + JSON.stringify($queryFormat));
+
+            //create the format here, then yarn start and send request to the server
+
+            $.ajax({
+                url: "http://localhost:4321/query",
+                type: 'POST',
+                data: $officialQueryString,
+                dataType: 'json', //data is already in json format
+                contentType: 'application/json'
+            }).done(function(data) {
+                console.log("Response", data);
+                //generateTable(data.result);
+            }).fail(function(e) {
+                console.error("ERROR - Failed to submit query", e);
+
+                //window.print("ERROR - Failed to submit query", e)
+            });
+
+                /*$.ajax('/query',
+                    {
+                    type: 'POST',
+                    data: $queryFormat,
+                        contentType: 'application/json',
+                    dataType: 'json'
+                }).done(function(data) {
+                    console.log("Response", data);
+                }).fail(function(e) {
+                    console.error("ERROR - Failed to submit query", e);
+                });*/
+
+
+            /*$.post("http://localhost:4321/query",$queryFormat,function(data) {
+                alert("here");
+                fulfill(data);
+            },"jsonp");*/
+            }
+
+
+            if ($isRooms) {
+                var roomsColVals = [];
+                $('.ifrooms :selected').each(function(l, selected){
+                    roomsColVals[l] = $(selected).val();
+                });
+
+            }
+        }
+
 		</script>
 	</head>
 	<body>
@@ -984,7 +1074,8 @@
 					<br>
 
 					You can use AND/OR for below filters (AND/OR will not be applied if only one filter is filled):
-					<input type = "radio" name = "roomsAndOr" value = "AND" checked>AND</input>
+                    <!--AndOr is now separated into one for courses one for rooms -->
+					<input type = "radio" name = "roomsAndOr" value = "AND" checked>AND</input> 
                     <input type = "radio" name = "roomsAndOr" value = "OR">OR</input>
                     <br>
 

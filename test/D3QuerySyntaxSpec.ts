@@ -65,7 +65,7 @@ describe("D3QuerySyntaxSpec", function () {
      rooms_href: string; The link to full details online (e.g., "http://students.ubc.ca/campus/discover/buildings-and-classrooms/room/DMP-201").*/
 
 
-    it.only("testing out simple query provided in deliverable", function () {
+    it("testing out simple query provided in deliverable", function () {
         var queryTest: any = {
             "WHERE": {
                 "NOT": {
@@ -142,7 +142,7 @@ describe("D3QuerySyntaxSpec", function () {
         }
 
         var keyTest = Object.keys(queryTest);
-        var result = {"true": ["courses"]}
+        var result = {"true": ["rooms"]}
         sanityCheck(queryTest);
         expect(insightFacade.isValid(queryTest)).to.deep.equal(result);
 
@@ -318,7 +318,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("400 isValid with apply with underscore", function () {
+    it("400 isValid with apply with underscore", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
@@ -352,7 +352,7 @@ describe("D3QuerySyntaxSpec", function () {
 
     });
 
-    it.only("400 new order with unknown key", function () {
+    it("400 new order with unknown key", function () {
         var queryTest: any =  {
             "WHERE": {},
             "OPTIONS": {
