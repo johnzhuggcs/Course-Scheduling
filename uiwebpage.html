@@ -3,6 +3,24 @@
 	<head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
 		</script>
+
+		<!-- PAUL'S CSS AND JQUERY-->
+
+		<style>
+			.head td {
+				font-weight: bold;
+			}
+			td {
+				text-align: center;
+				padding: 5px;
+			}
+			table {
+				border-spacing: 0;
+				border-collapse: separate;
+			}
+
+		</style>
+
 		<script>
 
 			var $isCourses = false;
@@ -257,7 +275,7 @@
                     if ($("#rooms_furniture").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#rooms_loc").val() != "") {
+                    if ($("#rooms_distance").val() != "") {
                         attrCounter++;
                     }
                     if ($("#rooms_number").val() != "") {
@@ -334,16 +352,95 @@
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#rooms_loc").val() != "") {
-                            lastAttrCounter++;
-                            $jsonstr //unsure what's rooms_loc
+                        if ($("#rooms_distance").val() != "") {
 
-                            if (lastAttrCounter < attrCounter) {
-                                $jsonstr = $jsonstr + ",";
-                            }
+                            var $smallQuery =
+								{
+								    "WHERE":{
+								        "OR":[
+								            {
+								                "IS":{
+								                    "rooms_fullname": $("#given_building").val()
+								                }
+								            }/*,
+											{
+											    "IS":{
+											        "rooms_shortname":"LSC"
+											    }
+											}*/
+										]
+								    },
+                                "OPTIONS":{
+									"COLUMNS":[
+										"rooms_fullname",
+										"rooms_lat",
+										"rooms_lon"
+									],
+									"ORDER":"rooms_fullname",
+									"FORM":"TABLE"
+									}
+								};
+
+                            var $smallQueryString = JSON.stringify($smallQuery);
+                            console.log("SQ" + $smallQueryString);
+
+                            $.ajax({
+                                url: "http://localhost:4321/query",
+								async: false,
+                                type: 'POST',
+                                data: $smallQueryString,
+                                dataType: 'json', //data is already in json format
+                                contentType: 'application/json'
+                            }).done(function(smallData) {
+                                console.log("Response", smallData);
+                                console.log("ResponseVal1", smallData.result[0].rooms_fullname);
+                                console.log("ResponseVal1", smallData.result[0].rooms_lat);
+                                console.log("ResponseVal1", smallData.result[0].rooms_lon);
+
+                                var chosenFullname = smallData.result[0].rooms_fullname;
+                                var chosenLat = smallData.result[0].rooms_lat;
+                                var chosenLon = smallData.result[0].rooms_lon;
+
+
+                                lastAttrCounter++;
+                                $jsonstr = $jsonstr +
+                                    "{" +
+                                    "\"" + comparison("compareSizeLocation") + "\": {" +
+                                    "\"rooms_distance\": [\"" + chosenFullname + "\", " + chosenLat + ", " + chosenLon
+										+ ", " + $("#rooms_loc").val() + "]"
+                                    + "}" +
+                                    "}";
+                                console.log("jsonstr" + $jsonstr);
+
+                                if (lastAttrCounter < attrCounter) {
+                                    $jsonstr = $jsonstr + ",";
+                                }
+
+                                $.each(smallData.result, function() {
+                                    $.each(this, function(k , v) {
+                                        console.log(v);
+                                    });
+                                })
+                            }).fail(function(e) {
+                                console.error("ERROR - Failed to submit query!", e);
+
+                                //window.print("ERROR - Failed to submit query", e)
+                            });
                         }
                     }
                 }
+
+                /*
+				 Have to submit query twice
+
+				 1.	Get lat lon using simple query with the building name
+				 And then, using the latlon from the simple query, you can filter out one building for the latlon
+
+				 2.	Using the lat lon I just got, put it into the big query and use room distance key
+				 Room distance key is an array
+
+				 */
+
                 return $jsonstr;
             }
 
@@ -508,6 +605,50 @@
 
 			}
 
+            function generateTable(data) {
+		    	$("tbody").remove();
+                var tbl_body = document.createElement("tbody");
+                var odd_even = false;
+                console.log("DATA", data);
+
+                var justOne = 0;
+                $.each(data.result,function () {
+                    if (justOne == 0) {
+                        var tbl_row = tbl_body.insertRow();
+                        tbl_row.className = odd_even ? "odd" : "even";
+                        tbl_row.className = "head";
+                        $.each(this, function (k, v) {
+                            //console.log(k);
+                            var cell = tbl_row.insertCell();
+                            cell.appendChild(document.createTextNode(k));
+                        });
+                        odd_even = !odd_even;
+                    }
+                    justOne++;
+				});
+
+                $.each(data.result, function() {
+                    //console.log(data.result);
+                    var tbl_row = tbl_body.insertRow();
+                    tbl_row.className = odd_even ? "odd" : "even";
+                    $.each(this, function(k , v) {
+                        //key: 0, 1, 2, ...., n
+						//v: {k:v, k2:v2}
+                       /* for (var key in v) {
+                            //console.log(key, v[key]);
+                            var cell = tbl_row.insertCell();
+                            cell.appendChild(document.createTextNode(v[key]));
+						}*/
+                       //console.log(v);
+                       var cell = tbl_row.insertCell();
+                       cell.appendChild(document.createTextNode(v));
+                    });
+                    odd_even = !odd_even;
+                })
+                document.getElementById("tblResults").appendChild(tbl_body);
+                // $("#tblResults").appendChild(tbl_body);
+            }
+
 
         function generateData() {
             if ($isCourses) {
@@ -581,6 +722,7 @@
                 contentType: 'application/json'
             }).done(function(data) {
                 console.log("Response", data);
+                generateTable(data);
                 //generateTable(data.result);
 			}).fail(function(e) {
 			    console.error("ERROR - Failed to submit query", e);
@@ -659,6 +801,7 @@
                     contentType: 'application/json'
                 }).done(function(data) {
                     console.log("Response", data);
+                    generateTable(data);
                     //generateTable(data.result);
                 }).fail(function(e) {
                     console.error("ERROR - Failed to submit query", e);
@@ -991,8 +1134,15 @@
 					</select>
 					<input type="text" id="rooms_furniture" value="">
 					<br>
-					Location (distance from a given building):
+					Location (distance from a given building): Distance:
+					<select class = "compareSizeLocation">
+						<option value="LT">Less than</option>
+						<option value="EQ">Equal to</option>
+						<option value="GT">Greater than</option>
+					</select>
 					<input type="text" id="rooms_loc" value="">
+					Given Building:
+					<input type="text" id="given_building" value="">
 				</div>
 
 			</p>
@@ -1075,6 +1225,8 @@
 					<button type="button" onclick="generateData()">Generate Data Table</button>
 				</span>
 			</p>
+
+			<table id="tblResults" border="1" align="center"></table>
 
 		</div>
 	</body>
