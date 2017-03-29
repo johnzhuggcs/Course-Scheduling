@@ -3,6 +3,7 @@
 	<head>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
 		</script>
+		<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
 		<!-- PAUL'S CSS AND JQUERY-->
 
@@ -26,6 +27,7 @@
 			var $isCourses = false;
 			var $isRooms = false;
 			var $isScheduling = false;
+			var $isScheduling2 = false;
 			var $isExplorer = false;
 			var $counter = 0;
 
@@ -52,11 +54,13 @@
 
                     $(".ifcoursesExtraInfo").hide();
 
+
 				}
 				if ($(".dataset").val() == "courses") {
 
                     $(".coursesAndOrClass").show()
                     $(".ifcoursesFilters").show();
+                    $("#nonScheduleCourseFilters").show();
                     $(".roomsFilterSchedule").hide(); //this is the new AndOr banner
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").show();
@@ -79,6 +83,8 @@
 
                     $(".coursesAndOrClass").hide()
                     $(".roomsFilterSchedule").show();
+                    $("#nonScheduleCourseFilters").hide();
+                    $("#nonScheduleRoomsFilter").show();
 				    $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").show();
                     $(".ifgroupFilters").show();
@@ -179,10 +185,14 @@
 			}
 
             function stringObjectOfAttr() {
+		    //Case sub1: when you have scheduling, check both fields separately
 		    //Case 1: Just 1 field is being filled
 				//Case 2: AND multifields
 				//Case 3: OR multifields
                 var $jsonstr = "";
+                if($isScheduling){ //JON's code
+
+				}
 				if ($isCourses) {
                     var attrCounter = 0; //counts the number of attributes that are not blank
                     var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
@@ -424,7 +434,7 @@
                             }).fail(function(e) {
                                 console.error("ERROR - Failed to submit query!", e);
 
-                                //window.print("ERROR - Failed to submit query", e)
+                                window.print("ERROR - Failed to submit query", e)
                             });
                         }
                     }
@@ -663,6 +673,7 @@
 				    //TODO: rename classes for different parts, so that they can be more distinct
                 //for courses column
 
+
 				var coursesColVals = [];
 				var coursesOrderVals = [];
                 coursesColVals = detectDuplicatesSendAlertElseSend("ifcourses",coursesColVals,"Show column(s)");
@@ -684,6 +695,7 @@
             //console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
             //console.log("dir: " + declareDirection());
             //console.log("transformationMaker(): " + transformationMaker());
+
 
 
             var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationMaker());
@@ -813,6 +825,7 @@
                     //dataset.style.visibility = "hidden";
                     //$(".dataset").hide();
                     $isScheduling = false;
+					$isScheduling2 = false;
                     $isExplorer = false;
 
                     $(".coursesAndOrClass").hide();
@@ -830,20 +843,25 @@
                     $(".ifgroupGroup").hide();
 
                     $(".ifcoursesApply").hide();
+                    $(".ifcoursesExtraInfo").hide();
+                    $(".ifScheduleButton").hide();
                 }
                 if($(".explorerOrScheduler").val() == "explorer"){
                     //console.log(dataset.toString());
                     $(".explorerBanner").show()
+					$(".dataset").val("default")
                     //dataset.style.visibility = "visible";
                     $(".coursesAndOrClass").hide();
                     $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").hide();
+                    $(".ifcoursesExtraInfo").hide();
                     $(".ifroomsFilters").hide();
                     $(".ifgroupFilters").hide();
                     $(".ifcourses").hide();
                     $(".ifrooms").hide();
                     $(".ifgroup").hide();
                     $isScheduling = false;
+                    $isScheduling2 = false;
                     $isExplorer = true;
                     $isCourses = false;
                     $isRooms = false;
@@ -852,121 +870,225 @@
                     $(".ifgroupGroup").hide();
 
                     $(".ifcoursesApply").hide();
+                    $(".ifScheduleButton").hide();
                 }
                 if($(".explorerOrScheduler").val() == "scheduler"){
                     //console.log(dataset.toString());
                     $(".explorerBanner").hide()
                     //dataset.style.visibility = "hidden";
                     $isScheduling = true;
+                    $isScheduling2 = false;
                     $isExplorer = false;
                     $(".coursesAndOrClass").show();
                     $(".roomsFilterSchedule").show();
                     $(".ifcoursesFilters").show();
+                    $("#nonScheduleCourseFilters").hide();
+                    $("#nonScheduleRoomsFilter").hide();
                     $(".ifroomsFilters").show();
                     $(".ifgroupFilters").hide();
                     $(".roomsFilterSchedule").show()
                     $(".ifcourses").hide();
                     $(".ifrooms").hide();
-                    $(".ifgroup").show();
+                    $(".ifgroup").hide();
+
+                    $(".ifScheduleButton").show();
 
                     $isCourses = false;
                     $isRooms = false;
+                    //$(".compareSizeSection").hide();
                     $(".ifcoursesGroup").hide();
                     $(".ifroomsGroup").hide();
                     $(".ifgroupGroup").hide();
                     $(".ifcoursesApply").hide();
+
+                    $(".ifcoursesExtraInfo").hide();
                 }
             }
 
             function generateDataScheduling() {
-            if ($isCourses) {
-                //for filters
+                var coursesResult;
+                var roomsResult;
+
+            if ($isScheduling && !($isScheduling2)){
+                $isCourses = true;
+                $isRooms = false;
+				coursesResult = scheduleGenerateData();
+				$isScheduling2 = true;
+				console.log(JSON.stringify(coursesResult));
+			}
+			if($isScheduling2){
+                $isCourses = false;
+                $isRooms = false;
+				roomsResult = scheduleGenerateData();
+			}
+
+        }
+
+            function scheduleGenerateData() {
+                if ($isCourses) {
+                    //for filters
 
                     //TODO: rename classes for different parts, so that they can be more distinct
-                //for courses column
-
-                var coursesColVals = [];
-                var coursesOrderVals = [];
-                coursesColVals = detectDuplicatesSendAlertElseSend("ifcourses",coursesColVals,"Show column(s)");
-                coursesOrderVals = detectDuplicatesSendAlertElseSend("ifcoursesGroup",coursesOrderVals,"Order by");
+                    //for courses column
 
 
-
-                var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
-            $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
-
-            //for order
-                var $order = $(".ifcoursesGroup :selected").val();
-
-            var $andor1 = $(".radioclass :checked").val();
-
-            console.log("andOrString: " + $andOrString);
-            console.log("coursesColVals.toString(): " + coursesColVals.toString());
-            console.log("order: " + $order);
-            console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
-            console.log("dir: " + declareDirection());
-            console.log("transformationMaker(): " + transformationMaker());
+                    var coursesColVals = [];
+                    var coursesOrderVals = [];
+                    coursesColVals = ['"courses_dept"', '"courses_id"', '"maxCourseSize"', '"uniqueSection"'];
+                    coursesOrderVals = ['"maxCourseSize"'];
 
 
-            var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationMaker());
-            console.log("officialQueryString: " + $officialQueryString);
 
-            //if the queryString failed to be made
-            if ($officialQueryString == "") {
-                return;
+                    var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+                    $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+
+                    //for order
+                    var $order = $(".ifcoursesGroup :selected").val();
+
+                    var $andor1 = $(".radioclass :checked").val();
+
+                    console.log(coursesColVals.toString());
+                    //console.log("andOrString: " + $andOrString);
+                    //console.log("coursesColVals.toString(): " + coursesColVals.toString());
+                    //console.log("order: " + $order);
+                    //console.log("coursesOrderVals.toString(): " + coursesOrderVals.toString());
+                    //console.log("dir: " + declareDirection());
+                    //console.log("transformationMaker(): " + transformationMaker());
+
+                    var transformationString = '"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],' +
+						'"APPLY": [{"maxCourseSize":{"MAX":"courses_sectionsize"}},' +
+						' {"uniqueSection":{"COUNT":"courses_uuid"}}]}'
+                    var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationString);
+                    console.log("officialQueryString (courses): " + $officialQueryString);
+                    //if there is no filter
+                    var coursesFiltersInputCounter = 0;
+                    $(".ifcoursesFilters input").each(function() {
+                        coursesFiltersInputCounter++;
+                    });
+
+                    var emptyCoursesFilterCounter = 0;
+                    $(".ifcoursesFilters input").each(function() {
+                        if ($(this).val() == "") {
+                            emptyCoursesFilterCounter++;
+                        }
+                    });
+
+                    if (coursesFiltersInputCounter == emptyCoursesFilterCounter) {
+                        alert("Please insert some Courses Filter(s) before creating the table");
+                        return;
+                    }
+
+
+                    //if the queryString failed to be made
+                    if ($officialQueryString == "") {
+                        return;
+                    }
+
+                    var $queryFormat = JSON.parse($officialQueryString);
+
+
+                    //console.log("qq" + $queryFormat);
+                    //console.log("qqq" + JSON.stringify($queryFormat));
+
+                    //create the format here, then yarn start and send request to the server
+
+                    $.ajax({
+                        url: "http://localhost:4321/query",
+                        type: 'POST',
+                        data: $officialQueryString,
+                        dataType: 'json', //data is already in json format
+                        contentType: 'application/json'
+                    }).done(function(data) {
+                        console.log("Response", data);
+                        generateTable(data);
+                        //generateTable(data.result);
+                    }).fail(function(e) {
+                        console.error("ERROR - Failed to submit query", e);
+
+                        //window.print("ERROR - Failed to submit query", e)
+                    });
+
+					/*$.ajax('/query',
+					 {
+					 type: 'POST',
+					 data: $queryFormat,
+					 contentType: 'application/json',
+					 dataType: 'json'
+					 }).done(function(data) {
+					 console.log("Response", data);
+					 }).fail(function(e) {
+					 console.error("ERROR - Failed to submit query", e);
+					 });*/
+
+
+					/*$.post("http://localhost:4321/query",$queryFormat,function(data) {
+					 alert("here");
+					 fulfill(data);
+					 },"jsonp");*/
+                }
+
+
+                if ($isRooms) {
+                    var roomsColVals = [];
+                    $('.ifrooms :selected').each(function(l, selected){
+                        roomsColVals[l] = $(selected).val();
+                    });
+
+                    var roomsColVals = [];
+                    var roomsOrderVals = [];
+                    roomsColVals = ["rooms_seats", "rooms_fullname"];
+                    roomsOrderVals = ["rooms_seats"]
+
+                    var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+                    $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+
+                    console.log($andOrString);
+
+                    var $officialQueryString = queryMaker($andOrString,roomsColVals.toString(),declareDirection(),roomsOrderVals,"");
+
+                    console.log("officialQueryString (rooms): " + $officialQueryString);
+                    //if there is no filter
+                    var roomsFiltersInputCounter = 0;
+                    $(".ifroomsFilters input").each(function() {
+                        roomsFiltersInputCounter++;
+                    });
+
+                    var emptyRoomsFilterCounter = 0;
+                    $(".ifroomsFilters input").each(function() {
+                        if ($(this).val() == "") {
+                            emptyRoomsFilterCounter++;
+                        }
+                    });
+
+                    if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
+                        alert("Please insert some Rooms Filter(s) before creating the table");
+                        return;
+                    }
+
+
+                    //if the queryString failed to be made
+                    if ($officialQueryString == "") {
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "http://localhost:4321/query",
+                        type: 'POST',
+                        data: $officialQueryString,
+                        dataType: 'json', //data is already in json format
+                        contentType: 'application/json'
+                    }).done(function(data) {
+                        console.log("Response", data);
+                        generateTable(data);
+                        //generateTable(data.result);
+                    }).fail(function(e) {
+                        console.error("ERROR - Failed to submit query", e);
+
+                        //window.print("ERROR - Failed to submit query", e)
+                    });
+
+                }
             }
-
-            var $queryFormat = JSON.parse($officialQueryString);
-
-
-            console.log("qq" + $queryFormat);
-            console.log("qqq" + JSON.stringify($queryFormat));
-
-            //create the format here, then yarn start and send request to the server
-
-            $.ajax({
-                url: "http://localhost:4321/query",
-                type: 'POST',
-                data: $officialQueryString,
-                dataType: 'json', //data is already in json format
-                contentType: 'application/json'
-            }).done(function(data) {
-                console.log("Response", data);
-                //generateTable(data.result);
-            }).fail(function(e) {
-                console.error("ERROR - Failed to submit query", e);
-
-                //window.print("ERROR - Failed to submit query", e)
-            });
-
-                /*$.ajax('/query',
-                    {
-                    type: 'POST',
-                    data: $queryFormat,
-                        contentType: 'application/json',
-                    dataType: 'json'
-                }).done(function(data) {
-                    console.log("Response", data);
-                }).fail(function(e) {
-                    console.error("ERROR - Failed to submit query", e);
-                });*/
-
-
-            /*$.post("http://localhost:4321/query",$queryFormat,function(data) {
-                alert("here");
-                fulfill(data);
-            },"jsonp");*/
-            }
-
-
-            if ($isRooms) {
-                var roomsColVals = [];
-                $('.ifrooms :selected').each(function(l, selected){
-                    roomsColVals[l] = $(selected).val();
-                });
-
-            }
-        }
 
 		</script>
 	</head>
@@ -1009,14 +1131,6 @@
 				</span>
 
 				<div class = "ifcoursesFilters" style="display:none">
-					Section size:
-					<select class = "compareSizeSection">
-						<option value="LT">Less than</option>
-						<option value="EQ">Equal to</option>
-						<option value="GT">Greater than</option>
-					</select>
-					<input type="number" id="courses_sectionsize" value="">
-					<br>
 					Department:
 					<select class = "isItDep">
 						<option value="IS" selected>IS</option>
@@ -1035,28 +1149,38 @@
 					</select>
 					<input type="text" id="courses_id" value="">
 					<br>
-					Instructor:
-					<select class = "isItIns">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
+					<div id = "nonScheduleCourseFilters">Section size:
+						<select class = "compareSizeSection">
+							<option value="LT">Less than</option>
+							<option value="EQ">Equal to</option>
+							<option value="GT">Greater than</option>
+						</select>
+						<input type="number" id="courses_sectionsize" value="">
+						<br>
+						Instructor:
+						<select class = "isItIns">
+							<option value="IS" selected>IS</option>
+							<option value="SW">Starts With</option>
+							<option value="EW">Ends With</option>
+							<option value="CT">Contains</option>
+							</select>
+				<input type="text" id="courses_instructor" value="">
+				<br>
+				Title:
+				<select class = "isItTit">
+					<option value="IS" selected>IS</option>
+					<option value="SW">Starts With</option>
+					<option value="EW">Ends With</option>
+					<option value="CT">Contains</option>
+				</select>
+				<input type="text" id="courses_title" value="">
+				<br>
 
-					</select>
-					<input type="text" id="courses_instructor" value="">
-					<br>
-					Title:
-					<select class = "isItTit">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
-					</select>
-					<input type="text" id="courses_title" value="">
-					<br>
-                    <br>
-				</div>
+			</div>
 
+		</div>
+
+				<br>
                 <span class = "roomsFilterSchedule radioclass" style="display:none"><b>Room Filters (can leave blank): </b>
                     <!-- Added new banner to represent Room filters banner -->
 					<br>
@@ -1081,41 +1205,44 @@
 					</select>
 					<input type="text" id="rooms_fullname" value="">
 					<br>
-					Room number:
-					<select class = "isItNumber">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
-					</select>
-					<input type="text" id="rooms_number" value="">
-					<br>
-					Room size:
-					<select class = "compareSizeSize">
-						<option value="LT">Less than</option>
-						<option value="EQ">Equal to</option>
-						<option value="GT">Greater than</option>
-					</select>
-					<input type="number" id="rooms_seats" value="">
-					<br>
-					Room type:
-					<select class = "isItType">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
-					</select>
-					<input type="text" id="rooms_type" value="">
-					<br>
-					Furniture type:
-					<select class = "isItFurniture">
-						<option value="IS" selected>IS</option>
-						<option value="SW">Starts With</option>
-						<option value="EW">Ends With</option>
-						<option value="CT">Contains</option>
-					</select>
-					<input type="text" id="rooms_furniture" value="">
-					<br>
+
+					<div id = "nonScheduleRoomsFilter">Room number:
+						<select class = "isItNumber">
+							<option value="IS" selected>IS</option>
+							<option value="SW">Starts With</option>
+							<option value="EW">Ends With</option>
+							<option value="CT">Contains</option>
+						</select>
+						<input type="text" id="rooms_number" value="">
+						<br>
+						Room size:
+						<select class = "compareSizeSize">
+							<option value="LT">Less than</option>
+							<option value="EQ">Equal to</option>
+							<option value="GT">Greater than</option>
+						</select>
+						<input type="number" id="rooms_seats" value="">
+						<br>
+						Room type:
+						<select class = "isItType">
+							<option value="IS" selected>IS</option>
+							<option value="SW">Starts With</option>
+							<option value="EW">Ends With</option>
+							<option value="CT">Contains</option>
+						</select>
+						<input type="text" id="rooms_type" value="">
+						<br>
+						Furniture type:
+						<select class = "isItFurniture">
+							<option value="IS" selected>IS</option>
+							<option value="SW">Starts With</option>
+							<option value="EW">Ends With</option>
+							<option value="CT">Contains</option>
+						</select>
+						<input type="text" id="rooms_furniture" value="">
+						<br>
+					</div>
+
 					Location (distance from a given building): Distance:
 					<select class = "compareSizeLocation">
 						<option value="LT">Less than</option>
@@ -1126,6 +1253,11 @@
 					Given Building:
 					<input type="text" id="given_building" value="">
 				</div>
+
+				<br>
+				<span class = "ifScheduleButton" style="display:none">
+					<button type="button" onclick="generateDataScheduling()">Generate Schedule</button>
+				</span>
 
 			</p>
 
@@ -1142,7 +1274,7 @@
 					<option value="courses_title">Title</option>
 					<option value="courses_pass">Number of passed students</option>
 					<option value="courses_fail">Number of failed students</option>
-					<option value="coourses_sectionsize">Section size</option>
+					<option value="courses_sectionsize">Section size</option>
 					<!-- based on no.of passed + failed-->
 					<option value="courses_audit">Number of students audited</option>
 					<option value="courses_uuid">ID of a course offering</option>
