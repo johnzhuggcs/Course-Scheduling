@@ -434,7 +434,7 @@
                             }).fail(function(e) {
                                 console.error("ERROR - Failed to submit query!", e);
 
-                                window.print("ERROR - Failed to submit query", e)
+                                //window.print("ERROR - Failed to submit query", e)
                             });
                         }
                     }
@@ -454,17 +454,30 @@
                 return $jsonstr;
             }
 
-            function stringWrapWithAndOr(attrJsString) {
+            function stringWrapWithAndOr(attrJsString, $ifCourses) {
 				var $jstring = "";
-				if (notBlankAttrCounter > 1) {
-                    if ($(".radioclass :checked").val() == "AND") {
-                        $jstring = "{\"AND\":[" + attrJsString + "]}";
+				if($ifCourses) {
+                    if (notBlankAttrCounter > 1) {
+                        if ($(".radioclass :checked").val() == "AND") {
+                            $jstring = "{\"AND\":[" + attrJsString + "]}";
+                        }
+                        if ($(".radioclass :checked").val() == "OR") {
+                            $jstring = "{\"OR\":[" + attrJsString + "]}";
+                        }
+                    } else {
+                        $jstring = attrJsString; //it's unnecessary to return and/or if there's only 0/1 attr
                     }
-                    if ($(".radioclass :checked").val() == "OR") {
-                        $jstring = "{\"OR\":[" + attrJsString + "]}";
+                }else{
+                    if (notBlankAttrCounter > 1) {
+                        if ($(".roomsFilterSchedule :checked").val() == "AND") {
+                            $jstring = "{\"AND\":[" + attrJsString + "]}";
+                        }
+                        if ($(".roomsFilterSchedule :checked").val() == "OR") {
+                            $jstring = "{\"OR\":[" + attrJsString + "]}";
+                        }
+                    } else {
+                        $jstring = attrJsString; //it's unnecessary to return and/or if there's only 0/1 attr
                     }
-                } else {
-				    $jstring = attrJsString; //it's unnecessary to return and/or if there's only 0/1 attr
 				}
 				return $jstring;
 
@@ -933,14 +946,129 @@
                 $isCourses = false;
                 $isRooms = true;
 				roomsResult = scheduleGenerateData();
+				$isCourses = false;
+				$isRooms = false;
+				$isScheduling = true;
+				$isScheduling2 = false;
 			}
 
 			var returnSchedule = makingSchedule(coursesResult, roomsResult);
 			console.log("return schedule: "+JSON.stringify(returnSchedule[0])+JSON.stringify(returnSchedule[1])+JSON.stringify(returnSchedule[2]));
 
-			generateTable(returnSchedule);
+			generateScheduleTable(returnSchedule[0]);
+
+			//createQualityMeasure(returnSchedule[1], returnSchedule[2])
 
         }
+        function createQualityMeasure(data1, data2){
+
+			$("quality").remove();
+			var quality_measure = document.createElement("quality");
+            document.getElementById("QualityMeasure").appendChild(quality_measure);
+
+		}
+
+            function generateScheduleTable(data) {
+                $("tbody").remove();
+                var tbl_body = document.createElement("tbody");
+                var odd_even = false;
+                console.log("DATA", data);
+
+                var justOne = 0;
+                $.each(data,function () {
+                    if (justOne == 0) {
+                        var tbl_row = tbl_body.insertRow();
+                        //tbl_row.className = odd_even ? "odd" : "even";
+                        tbl_row.className = "head";
+                        var firstRow = tbl_row.insertCell();
+                        firstRow.appendChild(document.createTextNode("Time Slots"));
+                        $.each(this, function (k, v) {
+                            //console.log(k);
+                            var cell = tbl_row.insertCell();
+                            cell.appendChild(document.createTextNode(k));
+                        });
+                        odd_even = !odd_even;
+                    }
+                    justOne++;
+                });
+
+                $.each(data, function(indexTemp) {
+                    //console.log(data.result);
+                    var tbl_row = tbl_body.insertRow();
+                    tbl_row.className = odd_even ? "odd" : "even";
+                    var firstCell = tbl_row.insertCell();
+                    switch(indexTemp){
+						case -1:
+                            firstCell.appendChild(document.createTextNode("Fuck GG"));
+                            console.log("table:"+firstCell.valueOf());
+                            break;
+						case 0:
+						    firstCell.appendChild(document.createTextNode("MWF(1hr) 8:00 am"));
+						    console.log("table:"+firstCell.valueOf());
+						    break;
+                        case 1:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 9:00 am"));
+                            break;
+                        case 2:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 10:00 am"));
+                            break;
+                        case 3:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 11:00 am"));
+                            break;
+                        case 4:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 12:00 pm"));
+                            break;
+                        case 5:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 1:00 pm"));
+                            break;
+                        case 6:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 2:00 pm"));
+                            break;
+                        case 7:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 3:00 pm"));
+                            break;
+                        case 8:
+                            firstCell.appendChild(document.createTextNode("MWF(1hr) 4:00 pm"));
+                            break;
+                        case 9:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 8:00 am"));
+                            break;
+                        case 10:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 9:30 am"));
+                            break;
+                        case 11:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 11:00 am"));
+                            break;
+                        case 12:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 12:30 pm"));
+                            break;
+                        case 13:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 2:00 pm"));
+                            break;
+                        case 14:
+                            firstCell.appendChild(document.createTextNode("TuTh(1.5hr) 3:30 pm"));
+                            break;
+
+					}
+                    $.each(this, function(k , v) {
+                        //key: 0, 1, 2, ...., n
+                        //v: {k:v, k2:v2}
+						/* for (var key in v) {
+						 //console.log(key, v[key]);
+						 var cell = tbl_row.insertCell();
+						 cell.appendChild(document.createTextNode(v[key]));
+						 }*/
+                        //console.log(v);
+                        var cell = tbl_row.insertCell();
+                        cell.appendChild(document.createTextNode(v));
+                    });
+                    odd_even = !odd_even;
+                })
+                document.getElementById("tblResults").appendChild(tbl_body);
+                // $("#tblResults").appendChild(tbl_body);
+            }
+
+
 
         function makingSchedule(coursesResult, roomsResult){
 			var oldSchedule = [];
@@ -966,7 +1094,7 @@
 			    console.log("propName "+propName);
 			    console.log("schedule propName "+schedule[propName]);
 			}*/
-			console.log("scheduel: "+JSON.stringify(schedule));
+			//console.log("scheduel: "+JSON.stringify(schedule));
 			console.log("tempCoursesResult: "+JSON.stringify(tempCoursesResult));
             console.log("tempRoomsResult: "+JSON.stringify(tempRoomsResult));
 
@@ -976,16 +1104,16 @@
 				singleCourse = tempCoursesResult[x];
 				$numOfSections = Math.ceil(Number(singleCourse["uniqueSection"])/3);
 
-				console.log("numofsections: "+$numOfSections.toString());
-				console.log("singleCourse: "+JSON.stringify(singleCourse));
+				//console.log("numofsections: "+$numOfSections.toString());
+				//console.log("singleCourse: "+JSON.stringify(singleCourse));
 				for(var y = 0; y < schedule.length; y++){
-				    console.log("Y: "+JSON.stringify(y));
+				    //console.log("Y: "+JSON.stringify(y));
 				    oneHour = $.extend(true, {}, schedule[y]);
 					//oneHour = Object.assign(schedule[Number(y)]);
-					console.log("oneHour: "+JSON.stringify(oneHour));
-					console.log(JSON.stringify(y) + " " + JSON.stringify($sectionCounter));
+					//console.log("oneHour: "+JSON.stringify(oneHour));
+					//console.log(JSON.stringify(y) + " " + JSON.stringify($sectionCounter));
                     if ($sectionCounter >= $numOfSections) {
-                        console.log('Im here!')
+                        //console.log('Im here!')
                         continue;
                     } else  {
                         tempScheduledValue = addingCoursesIntoSlot(singleCourse, oneHour, tempRoomsResult);
@@ -993,16 +1121,16 @@
                         if(tempScheduledValue == "Hour is filled"){
                             if(y == schedule.length - 1){
                                 $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
-                                console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
+                                //console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
                                 $notScheduledCounter++;
                             }
 						}else{
-                            console.log("schedule element before add: "+JSON.stringify(schedule[y]));
+                            //onsole.log("schedule element before add: "+JSON.stringify(schedule[y]));
                             schedule[Number(y)] = tempScheduledValue;
                             $sectionCounter++;
-                            console.log("sectionCounter after add "+$sectionCounter.toString());
-                            console.log("successfully added courses");
-                            console.log("tempTotalScheduel: "+JSON.stringify(schedule));
+                            //console.log("sectionCounter after add "+$sectionCounter.toString());
+                            //console.log("successfully added courses");
+                            //console.log("tempTotalScheduel: "+JSON.stringify(schedule));
 						}
                     }
 
@@ -1052,7 +1180,7 @@
 			}
             console.log("notScheduledCounter: "+JSON.stringify($notScheduledCounter));
             console.log("totalNumberOfSections: "+JSON.stringify($totalNumOfSections));
-			var qualityMeasure = (1 - Number($notScheduledCounter))/Number($totalNumOfSections);
+			var qualityMeasure = 1 - ((Number($notScheduledCounter))/Number($totalNumOfSections));
 
 			return [schedule, $notScheduledObject, qualityMeasure];
 
@@ -1078,12 +1206,12 @@
 		    for(let x in rooms){
 				singleRooms = rooms[x];
 				takenTimeSlot = singleHour[singleRooms["rooms_name"]];
-				console.log("singleHour: "+JSON.stringify(singleHour));
-				console.log("singleCourse: "+JSON.stringify(singleCourse));
+				//console.log("singleHour: "+JSON.stringify(singleHour));
+				//console.log("singleCourse: "+JSON.stringify(singleCourse));
                 if(singleCourse["maxCourseSize"] <= singleRooms["rooms_seats"]){
-					if(takenTimeSlot == "1"){
+					if(takenTimeSlot == "Unscheduled"){
 					    singleHour[singleRooms["rooms_name"]] = (singleCourse["courses_dept"] + " " + singleCourse["courses_id"]);
-					    console.log("updated single hour");
+					    //console.log("updated single hour");
 					    break;
 					}else{
 					    filledCounter++;
@@ -1116,9 +1244,9 @@
 		function createArrayOfTimeSlots(schedule, roomsArray){
 
 			var tempObject = {}
-            for (var i = 0; i < 16; i++) {
+            for (var i = 0; i < 15; i++) {
                 for(let x in roomsArray) {
-                    tempObject[roomsArray[x]["rooms_name"]] = "1"
+                    tempObject[roomsArray[x]["rooms_name"]] = "Unscheduled"
                     schedule[i] = tempObject;
                 }
                 //Do something
@@ -1556,6 +1684,8 @@
 			</p>
 
 			<table id="tblResults" border="1" align="center"></table>
+
+			<p id="QualityMeasure" align="center"></p>
 
 		</div>
 	</body>
