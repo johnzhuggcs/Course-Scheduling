@@ -925,15 +925,206 @@
                 $isRooms = false;
 				coursesResult = scheduleGenerateData();
 				$isScheduling2 = true;
-				console.log(JSON.stringify(coursesResult));
+                console.log("<I> " + new Date().toLocaleString() + ": " + JSON.stringify(coursesResult))
+				//Log.info(JSON.stringify(coursesResult));
+				//console.log(JSON.stringify(coursesResult));
 			}
 			if($isScheduling2){
                 $isCourses = false;
-                $isRooms = false;
+                $isRooms = true;
 				roomsResult = scheduleGenerateData();
 			}
 
+			var returnSchedule = makingSchedule(coursesResult, roomsResult);
+			console.log("return schedule: "+JSON.stringify(returnSchedule[0])+JSON.stringify(returnSchedule[1])+JSON.stringify(returnSchedule[2]));
+
+			generateTable(returnSchedule);
+
         }
+
+        function makingSchedule(coursesResult, roomsResult){
+			var oldSchedule = [];
+			var schedule;
+			var tempCoursesResult = coursesResult.result;
+			var tempRoomsResult = roomsResult.result;
+			var singleCourse;
+			var singleRooms;
+			var singleRoomsTimes;
+			var oneHour;
+			var $numOfSections = 0;
+			var $sectionCounter = 0;
+			var $notScheduledCounter = 0;
+			var $notScheduledObject = {};
+			var tempScheduledValue;
+			var $totalNumOfSections = 0;
+
+			schedule = createArrayOfTimeSlots(oldSchedule, tempRoomsResult);
+
+			/**for(let x in tempRoomsResult){
+			    var propName = tempRoomsResult[x]["rooms_name"]
+				schedule[propName] = createArrayOfTimeSlots();
+			    console.log("propName "+propName);
+			    console.log("schedule propName "+schedule[propName]);
+			}*/
+			console.log("scheduel: "+JSON.stringify(schedule));
+			console.log("tempCoursesResult: "+JSON.stringify(tempCoursesResult));
+            console.log("tempRoomsResult: "+JSON.stringify(tempRoomsResult));
+
+			for(let x in tempCoursesResult){
+			    $sectionCounter = 0;
+				$totalNumOfSections += $numOfSections;
+				singleCourse = tempCoursesResult[x];
+				$numOfSections = Math.ceil(Number(singleCourse["uniqueSection"])/3);
+
+				console.log("numofsections: "+$numOfSections.toString());
+				console.log("singleCourse: "+JSON.stringify(singleCourse));
+				for(var y = 0; y < schedule.length; y++){
+				    console.log("Y: "+JSON.stringify(y));
+				    oneHour = $.extend(true, {}, schedule[y]);
+					//oneHour = Object.assign(schedule[Number(y)]);
+					console.log("oneHour: "+JSON.stringify(oneHour));
+					console.log(JSON.stringify(y) + " " + JSON.stringify($sectionCounter));
+                    if ($sectionCounter >= $numOfSections) {
+                        console.log('Im here!')
+                        continue;
+                    } else  {
+                        tempScheduledValue = addingCoursesIntoSlot(singleCourse, oneHour, tempRoomsResult);
+                        console.log("tempSceduledValue: "+JSON.stringify(tempScheduledValue));
+                        if(tempScheduledValue == "Hour is filled"){
+                            if(y == schedule.length - 1){
+                                $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
+                                console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
+                                $notScheduledCounter++;
+                            }
+						}else{
+                            console.log("schedule element before add: "+JSON.stringify(schedule[y]));
+                            schedule[Number(y)] = tempScheduledValue;
+                            $sectionCounter++;
+                            console.log("sectionCounter after add "+$sectionCounter.toString());
+                            console.log("successfully added courses");
+                            console.log("tempTotalScheduel: "+JSON.stringify(schedule));
+						}
+                    }
+
+
+				}
+				/**
+				for(let y in tempRoomsResult){
+                    singleRooms = tempRoomsResult[y];
+                    console.log("sectionCounter: "+$sectionCounter.toString());
+                    if($sectionCounter >= $numOfSections) {
+                        console.log('Im here!')
+						continue;
+                    }else
+                    if(singleCourse["maxCourseSize"] <= singleRooms["rooms_seats"]){
+                        console.log("singleCourseSize: "+singleCourse["maxCourseSize"].toString());
+                        console.log("singleRoomsSeats: "+singleRooms["rooms_seats"].toString());
+                        singleRoomsTimes = schedule[singleRooms["rooms_name"]];
+                        console.log("singleRoomsTimes: "+JSON.stringify(singleRoomsTimes));
+                        tempScheduledValue = addingCoursesIntoSlot(singleCourse, singleRoomsTimes);
+                        if(tempScheduledValue == "Room is filled"){
+                            if(Number(y) == tempRoomsResult.length - 1){
+                                $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
+								console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
+								$notScheduledCounter++;
+							}
+						}else{
+                            singleRoomsTimes = tempScheduledValue;
+                            $sectionCounter++;
+                            console.log("successfully added courses");
+
+						}
+                        console.log("temp schedule before adding: "+JSON.stringify(schedule));
+                        console.log("adding singleRoomsTimes: "+JSON.stringify(singleRoomsTimes));
+                        schedule[singleRooms["rooms_name"]] = singleRoomsTimes;
+                        console.log("temp scheduel: "+JSON.stringify(schedule));
+                    }else{
+                        if(Number(y) == tempRoomsResult.length - 1){
+                            $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
+                            console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
+                            $notScheduledCounter++;
+                        }
+					}
+
+				}*/
+
+
+			}
+            console.log("notScheduledCounter: "+JSON.stringify($notScheduledCounter));
+            console.log("totalNumberOfSections: "+JSON.stringify($totalNumOfSections));
+			var qualityMeasure = (1 - Number($notScheduledCounter))/Number($totalNumOfSections);
+
+			return [schedule, $notScheduledObject, qualityMeasure];
+
+
+		}
+
+		function checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse){
+            var courseName = (singleCourse["courses_dept"]+" "+singleCourse["courses_id"]);
+			if($notScheduledObject.hasOwnProperty(courseName)){
+				$notScheduledObject[courseName] = $notScheduledObject[courseName]++;
+			}else{
+			    $notScheduledObject[courseName] = $numOfSections - $sectionCounter;
+			}
+			return $notScheduledObject
+		}
+
+		function addingCoursesIntoSlot(singleCourse, singleHour, rooms){
+		    var filledCounter = 0;
+		    var ranOnce = 0;
+		    var singleRooms
+			//var singleRoomsTimes;
+		    var takenTimeSlot;
+		    for(let x in rooms){
+				singleRooms = rooms[x];
+				takenTimeSlot = singleHour[singleRooms["rooms_name"]];
+				console.log("singleHour: "+JSON.stringify(singleHour));
+				console.log("singleCourse: "+JSON.stringify(singleCourse));
+                if(singleCourse["maxCourseSize"] <= singleRooms["rooms_seats"]){
+					if(takenTimeSlot == "1"){
+					    singleHour[singleRooms["rooms_name"]] = (singleCourse["courses_dept"] + " " + singleCourse["courses_id"]);
+					    console.log("updated single hour");
+					    break;
+					}else{
+					    filledCounter++;
+					}
+				}else filledCounter++;
+
+			}
+			/**
+			for(let x in singleRoomsTimes){
+			    if(singleRoomsTimes[x] == "1"){
+			        console.log('ranOnce: '+ranOnce.toString());
+			        if(ranOnce == 1){
+						break;
+					}else {
+                        console.log("x in singleRoomsTimes: " + x);
+                        singleRoomsTimes[x] = (singleCourse["courses_dept"] + " " + singleCourse["courses_id"]);
+                        ranOnce++;
+                        return singleRoomsTimes;
+                    }
+				}else{
+			        filledCounter++;
+				}
+			}*/
+			if(filledCounter >= Number(rooms.length)){
+			    singleHour = "Hour is filled"
+            }
+            return singleHour;
+		}
+
+		function createArrayOfTimeSlots(schedule, roomsArray){
+
+			var tempObject = {}
+            for (var i = 0; i < 16; i++) {
+                for(let x in roomsArray) {
+                    tempObject[roomsArray[x]["rooms_name"]] = "1"
+                    schedule[i] = tempObject;
+                }
+                //Do something
+            }
+            return schedule;
+		}
 
             function scheduleGenerateData() {
                 if ($isCourses) {
@@ -951,7 +1142,10 @@
 
 
                     var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
+					console.log("and or string: "+$andOrString);
                     $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
+					var $tempString = ',{"EQ":{"courses_year":2014}}'
+                    $andOrString = "{\"AND\":[" + $andOrString + $tempString + "]}";
 
                     //for order
                     var $order = $(".ifcoursesGroup :selected").val();
@@ -969,7 +1163,7 @@
                     var transformationString = '"TRANSFORMATIONS": {"GROUP": ["courses_dept","courses_id"],' +
 						'"APPLY": [{"maxCourseSize":{"MAX":"courses_sectionsize"}},' +
 						' {"uniqueSection":{"COUNT":"courses_uuid"}}]}'
-                    var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),declareDirection(),coursesOrderVals,transformationString);
+                    var $officialQueryString = queryMaker($andOrString,coursesColVals.toString(),'"DOWN"',coursesOrderVals,transformationString);
                     console.log("officialQueryString (courses): " + $officialQueryString);
                     //if there is no filter
                     var coursesFiltersInputCounter = 0;
@@ -996,6 +1190,7 @@
                     }
 
                     var $queryFormat = JSON.parse($officialQueryString);
+                    var result;
 
 
                     //console.log("qq" + $queryFormat);
@@ -1004,6 +1199,7 @@
                     //create the format here, then yarn start and send request to the server
 
                     $.ajax({
+                        async:false,
                         url: "http://localhost:4321/query",
                         type: 'POST',
                         data: $officialQueryString,
@@ -1011,13 +1207,17 @@
                         contentType: 'application/json'
                     }).done(function(data) {
                         console.log("Response", data);
-                        generateTable(data);
+                        //generateTable(data);
+                        result = data;
+
                         //generateTable(data.result);
                     }).fail(function(e) {
                         console.error("ERROR - Failed to submit query", e);
 
                         //window.print("ERROR - Failed to submit query", e)
                     });
+
+                    return result;
 
 					/*$.ajax('/query',
 					 {
@@ -1045,17 +1245,17 @@
                         roomsColVals[l] = $(selected).val();
                     });
 
-                    var roomsColVals = [];
+                    //var roomsColVals = [];
                     var roomsOrderVals = [];
-                    roomsColVals = ["rooms_seats", "rooms_fullname"];
-                    roomsOrderVals = ["rooms_seats"]
+                    roomsColVals = ['"rooms_seats"', '"rooms_name"'];
+                    roomsOrderVals = ['"rooms_seats"'];
 
                     var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
                     $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
 
                     console.log($andOrString);
 
-                    var $officialQueryString = queryMaker($andOrString,roomsColVals.toString(),declareDirection(),roomsOrderVals,"");
+                    var $officialQueryString = queryMaker($andOrString,roomsColVals.toString(),'"DOWN"',roomsOrderVals,"");
 
                     console.log("officialQueryString (rooms): " + $officialQueryString);
                     //if there is no filter
@@ -1070,7 +1270,8 @@
                             emptyRoomsFilterCounter++;
                         }
                     });
-
+					console.log("rooms filter counter:  "+roomsFiltersInputCounter)
+                    console.log("empty rooms filter counter  "+emptyRoomsFilterCounter)
                     if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
                         alert("Please insert some Rooms Filter(s) before creating the table");
                         return;
@@ -1081,8 +1282,10 @@
                     if ($officialQueryString == "") {
                         return;
                     }
+                    var resultRoom;
 
                     $.ajax({
+                        async:false,
                         url: "http://localhost:4321/query",
                         type: 'POST',
                         data: $officialQueryString,
@@ -1090,14 +1293,15 @@
                         contentType: 'application/json'
                     }).done(function(data) {
                         console.log("Response", data);
-                        generateTable(data);
+                        //generateTable(data);
                         //generateTable(data.result);
+						resultRoom = data
                     }).fail(function(e) {
                         console.error("ERROR - Failed to submit query", e);
 
                         //window.print("ERROR - Failed to submit query", e)
                     });
-
+					return resultRoom;
                 }
             }
 
@@ -1254,7 +1458,7 @@
 						<br>
 					</div>
 
-					Location (distance from a given building): Distance:
+					Location (distance from a given building): Distance(km):
 					<select class = "compareSizeLocation">
 						<option value="LT">Less than</option>
 						<option value="EQ">Equal to</option>
