@@ -957,14 +957,37 @@
 
 			generateScheduleTable(returnSchedule[0]);
 
-			//createQualityMeasure(returnSchedule[1], returnSchedule[2])
+			createQualityMeasure(returnSchedule[1], returnSchedule[2])
 
         }
         function createQualityMeasure(data1, data2){
 
-			$("quality").remove();
-			var quality_measure = document.createElement("quality");
-            document.getElementById("QualityMeasure").appendChild(quality_measure);
+				$(".nonScheduledObjectClass").remove();
+				$(".qualityMeasureText").remove();
+                //$("quality").remove();
+                var quality_measure = document.createElement("p");
+                //document.getElementById("QualityMeasure").appendChild(quality_measure);
+                var counter = 0
+                $.each(data1, function (k, v) {
+                    var element = document.createElement('div');
+                    if(JSON.stringify(v) == "1"){
+                        var text = document.createTextNode(JSON.stringify(k) + " has " + JSON.stringify(v) + " section not scheduled");
+					}else{
+                        var text = document.createTextNode(JSON.stringify(k) + " has " + JSON.stringify(v) + " sections not scheduled");
+					}
+
+                    element.appendChild(text);
+                    element.setAttribute("class", "nonScheduledObjectClass");
+                    document.getElementById("QualityMeasure").appendChild(element);
+
+                })
+
+
+                var text2 = document.createTextNode("Your schedule has a quality measure of " + JSON.stringify(data2) + ", representing the percentage of sections scheduled")
+                quality_measure.appendChild(text2);
+                quality_measure.setAttribute("class", "qualityMeasureText");
+                document.getElementById("QualityMeasure").appendChild(quality_measure);
+
 
 		}
 
@@ -1180,7 +1203,8 @@
 			}
             console.log("notScheduledCounter: "+JSON.stringify($notScheduledCounter));
             console.log("totalNumberOfSections: "+JSON.stringify($totalNumOfSections));
-			var qualityMeasure = 1 - ((Number($notScheduledCounter))/Number($totalNumOfSections));
+			var qualityMeasure = (1 - ((Number($notScheduledCounter))/Number($totalNumOfSections)))*100;
+			qualityMeasure = Number(qualityMeasure.toFixed(2));
 
 			return [schedule, $notScheduledObject, qualityMeasure];
 
@@ -1685,7 +1709,7 @@
 
 			<table id="tblResults" border="1" align="center"></table>
 
-			<p id="QualityMeasure" align="center"></p>
+			<div id="QualityMeasure" align="center"></div>
 
 		</div>
 	</body>
