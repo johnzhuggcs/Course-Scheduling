@@ -9,6 +9,7 @@ import {isNumber} from "util";
 import {isUndefined} from "util";
 //import {read} from "fs";
 import {isNullOrUndefined} from "util";
+import {isNull} from "util";
 
 //import {objectify} from "tslint/lib/utils";
 
@@ -970,6 +971,10 @@ export default class InsightFacade implements IInsightFacade {
                                             }
                                         }
                                         if(!isUndefined(result)) {
+                                            if(!isNullOrUndefined(returnInfo["courses_pass"]) && !isNullOrUndefined(returnInfo["courses_fail"])){
+                                                var tempTempValue = Number(returnInfo["courses_pass"]) + Number(returnInfo["courses_fail"])
+                                                returnInfo = Object.assign({}, returnInfo, {"courses_sectionsize":tempTempValue})
+                                            }
                                             returnInfo = newThis.filterQueryRequest(returnInfo, result, keys);
                                         }
                                         //Log.info(returnInfo);
