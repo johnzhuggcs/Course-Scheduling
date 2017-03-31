@@ -41,6 +41,8 @@
 			//$(document).ready(function(){
 				if ($(".dataset").val() == "default") {
 
+                    $(".groupBySelected").hide();
+                    $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").hide()
                     $(".ifcoursesFilters").hide();
                     $(".ifroomsFilters").hide();
@@ -89,6 +91,10 @@
 				}
 				if ($(".dataset").val() == "rooms") {
 
+                    isGroupChecked = false;
+                    isAdditional = false;
+                    $(".groupBySelected").hide();
+                    $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").hide()
                     $(".roomsFilterSchedule").show();
                     $("#nonScheduleCourseFilters").hide();
@@ -1237,7 +1243,8 @@
                     $isScheduling = false;
 					$isScheduling2 = false;
                     $isExplorer = false;
-
+                    $(".groupBySelected").hide();
+                    $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").hide();
                     $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").hide();
@@ -1264,6 +1271,8 @@
                     $(".explorerBanner").show()
 					$(".dataset").val("default")
                     //dataset.style.visibility = "visible";
+                    $(".groupBySelected").hide();
+                    $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").hide();
                     $(".roomsFilterSchedule").hide();
                     $(".ifcoursesFilters").hide();
@@ -1289,9 +1298,14 @@
                     //console.log(dataset.toString());
                     $(".explorerBanner").hide()
                     //dataset.style.visibility = "hidden";
+					isGroupChecked = false;
+                    isAdditional = false;
+                    $(".groupBy").attr("checked", false);
                     $isScheduling = true;
                     $isScheduling2 = false;
                     $isExplorer = false;
+                    $(".groupBySelected").hide();
+                    $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").show();
                     $(".roomsFilterSchedule").show();
                     $(".ifcoursesFilters").show();
@@ -2124,12 +2138,12 @@
 			<p>
 
 			</p>
-				<span class = "ifcoursesExtraInfo" style="display:none"><b>Group by department and course number? </b>
+				<span class = "ifcoursesExtraInfo" style="display:none"><b>Group by department and course number? (unclick before switching modes) </b>
 					<input type="checkbox" class="groupBy" onchange="groupByActivated()">Yes<br>
 				</span>
 
 			<p>
-				<span class = "ifcoursesExtraInfo" style="display:none"><b>Extra Info Available: </b>
+				<span class = "ifcoursesExtraInfo" style="display:none"><b>Extra Info Available (unclick before switching modes): </b>
 				<div class = "ifcoursesApply" style="display:none" onchange="extraInfoActivated()">
 					<input type="checkbox" class="highestavg">Courses With highest Average<br>
 					<input type="checkbox" class="lowestavg">Courses With Lowest Average<br>
