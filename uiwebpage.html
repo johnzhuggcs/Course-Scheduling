@@ -54,6 +54,8 @@
 
                     $(".ifcoursesExtraInfo").hide();
 
+                    $(".ifSelected").hide();
+
 
 				}
 				if ($(".dataset").val() == "courses") {
@@ -76,6 +78,8 @@
                     $(".ifcoursesApply").show();
 
                     $(".ifcoursesExtraInfo").show();
+
+                    $(".ifSelected").hide();
 
 
 				}
@@ -100,6 +104,8 @@
                     $(".ifcoursesApply").hide();
 
                     $(".ifcoursesExtraInfo").hide();
+
+                    $(".ifSelected").hide();
 				}
 			//})
 		}
@@ -592,7 +598,7 @@
 
 			function queryMaker(andOr,coursesColVal,direction,coursesOrderVal,transformation) {
 				var query ="{";
-				if (coursesColVal == "") {
+				if (coursesColVal == "" && !isAdditional && !isGroupChecked) {
 				    alert("Please select the columns to display")
 					return "";
 				}
@@ -600,17 +606,139 @@
                 query = query + '"WHERE": ' + andOr + ', '
 				}
 
-				query = query + '"OPTIONS": {"COLUMNS": [' + coursesColVal + ']'
-
-				if (direction == "" && coursesOrderVal.length == 1) {
-                    query = query + ', "ORDER":' +  coursesOrderVal.toString()
-                }
-                if (direction == "" && coursesOrderVal.length > 1) {
-                    alert("Please select the direction for more than one orderings")
-                    return "";
+				if (isGroupChecked && !isAdditional) {
+                    query = query + '"OPTIONS": {"COLUMNS": ["courses_dept", "courses_id"]'
 				}
-				if (direction != "" && coursesOrderVal.length > 0) {
-                    query = query + ', "ORDER": {"dir": ' + direction + ', "keys": [' + coursesOrderVal.toString() + ']}'
+				if (isAdditional) {
+                    query = query + '"OPTIONS": {"COLUMNS": ["courses_dept", "courses_id"'
+				    if (isHighestAvgChecked) {
+                    	query = query + ', "HighestAverage"';
+                    }
+                    if (isLowestAvgChecked) {
+                        query = query + ', "LowestAverage"';
+                    }
+                    if (isMostSecChecked) {
+                        query = query + ', "MostSections"';
+					}
+					if (isMostPassChecked) {
+                        query = query + ', "MostPasses"';
+					}
+                    if (isMostFailChecked) {
+                        query = query + ', "MostFails"';
+                    }
+                    query = query + ']'
+
+				}
+				if (!isGroupChecked && !isAdditional) {
+                    query = query + '"OPTIONS": {"COLUMNS": [' + coursesColVal + ']'
+                }
+
+				/*
+				 var isGroupChecked = false;
+				 var isAdditional = false;
+				 var isHighestAvgChecked = false;
+				 var isMostSecChecked = false;
+				 var isMostPassChecked = false;
+				 var isMostFailChecked = false;
+				 */
+
+				if (isGroupChecked || isAdditional) {
+
+                    var attrCounter = 0; //counts the number of attributes that are checked
+                    var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
+                    if ($(".selDep").is(":checked")) {attrCounter++;}
+                    if ($(".selCid").is(":checked")) {attrCounter++;}
+                    if ($(".selHiAvg").is(":checked")) {attrCounter++;}
+                    if ($(".selLoAvg").is(":checked")) {attrCounter++;}
+                    if ($(".selMostSec").is(":checked")) {attrCounter++;}
+                    if ($(".selMostPass").is(":checked")) {attrCounter++;}
+                    if ($(".selMostFail").is(":checked")) {attrCounter++;}
+
+                    console.log("attrcounter" + attrCounter);
+
+				    if (direction == "" && attrCounter == 1) {
+                        query = query + ', "ORDER": '
+                        if ($('.selDep').is(":checked")) {query = query + '"courses_dept"'}
+                        if ($('.selCid').is(":checked")) {query = query + '"courses_id"'}
+                        if ($('.selHiAvg').is(":checked")) {query = query + '"HighestAverage"'}
+                        if ($('.selLoAvg').is(":checked")) {query = query + '"LowestAverage"'}
+                        if ($('.selMostSec').is(":checked")) {query = query + '"MostSections"'}
+                        if ($('.selMostPass').is(":checked")) {query = query + '"MostPasses"'}
+                        if ($('.selMostFail').is(":checked")) {query = query + '"MostFails"'}
+                    }
+
+                    if (direction == "" && attrCounter > 1) {
+                        alert("Please select the direction for more than one orderings")
+                        return "";
+                    }
+
+
+                    if (direction != "" && attrCounter > 0) {
+
+                        query = query + ', "ORDER": {"dir": ' + direction + ', "keys": ['
+
+						if ($('.selDep').is(":checked")) {
+                            query = query + '"courses_dept"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selCid').is(":checked")) {
+                            query = query + '"courses_id"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selHiAvg').is(":checked")) {
+                            query = query + '"HighestAverage"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selLoAvg').is(":checked")) {
+                            query = query + '"LowestAverage"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selMostSec').is(":checked")) {
+                            query = query + '"MostSections"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selMostPass').is(":checked")) {
+                            query = query + '"MostPasses"'
+                            lastAttrCounter++;
+                            if (lastAttrCounter < attrCounter) {
+                                query = query + ', '
+                            }
+                        }
+                        if ($('.selMostFail').is(":checked")) {
+                            query = query + '"MostFails"'
+                            lastAttrCounter++;
+                        }
+
+						query = query + ']}'
+					}
+				}
+
+				if (!isGroupChecked && !isAdditional) {
+                    if (direction == "" && coursesOrderVal.length == 1) {
+                        query = query + ', "ORDER":' + coursesOrderVal.toString()
+                    }
+                    if (direction == "" && coursesOrderVal.length > 1) {
+                        alert("Please select the direction for more than one orderings")
+                        return "";
+                    }
+                    if (direction != "" && coursesOrderVal.length > 0) {
+                        query = query + ', "ORDER": {"dir": ' + direction + ', "keys": [' + coursesOrderVal.toString() + ']}'
+                    }
                 }
 
 				query = query + ', "FORM": "TABLE"}'
@@ -659,11 +787,263 @@
             }
 
             var isGroupChecked = false;
+			var isAdditional = false;
+			var isHighestAvgChecked = false;
+			var isLowestAvgChecked = false;
+			var isMostSecChecked = false;
+			var isMostPassChecked = false;
+			var isMostFailChecked = false;
+
+			// To make it more efficient: consider splitting it into 4 cases: addional 2 and group 2
             function groupByActivated() {
-                if ($(".groupBy ").is(":checked")) {
+                console.log("isAdditional" + isAdditional);
+                if ($(".groupBy ").is(":checked") && isAdditional) {
+                    console.log("checked");
+                    isGroupChecked = true;
+                    $(".additionalInfoSelected").show();
+                    $(".groupBySelected").hide();
+                    $(".catButton").hide();
+                    $(".test").hide();
+                    $(".extra").hide();
+
+                    $(".testOrder").hide();
+                    $(".extraOrder").hide();
+                    if ($(".selDep")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                    }
+                    if ($(".selCid")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                    }
+
+                    $(".extraOrderButton").hide();
+                }
+                if ($(".groupBy ").is(":checked") && !isAdditional) {
+                    console.log("checked");
 					isGroupChecked = true;
-					$(".ifcourses").hide();
+                    $(".additionalInfoSelected").hide();
+					$(".groupBySelected").show();
+                    $(".catButton").hide();
+                    $(".test").hide();
+                    $(".extra").hide();
+
+                    $(".testOrder").hide();
+                    $(".extraOrder").hide();
+                    if ($(".selDep")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                    }
+                    if ($(".selCid")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                    }
+
+                    $(".extraOrderButton").hide();
 				}
+
+                if (!($(".groupBy ").is(":checked")) && isAdditional) {
+                    console.log("unchecked");
+                    isGroupChecked = false;
+                    $(".additionalInfoSelected").show();
+                    $(".groupBySelected").hide();
+                    $(".catButton").hide();
+                    $(".test").hide();
+                    $(".extra").hide();
+
+                    $(".testOrder").hide();
+                    $(".extraOrder").hide();
+                    if ($(".selDep")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                    }
+                    if ($(".selCid")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                    }
+
+                    $(".extraOrderButton").hide();
+
+                }
+
+                if (!($(".groupBy ").is(":checked")) && !isAdditional) {
+                    console.log("unchecked");
+                    isGroupChecked = false;
+                    $(".additionalInfoSelected").hide();
+                    $(".groupBySelected").hide();
+                    $(".catButton").show();
+                    $(".test").show();
+                    $(".extra").show();
+
+                    $(".testOrder").show();
+                    $(".extraOrder").show();
+                    $('.selDep').next('label').text("");
+                    $('.selCid').next('label').text("");
+                    $('.selDep').remove();
+                    $('.selCid').remove();
+
+                    $(".extraOrderButton").show();
+                }
+			}
+
+			function extraInfoActivated() {
+
+                console.log("isGroupChecked" + isGroupChecked);
+                console.log($(".selDep")[0]);
+                console.log($(".selDep")[0]==null);
+
+                var additionalStr = "";
+                if ($(".highestavg ").is(":checked")
+				|| $(".lowestavg ").is(":checked")
+                    || $(".mostsec ").is(":checked")
+				|| $(".mostpass").is(":checked")
+				|| $(".mostfail ").is(":checked")) {
+
+                    if (isGroupChecked) {
+                        isAdditional = true;
+                        $(".additionalInfoSelected").show();
+                        $(".groupBySelected").hide();
+                        $(".catButton").hide();
+                        $(".test").hide();
+                        $(".extra").hide();
+
+                        $(".testOrder").hide();
+                        $(".extraOrder").hide();
+
+                        if ($(".selDep")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                        }
+                        if ($(".selCid")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                        }
+
+                        $(".extraOrderButton").hide();
+					}
+
+					if (!isGroupChecked) {
+                        isAdditional = true;
+                        $(".additionalInfoSelected").show();
+                        $(".groupBySelected").hide();
+                        $(".catButton").hide();
+                        $(".test").hide();
+                        $(".extra").hide();
+
+                        $(".testOrder").hide();
+                        $(".extraOrder").hide();
+
+                        if ($(".selDep")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                        }
+                        if ($(".selCid")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                        }
+
+                        $(".extraOrderButton").hide();
+					}
+				} else {
+
+
+                    if (isGroupChecked) {
+                        isAdditional = false;
+                        $(".additionalInfoSelected").hide();
+                        $(".groupBySelected").show();
+                        $(".catButton").hide();
+                        $(".test").hide();
+                        $(".extra").hide();
+
+                        $(".testOrder").hide();
+                        $(".extraOrder").hide();
+
+                        if ($(".selDep")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selDep" /><label>Department</label>');
+                        }
+                        if ($(".selCid")[0] == null) {
+                            $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selCid" /><label>Course Number</label>');
+                        }
+
+                        $(".extraOrderButton").hide();
+                    }
+
+                    if (!isGroupChecked) {
+                        isAdditional = false;
+                        $(".additionalInfoSelected").hide();
+                        $(".groupBySelected").hide();
+                        $(".catButton").show();
+                        $(".test").show();
+                        $(".extra").show();
+
+                        $(".testOrder").show();
+                        $(".extraOrder").show();
+
+                        $('.selDep').next('label').text("");
+                        $('.selCid').next('label').text("");
+                        $('.selDep').remove();
+                        $('.selCid').remove();
+
+                        $(".extraOrderButton").show();
+                    }
+
+				}
+
+
+                if ($(".highestavg ").is(":checked")) {
+                    console.log("checked");
+                    isHighestAvgChecked = true;
+					additionalStr = additionalStr + ", highest average"
+                    if ($(".selHiAvg")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selHiAvg" /><label>Highest Average</label>');
+                    }
+
+                } else {
+                    isHighestAvgChecked = false;
+                    $('.selHiAvg').next('label').text("");
+                    $('.selHiAvg').remove();
+				}
+                if ($(".lowestavg ").is(":checked")) {
+                    console.log("checked");
+                    isLowestAvgChecked = true;
+                    additionalStr = additionalStr + ", lowest average"
+					if ($(".selLoAvg")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selLoAvg" /><label>Lowest Average</label>');
+                    }
+                } else {
+                    isLowestAvgChecked = false;
+                    $('.selLoAvg').next('label').text("");
+                    $('.selLoAvg').remove();
+                }
+                if ($(".mostsec ").is(":checked")) {
+                    console.log("checked");
+                    isMostSecChecked = true;
+                    additionalStr = additionalStr + ", most sections"
+                    if ($(".selMostSec")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selMostSec" /><label>Most Sections</label>');
+                    }
+                } else {
+                    isMostSecChecked = false;
+                    $('.selMostSec').next('label').text("");
+                    $('.selMostSec').remove();
+                }
+                if ($(".mostpass ").is(":checked")) {
+                    console.log("checked");
+                    isMostPassChecked = true;
+                    additionalStr = additionalStr + ", most passes"
+                    if ($(".selMostPass")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selMostPass" /><label>Most Passes</label>');
+                    }
+                } else {
+                    isMostPassChecked = false;
+                    $('.selMostPass').next('label').text("");
+                    $('.selMostPass').remove();
+                }
+                if ($(".mostfail ").is(":checked")) {
+                    console.log("checked");
+                    isMostFailChecked = true;
+                    additionalStr = additionalStr + ", most fails"
+                    if ($(".selMostFail")[0] == null) {
+                        $('.groupByAndAdditionalInfoCheckboxes').append('<input type="checkbox" class="selMostFail" /><label>Most Fails</label>');
+                    }
+                } else {
+                    isMostFailChecked = false;
+                    $('.selMostFail').next('label').text("");
+                    $('.selMostFail').remove();
+                }
+
+
+               	$(".additionalAddSpan").text(additionalStr); //set the text
 			}
 
         function generateData() {
@@ -1264,6 +1644,11 @@
 			<p>
 				<span class = "ifgroup" style="display:none"><b>Show column(s): </b></span>
                 <!-- should separate this into different classes for ifcourses and ifrooms -->
+				<span class= "groupBySelected" style="display:none">Group by activated: Only department and course number columns are selected.</span>
+				<span class= "additionalInfoSelected" style="display:none">
+					Additional info activated: Only columns department, course number<span class= "additionalAddSpan"></span> columns are selected.
+				</span>
+
 				<span class="test">
 				<select class = "ifcourses" style="display:none" onchange="columnLeadsGroupBy('ifcourses')">
 					<option value="default" selected></option>
@@ -1296,7 +1681,7 @@
 				</select>
 					</span>
 			<span class = "extra"></span>
-				<span class = "ifgroup" style="display:none">
+				<span class = "ifgroup catButton" style="display:none">
 					<button type="button" onclick="clickAddCat()">Add another category</button>
 				</span>
 			</p>
@@ -1308,6 +1693,27 @@
 					<option value="UP">Ascending</option>
 					<option value="DOWN">Descending</option>
 				</select>
+
+
+					<span class= "groupByAndAdditionalInfoCheckboxes"></span>
+					<!--
+					<span class= "groupBySelected" style="display:none">
+
+					<input type="checkbox" class="selDep">Courses With highest Average<br>
+					<input type="checkbox" class="selCid">Courses With Lowest Average<br>
+
+					</span>
+
+					<span class= "additionalInfoSelected" style="display:none">
+						<input type="checkbox" class="selHAvg">Courses With highest Average<br>
+						<input type="checkbox" class="selLAvg">Courses With Lowest Average<br>
+						<input type="checkbox" class="sel">Courses With highest Average<br>
+						<input type="checkbox" class="selCid">Courses With Lowest Average<br>
+						<input type="checkbox" class="selDep">Courses With highest Average<br>
+					</span>
+-->
+
+
 					<span class = "testOrder">
 				<select class = "ifcoursesGroup" style="display:none">
 					<option value="default" selected>Please select columns above to show before ordering</option>
@@ -1317,7 +1723,7 @@
 				</select>
 						</span>
 					<span class = "extraOrder"></span>
-					<button type="button" onclick="clickAddOrd()">Add another order</button>
+					<button type="button" class="extraOrderButton" onclick="clickAddOrd()">Add another order</button>
 
 				</span>
 			</p>
@@ -1331,7 +1737,7 @@
 
 			<p>
 				<span class = "ifcoursesExtraInfo" style="display:none"><b>Extra Info Available: </b>
-				<div class = "ifcoursesApply" style="display:none">
+				<div class = "ifcoursesApply" style="display:none" onchange="extraInfoActivated()">
 					<input type="checkbox" class="highestavg">Courses With highest Average<br>
 					<input type="checkbox" class="lowestavg">Courses With Lowest Average<br>
 					<input type="checkbox" class="mostsec">Courses With Most Sections<br>
