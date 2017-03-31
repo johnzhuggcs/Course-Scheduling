@@ -1809,8 +1809,11 @@
                     var $andOrString = stringObjectOfAttr();  //for filter: organize attributes into jsonstring
 					console.log("and or string: "+$andOrString);
                     $andOrString = stringWrapWithAndOr($andOrString); //wrap it with and/or
-					var $tempString = ',{"EQ":{"courses_year":2014}}'
-                    $andOrString = "{\"AND\":[" + $andOrString + $tempString + "]}";
+					if($andOrString != ""){
+					    $andOrString = ","+$andOrString;
+					}
+					var $tempString = '{"EQ":{"courses_year":2014}}'
+                    $andOrString = "{\"AND\":[" + $tempString + $andOrString + "]}";
 
                     //for order
                     var $order = $(".ifcoursesGroup :selected").val();
@@ -1842,11 +1845,11 @@
                             emptyCoursesFilterCounter++;
                         }
                     });
-
+					/**
                     if (coursesFiltersInputCounter == emptyCoursesFilterCounter) {
                         alert("Please insert some Courses Filter(s) before creating the table");
                         return;
-                    }
+                    }*/
 
 
                     //if the queryString failed to be made
@@ -1929,6 +1932,7 @@
                         roomsFiltersInputCounter++;
                     });
 
+                    /**
                     var emptyRoomsFilterCounter = 0;
                     $(".ifroomsFilters input").each(function() {
                         if ($(this).val() == "") {
@@ -1940,7 +1944,7 @@
                     if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
                         alert("Please insert some Rooms Filter(s) before creating the table");
                         return;
-                    }
+                    }*/
 
 
                     //if the queryString failed to be made
