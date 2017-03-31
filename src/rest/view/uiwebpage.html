@@ -48,6 +48,8 @@
 			//$(document).ready(function(){
 				if ($(".dataset").val() == "default") {
 
+                    $("#map").empty();
+				    $("#googlemaps").hide();
                     $(".groupBySelected").hide();
                     $(".additionalInfoSelected").hide();
                     $(".coursesAndOrClass").hide()
@@ -73,6 +75,8 @@
 				}
 				if ($(".dataset").val() == "courses") {
 
+                    $("#map").empty();
+                    $("#googlemaps").hide();
                     $(".coursesAndOrClass").show()
                     $(".ifcoursesFilters").show();
                     $("#nonScheduleCourseFilters").show();
@@ -98,6 +102,8 @@
 				}
 				if ($(".dataset").val() == "rooms") {
 
+                    $("#map").empty();
+                    $("#googlemaps").hide();
                     isGroupChecked = false;
                     isAdditional = false;
                     $(".groupBySelected").hide();
@@ -258,7 +264,7 @@
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val().toLowerCase() + addRightAsterisk("isItDep") + "\""
+                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $(".courses_dept").val().toLowerCase() + addRightAsterisk("isItDep") + "\""
                                 + "}" +
                                 "}";
                             if (lastAttrCounter < attrCounter) {
@@ -1274,6 +1280,8 @@
             }*/
 
             function generateMap(data) {
+                $("#map").empty();
+                $("#googlemaps").show();
                 var ubc = {lat: 49.2606, lng: -123.2460};
                 var map = new google.maps.Map(document.getElementById('map'), {
                     zoom: 14,
@@ -1342,6 +1350,9 @@
             function explorerOrScheduler(){
                 //var dataset = document.getElementsByClassName("dataset")[0];
                 if($(".explorerOrScheduler").val() == "default"){
+
+                    $("#map").empty();
+                    $("#googlemaps").hide();
                     $("tbody").remove();
                     $(".nonScheduledObjectClass").remove();
                     $(".qualityMeasureText").remove();
@@ -1373,6 +1384,9 @@
                     $(".ifScheduleButton").hide();
                 }
                 if($(".explorerOrScheduler").val() == "explorer"){
+
+                    $("#map").empty();
+                    $("#googlemaps").hide();
                     $("tbody").remove();
                     $(".nonScheduledObjectClass").remove();
                     $(".qualityMeasureText").remove();
@@ -1404,6 +1418,9 @@
                     $(".ifScheduleButton").hide();
                 }
                 if($(".explorerOrScheduler").val() == "scheduler"){
+
+                    $("#map").empty();
+                    $("#googlemaps").hide();
                     //console.log(dataset.toString());
                     $(".explorerBanner").hide()
                     //dataset.style.visibility = "hidden";
@@ -2259,7 +2276,7 @@
 			</p>
 
 			<p>
-				<h3>My Google Maps Demo</h3>
+				<h3 id = "googlemaps" style="display:none">My Google Maps Demo</h3>
 			<br>
 				<div id="map"></div>
 			</p>
