@@ -4,12 +4,15 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js">
 		</script>
 		<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Muli:300,400" rel="stylesheet">
 
 		<!-- PAUL'S CSS AND JQUERY-->
 
 		<style>
 			.head td {
 				font-weight: bold;
+				color: white;
+				background-color: #122b40;
 			}
 			td {
 				text-align: center;
@@ -18,6 +21,7 @@
 			table {
 				border-spacing: 0;
 				border-collapse: separate;
+				border-color: #b7b7b7;
 			}
 
 		</style>
@@ -239,7 +243,7 @@
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val() + addRightAsterisk("isItDep") + "\""
+                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val().toLowerCase() + addRightAsterisk("isItDep") + "\""
                                 + "}" +
                                 "}";
                             if (lastAttrCounter < attrCounter) {
@@ -291,7 +295,8 @@
                     if ($("#rooms_furniture").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#rooms_distance").val() != "") {
+                    if ($("#rooms_loc").val() != "" && $("#given_building").val() != "") {
+                        //console.log($("#rooms_distance").val());
                         attrCounter++;
                     }
                     if ($("#rooms_number").val() != "") {
@@ -303,6 +308,12 @@
 					if ($("#rooms_type").val() != "") {
 						attrCounter++;
 					}
+					if($("#rooms_loc").val() == "" && $("#given_building").val() != ""){
+                        alert("Error: 'Distance From' needed in Location")
+					}
+                    if($("#rooms_loc").val() != "" && $("#given_building").val() == ""){
+                        alert("Error: Given Building needed in Location")
+                    }
                     notBlankAttrCounter = attrCounter;
 
                     if (attrCounter > 0) {
@@ -368,7 +379,7 @@
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#rooms_distance").val() != "") {
+                        if ($("#rooms_loc").val() != "" && $("#given_building").val() != "") {
 
                             var $smallQuery =
 								{
@@ -1060,6 +1071,9 @@
 			}
 
         function generateData() {
+            $("tbody").remove();
+            $(".nonScheduledObjectClass").remove();
+            $(".qualityMeasureText").remove();
             if ($isCourses) {
 				//for filters
 
@@ -1213,6 +1227,9 @@
             function explorerOrScheduler(){
                 //var dataset = document.getElementsByClassName("dataset")[0];
                 if($(".explorerOrScheduler").val() == "default"){
+                    $("tbody").remove();
+                    $(".nonScheduledObjectClass").remove();
+                    $(".qualityMeasureText").remove();
 					//console.log(dataset.toString());
 					$(".explorerBanner").hide()
                     //dataset.style.visibility = "hidden";
@@ -1240,6 +1257,9 @@
                     $(".ifScheduleButton").hide();
                 }
                 if($(".explorerOrScheduler").val() == "explorer"){
+                    $("tbody").remove();
+                    $(".nonScheduledObjectClass").remove();
+                    $(".qualityMeasureText").remove();
                     //console.log(dataset.toString());
                     $(".explorerBanner").show()
 					$(".dataset").val("default")
@@ -1330,6 +1350,7 @@
 
         }
         function createQualityMeasure(data1, data2){
+
 
 				$(".nonScheduledObjectClass").remove();
 				$(".qualityMeasureText").remove();
@@ -1830,11 +1851,27 @@
 	</head>
 	<body>
 	<style type="text/css">
+		body{
+			font-family: 'Muli', sans-serif;
+		}
+
 		.heading{
-			color:midnightblue;
+			color:white;
+			background-color: #122b40;
+			padding: 20px;
+			font-family: 'Muli', sans-serif;
+			padding-left: 100px;
+			padding-right: 100px;
+			text-align: center;
+			position: sticky;
+			top: 0px;
+
+		}
+		.fields{
+			margin-top: 15px;
 		}
 	</style>
-		<h1 class = "heading" >InsightUBC Tool</h1>
+		<h1 class = "heading" >InsightUBC Tool(Alpha)</h1>
 		<div class = "fields">
 			<p><!-- Jon's code -->
 				<b>Tool Mode:</b>
@@ -1867,7 +1904,7 @@
 				</span>
 
 				<div class = "ifcoursesFilters" style="display:none">
-					Department:
+					Department (case insensitive):
 					<select class = "isItDep">
 						<option value="IS" selected>IS</option>
 						<option value="SW">Starts With</option>
@@ -1914,7 +1951,7 @@
 
 			</div>
 
-		</div>
+
 
 				<br>
                 <span class = "roomsFilterSchedule radioclass" style="display:none"><b>Room Filters (can leave blank): </b>
@@ -1932,7 +1969,7 @@
 
 				<div class = "ifroomsFilters" style="display:none">
                     <br>
-					Building name:
+					Building name (case sensitive):
 					<select class = "isItFullname">
 						<option value="IS" selected>IS</option>
 						<option value="SW">Starts With</option>
@@ -2113,6 +2150,7 @@
 
 			<div id="QualityMeasure" align="center"></div>
 
-		</div>
+
+	</div>
 	</body>
 </html>
