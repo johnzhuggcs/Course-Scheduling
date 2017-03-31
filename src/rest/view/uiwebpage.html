@@ -638,6 +638,9 @@
 				if (andOr != "") {
                 query = query + '"WHERE": ' + andOr + ', '
 				}
+				if (andOr == "") {
+				    query = query + '"WHERE": ' + '{}' + ', '
+				}
 
 				if (isGroupChecked && !isAdditional) {
                     query = query + '"OPTIONS": {"COLUMNS": ["courses_dept", "courses_id"]'
@@ -1129,10 +1132,10 @@
 					}
                 });
 
-                if (coursesFiltersInputCounter == emptyCoursesFilterCounter) {
+                /*if (coursesFiltersInputCounter == emptyCoursesFilterCounter) {
                     alert("Please insert some Courses Filter(s) before creating the table");
                     return;
-				}
+				}*/ //empty filters are tolerated
 
 
                 //if the queryString failed to be made
@@ -1200,10 +1203,10 @@
                     }
                 });
 
-                if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
+                /*if (roomsFiltersInputCounter == emptyRoomsFilterCounter) {
                     alert("Please insert some Rooms Filter(s) before creating the table");
                     return;
-                }
+                }*/ //mt filter tolerable
 
 
                 //if the queryString failed to be made
@@ -1237,7 +1240,7 @@
 			faker.push({lat:49.2606,lng:-123.2500});
 
 			var markers = [];
-			var infowindows = []
+			var infowindows = [];
             /*function initMap() {
                 var ubc = {lat: 49.2606, lng: -123.2460};
                 var map = new google.maps.Map(document.getElementById('map'), {
@@ -1271,10 +1274,43 @@
                     center: ubc
                 });
 
-                for (var i=0; i < faker.length; i++) {
+                var arrayOfRoomNames = [];
+                var arrayOfAddress = [];
+                var arrayOfLatLons = [];
+                $.each(data.result,function () {
+                    var jsonobj = {};
+                    $.each(this, function (k, v) {
+                        if (k == "rooms_fullname") {
+                            arrayOfRoomNames.push(v);
+						}
+                        if (k == "rooms_address") {
+                            arrayOfAddress.push(v);
+                        }
+                        if (k == "rooms_lat") {
+                            jsonobj["lat"] = v;
+						}
+						if (k == "rooms_lon") {
+                            jsonobj["lng"] = v;
+                            console.log(JSON.stringify(jsonobj));
+                            arrayOfLatLons.push(jsonobj)
+						}
+                    });
+				});
+
+                console.log("arrayOfRN" + arrayOfRoomNames.toString());
+
+                /*var arrayOfStreaks = []
+				ultimateCounter
+                for (var x = 0; x < arrayOfLatLons.length; x++) {
+                    if (arrayOfLatLons)
+
+				}*/
+
+                for (var i=0; i < arrayOfLatLons.length; i++) {
                     var marker = new google.maps.Marker({
-                        position: faker[i],
-                        contentString: JSON.stringify(faker[i]),
+                        position: arrayOfLatLons[i],
+                        contentString: '<p> Building Name: ' + arrayOfRoomNames[i]
+						+ '<br>Building Address: ' + arrayOfAddress[i] + '</p>',
                         map: map,
                         id: i
                     });
@@ -2200,14 +2236,12 @@
 			<p>
 				<span class = "ifgroup" style="display:none">
 					<button type="button" onclick="generateData()">Generate Data Table</button>
+					<span>(Building Map can be generated if you set columns as Building Name, Building Address, Lat and Lon)</span>
 				</span>
 			</p>
 
 			<p>
 				<h3>My Google Maps Demo</h3>
-				<div>
-					<button type="button" onclick="generateMap()">Generate Map</button>
-				</div>
 			<br>
 				<div id="map"></div>
 			</p>

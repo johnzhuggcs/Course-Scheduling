@@ -89,7 +89,7 @@ export default class Server {
                     //res.send(200); JONATHAN's
 
                     //res.send('hello ' + req.params.name);
-                    var data = fs.readFileSync('uiwebpage.html',{encoding: 'utf8'});
+                    var data = fs.readFileSync('src/rest/view/uiwebpage.html',{encoding: 'utf8'});
                     res.write(data);
                     res.end();
                     return next();
@@ -97,7 +97,7 @@ export default class Server {
 
                 /**that.rest.get("/:name", restify.serveStatic({
                     directory: __dirname + '/view',
-                    default: "index.html"
+                    default: ""
                 }));*/
 
                 // provides the echo service
