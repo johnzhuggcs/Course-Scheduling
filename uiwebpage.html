@@ -5,6 +5,9 @@
 		</script>
 		<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 
+		<script async defer
+				src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA-ac4OMajeELJz7TRCom3HfaRZuCP62d8&callback=initMap">
+		</script>
 		<!-- PAUL'S CSS AND JQUERY-->
 
 		<style>
@@ -18,6 +21,10 @@
 			table {
 				border-spacing: 0;
 				border-collapse: separate;
+			}
+			#map {
+				height: 400px;
+				width: 100%;
 			}
 
 		</style>
@@ -190,6 +197,8 @@
                 return ranstr;
 			}
 
+			//can consider creating a list instead
+
             function stringObjectOfAttr() {
 		    //Case sub1: when you have scheduling, check both fields separately
 		    //Case 1: Just 1 field is being filled
@@ -202,31 +211,31 @@
 				if ($isCourses) {
                     var attrCounter = 0; //counts the number of attributes that are not blank
                     var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
-                    if ($("#courses_sectionsize").val() != "") {
+                    if ($(".courses_sectionsize").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#courses_dept").val() != "") {
+                    if ($(".courses_dept").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#courses_id").val() != "") {
+                    if ($(".courses_id").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#courses_instructor").val() != "") {
+                    if ($(".courses_instructor").val() != "") {
                         attrCounter++;
                     }
-                    if ($("#courses_title").val() != "") {
+                    if ($(".courses_title").val() != "") {
                         attrCounter++;
                     }
                     notBlankAttrCounter = attrCounter;
 
                     if (attrCounter > 0) {
 
-                        if ($("#courses_sectionsize").val() != "") {
+                        if ($(".courses_sectionsize").val() != "") {
                             lastAttrCounter++;
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"" + comparison("compareSizeSection") + "\": {" +
-                                "\"courses_sectionsize\": " + $("#courses_sectionsize").val()
+                                "\"courses_sectionsize\": " + $(".courses_sectionsize").val()
                                 + "}" +
                                 "}";
 
@@ -234,54 +243,54 @@
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#courses_dept").val() != "") {
+                        if ($(".courses_dept").val() != "") {
                             lastAttrCounter++;
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $("#courses_dept").val() + addRightAsterisk("isItDep") + "\""
+                                "\"courses_dept\": \"" + addLeftAsterisk("isItDep") + $(".courses_dept").val() + addRightAsterisk("isItDep") + "\""
                                 + "}" +
                                 "}";
                             if (lastAttrCounter < attrCounter) {
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#courses_id").val() != "") {
+                        if ($(".courses_id").val() != "") {
                             lastAttrCounter++;
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_id\": \"" + addLeftAsterisk("isItCn") + $("#courses_id").val() + addRightAsterisk("isItCn") + "\""
+                                "\"courses_id\": \"" + addLeftAsterisk("isItCn") + $(".courses_id").val() + addRightAsterisk("isItCn") + "\""
                                 + "}" +
                                 "}";
                             if (lastAttrCounter < attrCounter) {
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#courses_instructor").val() != "") {
+                        if ($(".courses_instructor").val() != "") {
                             lastAttrCounter++;
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_instructor\": \"" + addLeftAsterisk("isItIns") + $("#courses_instructor").val() + addRightAsterisk("isItIns") + "\""
+                                "\"courses_instructor\": \"" + addLeftAsterisk("isItIns") + $(".courses_instructor").val() + addRightAsterisk("isItIns") + "\""
                                 + "}" +
                                 "}";
                             if (lastAttrCounter < attrCounter) {
                                 $jsonstr = $jsonstr + ",";
                             }
                         }
-                        if ($("#courses_title").val() != "") {
+                        if ($(".courses_title").val() != "") {
                             $jsonstr = $jsonstr +
                                 "{" +
                                 "\"IS\": {" +
-                                "\"courses_title\": \"" + addLeftAsterisk("isItTit") + $("#courses_title").val() + addRightAsterisk("isItTit") + "\""
+                                "\"courses_title\": \"" + addLeftAsterisk("isItTit") + $(".courses_title").val() + addRightAsterisk("isItTit") + "\""
                                 + "}" +
                                 "}";
                         }
                     }
                 }
-                console.log($isCourses);
-                console.log($isRooms);
+               // console.log($isCourses);
+                //console.log($isRooms);
                 if ($isRooms) {
                     var attrCounter = 0; //counts the number of attributes that are not blank
                     var lastAttrCounter = 0;//identifies whether the last attribute has been reach, if yes, don't insert ","
@@ -667,7 +676,7 @@
                     if ($(".selMostPass").is(":checked")) {attrCounter++;}
                     if ($(".selMostFail").is(":checked")) {attrCounter++;}
 
-                    console.log("attrcounter" + attrCounter);
+                    //console.log("attrcounter" + attrCounter);
 
 				    if (direction == "" && attrCounter == 1) {
                         query = query + ', "ORDER": '
@@ -809,9 +818,9 @@
 
 			// To make it more efficient: consider splitting it into 4 cases: addional 2 and group 2
             function groupByActivated() {
-                console.log("isAdditional" + isAdditional);
+                //console.log("isAdditional" + isAdditional);
                 if ($(".groupBy ").is(":checked") && isAdditional) {
-                    console.log("checked");
+                    //console.log("checked");
                     isGroupChecked = true;
                     $(".additionalInfoSelected").show();
                     $(".groupBySelected").hide();
@@ -831,7 +840,7 @@
                     $(".extraOrderButton").hide();
                 }
                 if ($(".groupBy ").is(":checked") && !isAdditional) {
-                    console.log("checked");
+                    //console.log("checked");
 					isGroupChecked = true;
                     $(".additionalInfoSelected").hide();
 					$(".groupBySelected").show();
@@ -852,7 +861,7 @@
 				}
 
                 if (!($(".groupBy ").is(":checked")) && isAdditional) {
-                    console.log("unchecked");
+                   // console.log("unchecked");
                     isGroupChecked = false;
                     $(".additionalInfoSelected").show();
                     $(".groupBySelected").hide();
@@ -874,7 +883,7 @@
                 }
 
                 if (!($(".groupBy ").is(":checked")) && !isAdditional) {
-                    console.log("unchecked");
+                   // console.log("unchecked");
                     isGroupChecked = false;
                     $(".additionalInfoSelected").hide();
                     $(".groupBySelected").hide();
@@ -895,9 +904,9 @@
 
 			function extraInfoActivated() {
 
-                console.log("isGroupChecked" + isGroupChecked);
-                console.log($(".selDep")[0]);
-                console.log($(".selDep")[0]==null);
+              //  console.log("isGroupChecked" + isGroupChecked);
+               // console.log($(".selDep")[0]);
+               // console.log($(".selDep")[0]==null);
 
                 var additionalStr = "";
                 if ($(".highestavg ").is(":checked")
@@ -994,7 +1003,7 @@
 
 
                 if ($(".highestavg ").is(":checked")) {
-                    console.log("checked");
+                   // console.log("checked");
                     isHighestAvgChecked = true;
 					additionalStr = additionalStr + ", highest average"
                     if ($(".selHiAvg")[0] == null) {
@@ -1007,7 +1016,7 @@
                     $('.selHiAvg').remove();
 				}
                 if ($(".lowestavg ").is(":checked")) {
-                    console.log("checked");
+                   // console.log("checked");
                     isLowestAvgChecked = true;
                     additionalStr = additionalStr + ", lowest average"
 					if ($(".selLoAvg")[0] == null) {
@@ -1019,7 +1028,7 @@
                     $('.selLoAvg').remove();
                 }
                 if ($(".mostsec ").is(":checked")) {
-                    console.log("checked");
+                    //console.log("checked");
                     isMostSecChecked = true;
                     additionalStr = additionalStr + ", most sections"
                     if ($(".selMostSec")[0] == null) {
@@ -1031,7 +1040,7 @@
                     $('.selMostSec').remove();
                 }
                 if ($(".mostpass ").is(":checked")) {
-                    console.log("checked");
+                   // console.log("checked");
                     isMostPassChecked = true;
                     additionalStr = additionalStr + ", most passes"
                     if ($(".selMostPass")[0] == null) {
@@ -1043,7 +1052,7 @@
                     $('.selMostPass').remove();
                 }
                 if ($(".mostfail ").is(":checked")) {
-                    console.log("checked");
+                    //console.log("checked");
                     isMostFailChecked = true;
                     additionalStr = additionalStr + ", most fails"
                     if ($(".selMostFail")[0] == null) {
@@ -1127,6 +1136,7 @@
 
             $.ajax({
                 url: "http://localhost:4321/query",
+                async: false,
                 type: 'POST',
                 data: $officialQueryString,
                 dataType: 'json', //data is already in json format
@@ -1189,6 +1199,7 @@
 
                 $.ajax({
                     url: "http://localhost:4321/query",
+                    async: false,
                     type: 'POST',
                     data: $officialQueryString,
                     dataType: 'json', //data is already in json format
@@ -1196,6 +1207,7 @@
                 }).done(function(data) {
                     console.log("Response", data);
                     generateTable(data);
+                    generateMap(data);
                     //generateTable(data.result);
                 }).fail(function(e) {
                     console.error("ERROR - Failed to submit query", e);
@@ -1206,7 +1218,68 @@
             }
 		}
 
+			var faker = [];
+			faker.push({lat:49.2606,lng:-123.2460});
+			faker.push({lat:49.2606,lng:-123.2500});
+
+			var markers = [];
+			var infowindows = []
+            /*function initMap() {
+                var ubc = {lat: 49.2606, lng: -123.2460};
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 14,
+                    center: ubc
+                });
+
+                for (var i=0; i < faker.length; i++) {
+                    var marker = new google.maps.Marker({
+                        position: faker[i],
+                        contentString: JSON.stringify(faker[i]),
+                        map: map,
+						id: i
+                    });
+                    var contentString = 'testing';
+
+                    var infowindow = new google.maps.InfoWindow({});
+
+                    marker.addListener('click', function () {
+                        infowindow.setPosition(this.position);
+                        infowindow.setContent(this.contentString);
+                        infowindow.open(map, marker[this.id]);
+                    });
+                }
+            }*/
+
+            function generateMap(data) {
+                var ubc = {lat: 49.2606, lng: -123.2460};
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 14,
+                    center: ubc
+                });
+
+                for (var i=0; i < faker.length; i++) {
+                    var marker = new google.maps.Marker({
+                        position: faker[i],
+                        contentString: JSON.stringify(faker[i]),
+                        map: map,
+                        id: i
+                    });
+                    var contentString = 'testing';
+
+                    var infowindow = new google.maps.InfoWindow({});
+
+                    marker.addListener('click', function () {
+                        infowindow.setPosition(this.position);
+                        infowindow.setContent(this.contentString);
+                        infowindow.open(map, marker[this.id]);
+                    });
+                }
+			}
+
+
 		// TODO: group by can only be set if it exists in column
+//========================================================================================================================//
+
 
 			//JON's Code
 
@@ -1874,7 +1947,7 @@
 						<option value="EW">Ends With</option>
 						<option value="CT">Contains</option>
 					</select>
-					<input type="text" id="courses_dept" value="">
+					<input type="text" class="courses_dept" value="">
 					<br>
 					Course number:
 					<select class = "isItCn">
@@ -1883,7 +1956,7 @@
 						<option value="EW">Ends With</option>
 						<option value="CT">Contains</option>
 					</select>
-					<input type="text" id="courses_id" value="">
+					<input type="text" class="courses_id" value="">
 					<br>
 					<div id = "nonScheduleCourseFilters">Section size:
 						<select class = "compareSizeSection">
@@ -1891,7 +1964,7 @@
 							<option value="EQ">Equal to</option>
 							<option value="GT">Greater than</option>
 						</select>
-						<input type="number" id="courses_sectionsize" value="">
+						<input type="number" class="courses_sectionsize" value="">
 						<br>
 						Instructor:
 						<select class = "isItIns">
@@ -1900,7 +1973,7 @@
 							<option value="EW">Ends With</option>
 							<option value="CT">Contains</option>
 							</select>
-				<input type="text" id="courses_instructor" value="">
+				<input type="text" class="courses_instructor" value="">
 				<br>
 				Title:
 				<select class = "isItTit">
@@ -1909,7 +1982,7 @@
 					<option value="EW">Ends With</option>
 					<option value="CT">Contains</option>
 				</select>
-				<input type="text" id="courses_title" value="">
+				<input type="text" class="courses_title" value="">
 				<br>
 
 			</div>
@@ -2052,22 +2125,6 @@
 
 
 					<span class= "groupByAndAdditionalInfoCheckboxes"></span>
-					<!--
-					<span class= "groupBySelected" style="display:none">
-
-					<input type="checkbox" class="selDep">Courses With highest Average<br>
-					<input type="checkbox" class="selCid">Courses With Lowest Average<br>
-
-					</span>
-
-					<span class= "additionalInfoSelected" style="display:none">
-						<input type="checkbox" class="selHAvg">Courses With highest Average<br>
-						<input type="checkbox" class="selLAvg">Courses With Lowest Average<br>
-						<input type="checkbox" class="sel">Courses With highest Average<br>
-						<input type="checkbox" class="selCid">Courses With Lowest Average<br>
-						<input type="checkbox" class="selDep">Courses With highest Average<br>
-					</span>
--->
 
 
 					<span class = "testOrder">
@@ -2107,6 +2164,15 @@
 				<span class = "ifgroup" style="display:none">
 					<button type="button" onclick="generateData()">Generate Data Table</button>
 				</span>
+			</p>
+
+			<p>
+				<h3>My Google Maps Demo</h3>
+				<div>
+					<button type="button" onclick="generateMap()">Generate Map</button>
+				</div>
+			<br>
+				<div id="map"></div>
 			</p>
 
 			<table id="tblResults" border="1" align="center"></table>
