@@ -1638,6 +1638,7 @@
 			var $notScheduledObject = {};
 			var tempScheduledValue;
 			var $totalNumOfSections = 0;
+			var $everySectionNotScheduledCoutner = 0;
 
 			schedule = createArrayOfTimeSlots(oldSchedule, tempRoomsResult);
 
@@ -1652,6 +1653,7 @@
             console.log("tempRoomsResult: "+JSON.stringify(tempRoomsResult));
 
 			for(let x in tempCoursesResult){
+                $everySectionNotScheduledCoutner = 0;
 			    $sectionCounter = 0;
 				singleCourse = tempCoursesResult[x];
 				$numOfSections = Math.ceil(Number(singleCourse["uniqueSection"])/3);
@@ -1676,6 +1678,7 @@
                                 $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
                                 //console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
                                 $notScheduledCounter++;
+                                $everySectionNotScheduledCoutner++;
                             }
 						}else{
                             //onsole.log("schedule element before add: "+JSON.stringify(schedule[y]));
@@ -1688,10 +1691,12 @@
                     }
 
 
-				}if(x >= tempCoursesResult.length - 1){
+				}if(x >= tempCoursesResult.length - 1 && $sectionCounter <= $numOfSections){
                     $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
                     //console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
-                    $notScheduledCounter++;
+					if($everySectionNotScheduledCoutner == 0) {
+                        $notScheduledCounter++;
+                    }
 				}
 				/**
 				for(let y in tempRoomsResult){
