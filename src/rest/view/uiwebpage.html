@@ -1391,8 +1391,8 @@
                     $(".nonScheduledObjectClass").remove();
                     $(".qualityMeasureText").remove();
                     //console.log(dataset.toString());
-                    $(".explorerBanner").show()
-					$(".dataset").val("default")
+                    $(".explorerBanner").show();
+					$(".dataset").val("default");
                     //dataset.style.visibility = "visible";
                     $(".groupBySelected").hide();
                     $(".additionalInfoSelected").hide();
@@ -1695,7 +1695,7 @@
                     $notScheduledObject = checkingNumberOfUnscheduledSections($notScheduledObject, $sectionCounter, $numOfSections, singleCourse)
                     //console.log("notScheduledObjects: "+JSON.stringify($notScheduledObject));
 					if($everySectionNotScheduledCoutner == 0) {
-                        $notScheduledCounter++;
+                        $notScheduledCounter += $numOfSections - 16;
                     }
 				}
 				/**
@@ -2013,11 +2013,10 @@
 			background-color: #122b40;
 			padding: 20px;
 			font-family: 'Muli', sans-serif;
-			padding-left: 100px;
-			padding-right: 100px;
 			text-align: center;
 			position: sticky;
 			top: 0px;
+			background-size: contain;
 
 		}
 		.fields{

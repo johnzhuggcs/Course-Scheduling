@@ -105,5 +105,53 @@ describe("D3ReturnAllSpec", function () {
 
     });
 
+    it.skip("200 testing returning all new order no transformation", function () {
+
+        var queryTest: QueryRequest =  {
+            "WHERE": {
+
+            },
+            "OPTIONS": {
+                "COLUMNS": [
+                    "rooms_fullname",
+                    "rooms_seats"
+                ],
+                "ORDER": {
+                    "dir": "DOWN",
+                    "keys": ["rooms_fullname", "rooms_seats"]
+                },
+                "FORM": "TABLE"
+            }
+        }
+
+        var result ={}
+
+        return insightFacade.performQuery(queryTest).then(function (value: any) {
+            Log.info(JSON.stringify(value.body));
+            expect(value.code).to.equal(200);
+            var resultKey:any = value.body["result"]
+            var expectedResult:any = result;
+            expect(value.body).to.deep.equal(result);
+            for(let x in resultKey){
+                expect(expectedResult).to.include(resultKey[x])
+            }
+            for(let x in expectedResult){
+                expect(resultKey).to.include(expectedResult[x])
+            }
+            //expect(expectedResult).includes(resultKey);
+            expect(expectedResult.length).to.deep.equal(resultKey.length);
+        }).catch(function (err) {
+            Log.test('Error: ' + err);
+
+            expect(err.code).to.equal(424);
+            expect(err.body).to.deep.equal({"error": "invalid query"})
+
+        })
+
+
+
+
+    });
+
 
 });
